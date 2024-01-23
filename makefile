@@ -2,12 +2,13 @@
 CXX=g++
 CXXFLAGS=-Wall -std=c++17
 
+# directory definitions
 SRCDIR=src
 
-# build target
+# build target definition
 TARGET=main
 
-# source files
+# existing source files
 SRC=$(wildcard $(SRCDIR)/*.cpp)
 
 # build rule for the target
