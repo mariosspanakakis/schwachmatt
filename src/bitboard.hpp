@@ -4,7 +4,7 @@
 #include <stdint.h>
 #include <iostream>
 
-namespace bitboard {
+namespace bb {
 
     // type definitions
     using U64 = uint64_t;

@@ -1,6 +1,6 @@
 #include "bitboard.hpp"
 
-namespace bitboard {
+namespace bb {
 
     void print_bitboard(U64 bitboard) {
         std::cout << "\n";
