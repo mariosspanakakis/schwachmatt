@@ -6,11 +6,12 @@
 
 namespace bb {
 
-    // type definitions
+    // type aliases
     using U64 = uint64_t;
     using Square = uint8_t;
+    using Side = uint8_t;
 
-    // board square aliases
+    // enumerations
     enum Squares {
         A1, B1, C1, D1, E1, F1, G1, H1,
         A2, B2, C2, D2, E2, F2, G2, H2,
@@ -22,19 +23,11 @@ namespace bb {
         A8, B8, C8, D8, E8, F8, G8, H8
     };
 
-    // direction aliases
-    enum Directions{
-        NORTH      =  8,
-        SOUTH      = -8,
-        WEST       = -1,
-        EAST       =  1,
-        NORTH_WEST =  7,
-        NORTH_EAST =  9,
-        SOUTH_WEST = -9,
-        SOUTH_EAST = -7
+    enum Sides {
+        WHITE,
+        BLACK
     };
 
-    // rank aliases
     enum Ranks{
         RANK_1,
         RANK_2,
@@ -46,7 +39,6 @@ namespace bb {
         RANK_8
     };
 
-    // file aliases
     enum Files{
         FILE_A,
         FILE_B,
@@ -81,17 +73,41 @@ namespace bb {
     // print a readable bitboard representation to the console
     void print_bitboard(U64 bitboard);
     
-    // set bit
-    inline void set_bit(U64& bitboard, Square square) {
+    // bit manipulation
+    inline void set_bit(U64& bitboard, Square square){
         bitboard |= (1ULL << square);
     }
-    // get bit
-    inline bool get_bit(U64& bitboard, Square square) {
+    inline bool get_bit(U64& bitboard, Square square){
         return ((bitboard >> square) & 1ULL) == 1;
     }
-    // clear bit
-    inline void clear_bit(U64& bitboard, Square square) {
+    inline void clear_bit(U64& bitboard, Square square){
         bitboard &= ~(1ULL << square);
+    }
+
+    // bit shift operations                                                     TODO: implement tests
+    inline U64 shift_north(U64 bitboard){
+        return (bitboard << 8);
+    }
+    inline U64 shift_south(U64 bitboard){
+        return (bitboard >> 8);
+    }
+    inline U64 shift_east(U64 bitboard){
+        return (bitboard << 1) & ~FILE_A_BB;
+    }
+    inline U64 shift_west(U64 bitboard){
+        return (bitboard >> 1) & ~FILE_H_BB;
+    }
+    inline U64 shift_northeast(U64 bitboard){
+        return (bitboard << 9) & ~FILE_A_BB;
+    }
+    inline U64 shift_northwest(U64 bitboard){
+        return (bitboard << 7) & ~FILE_H_BB;
+    }
+    inline U64 shift_southeast(U64 bitboard){
+        return (bitboard >> 7) & ~FILE_A_BB;
+    }
+    inline U64 shift_southwest(U64 bitboard){
+        return (bitboard >> 9) & ~FILE_H_BB;
     }
 }
 
