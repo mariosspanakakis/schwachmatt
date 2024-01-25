@@ -22,11 +22,13 @@ namespace bb {
         A7, B7, C7, D7, E7, F7, G7, H7,
         A8, B8, C8, D8, E8, F8, G8, H8
     };
+    const int N_SQUARES = 64;
 
-    enum Sides {
+    enum Colors {
         WHITE,
         BLACK
     };
+    const int N_COLORS = 2;
 
     enum Ranks{
         RANK_1,
