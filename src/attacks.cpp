@@ -4,9 +4,9 @@ namespace attacks {
 
     bb::U64 pawn_attack_table[bb::N_COLORS][bb::N_SQUARES];
     bb::U64 knight_attack_table[bb::N_SQUARES];
+    bb::U64 king_attack_table[bb::N_SQUARES];
 
     bb::U64 get_pawn_attacks(bb::Square square, bb::Side side){
-        
         // initialize bitboards for pawn position and attacked fields
         bb::U64 bitboard = 0ULL;
         bb::set_bit(bitboard, square);
@@ -14,13 +14,16 @@ namespace attacks {
 
         // white to move
         if (!side){
-            attacks |= bb::shift_northwest(bitboard) | bb::shift_northeast(bitboard);
+            attacks |= (
+                bb::shift_northwest(bitboard) | bb::shift_northeast(bitboard)
+            );
         }
         // black to move
         else{
-            attacks |= bb::shift_southwest(bitboard) | bb::shift_southeast(bitboard);
+            attacks |= (
+                bb::shift_southwest(bitboard) | bb::shift_southeast(bitboard)
+            );
         }
-
         return attacks;
     }
 
@@ -40,7 +43,25 @@ namespace attacks {
             | ((bitboard >> 15) & ~(bb::FILE_A_BB))                     // NNE
             | ((bitboard >> 17) & ~(bb::FILE_H_BB))                     // NNW
         );
+        return attacks;
+    }
 
+    bb::U64 get_king_attacks(bb::Square square){
+        // initialize bitboards for pawn position and attacked fields
+        bb::U64 bitboard = 0ULL;
+        bb::set_bit(bitboard, square);
+        bb::U64 attacks = 0ULL;
+        // generate attacks
+        attacks |= (
+              bb::shift_north(bitboard)
+            | bb::shift_northeast(bitboard)
+            | bb::shift_east(bitboard)
+            | bb::shift_southeast(bitboard)
+            | bb::shift_south(bitboard)
+            | bb::shift_southwest(bitboard)
+            | bb::shift_west(bitboard)
+            | bb::shift_northwest(bitboard)
+        );
         return attacks;
     }
 
@@ -51,9 +72,10 @@ namespace attacks {
                 pawn_attack_table[side][square] = get_pawn_attacks(square, side);
             }
         }
-        // generate knight attack table
+        // generate knight and king attack table
         for (int square = 0; square < bb::N_SQUARES; square++){
             knight_attack_table[square] = get_knight_attacks(square);
+            king_attack_table[square] = get_king_attacks(square);
         }
     }
 }
