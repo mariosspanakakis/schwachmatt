@@ -6,11 +6,12 @@
 namespace attacks {
 
     void initialize_attack_tables(void);
-    void initialize_pawn_attack_table(void);
     bb::U64 get_pawn_attacks(bb::Square square, bb::Side side);
+    bb::U64 get_knight_attacks(bb::Square square);
 
     // extern variables to hold attack tables
     extern bb::U64 pawn_attack_table[bb::N_COLORS][bb::N_SQUARES];
+    extern bb::U64 knight_attack_table[bb::N_SQUARES];
 }
 
 #endif
