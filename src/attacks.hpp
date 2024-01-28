@@ -5,6 +5,7 @@
 
 namespace attacks {
 
+    // functions for attack table initialization
     void initialize_attack_tables(void);
     bb::U64 get_pawn_attacks(bb::Square square, bb::Side side);
     bb::U64 get_knight_attacks(bb::Square square);

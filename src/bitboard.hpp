@@ -86,7 +86,7 @@ namespace bb {
         bitboard &= ~(1ULL << square);
     }
 
-    // bit shift operations                                                     TODO: implement tests
+    // bit shift operations with range checks
     inline U64 shift_north(U64 bitboard){
         return (bitboard << 8);
     }

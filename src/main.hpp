@@ -3,5 +3,6 @@
 
 #include <stdio.h>
 #include "bitboard.hpp"
+#include "attacks.hpp"
 
 #endif
