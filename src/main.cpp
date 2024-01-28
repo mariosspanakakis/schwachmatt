@@ -7,7 +7,7 @@ int main(int argc, char *argv[]) {
     //bb::U64 bitboard = 0ULL;
     //bb::set_bit(bitboard, bb::E4);
 
-    bb::print_bitboard(attacks::king_attack_table[bb::E4]);
+    bb::print_bitboard(attacks::rook_xray_attack_table[bb::E4]);
     
     return 0;
 }
