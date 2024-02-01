@@ -16,7 +16,7 @@ EXEC = main
 TEST_EXEC = test_main
 
 # source files
-MAIN_SOURCES  = $(SRCDIR)/main.cpp $(SRCDIR)/bitboard.cpp $(SRCDIR)/attacks.cpp
+MAIN_SOURCES  = $(SRCDIR)/main.cpp $(SRCDIR)/bitboard.cpp $(SRCDIR)/attacks.cpp $(SRCDIR)/board.cpp $(SRCDIR)/utils.cpp
 TEST_SOURCES = $(TESTDIR)/main_test.cpp
 
 # object files
@@ -24,7 +24,7 @@ MAIN_OBJECTS  = $(MAIN_SOURCES:.cpp=.o)
 TEST_OBJECTS = $(TEST_SOURCES:.cpp=.o)
 
 # header dependencies
-HEADERS  = $(SRCDIR)/main.hpp $(SRCDIR)/bitboard.hpp $(SRCDIR)/attacks.hpp
+HEADERS  = $(SRCDIR)/main.hpp $(SRCDIR)/bitboard.hpp $(SRCDIR)/attacks.hpp $(SRCDIR)/board.hpp $(SRCDIR)/utils.hpp
 
 # default target
 all: $(EXEC)

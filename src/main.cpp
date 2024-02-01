@@ -4,10 +4,13 @@ int main(int argc, char *argv[]) {
 
     attacks::initialize_attack_tables();
 
-    //bb::U64 bitboard = 0ULL;
-    //bb::set_bit(bitboard, bb::E4);
-
-    bb::print_bitboard(attacks::rook_xray_attack_table[bb::E4]);
-    
+    std::string fen = board::INITIAL_FEN;
+    try{
+        Board board(fen);
+    }
+    catch(std::runtime_error &err){
+        std::cerr << "Exception caught: " << err.what();
+        return 0;
+    }
     return 0;
 }

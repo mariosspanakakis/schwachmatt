@@ -30,7 +30,33 @@ namespace bb {
     };
     const int N_COLORS = 2;
 
-    enum Ranks{
+    // indices to address pieces in bitboards
+    enum PieceIndices {
+        PAWN_IDX,
+        KNIGHT_IDX,
+        BISHOP_IDX,
+        ROOK_IDX,
+        QUEEN_IDX,
+        KING_IDX
+    };
+
+    enum Pieces {
+        WHITE_PAWN,
+        WHITE_KNIGHT,
+        WHITE_BISHOP,
+        WHITE_ROOK,
+        WHITE_QUEEN,
+        WHITE_KING,
+        BLACK_PAWN,
+        BLACK_KNIGHT,
+        BLACK_BISHOP,
+        BLACK_ROOK,
+        BLACK_QUEEN,
+        BLACK_KING,
+    };
+    const int N_PIECES = 12;
+
+    enum Ranks {
         RANK_1,
         RANK_2,
         RANK_3,
@@ -41,7 +67,7 @@ namespace bb {
         RANK_8
     };
 
-    enum Files{
+    enum Files {
         FILE_A,
         FILE_B,
         FILE_C,
@@ -110,6 +136,11 @@ namespace bb {
     }
     inline U64 shift_southwest(U64 bitboard){
         return (bitboard >> 9) & ~FILE_H_BB;
+    }
+
+    // square conversion
+    inline int coord_to_square(int rank, int file){
+        return 8 * rank + file;
     }
 }
 
