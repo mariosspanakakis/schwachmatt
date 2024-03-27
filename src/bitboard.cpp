@@ -1,8 +1,8 @@
-#include "bitboard.hpp"
+#include "bitboard.h"
 
 namespace bb {
 
-    void print_bitboard(U64 bitboard) {
+    void PrintBitboard(U64 bitboard) {
         std::cout << "\n";
         for (int rank = 7; rank >= 0; rank--) {
             std::cout << " " << rank + 1 << "  ";

@@ -1,8 +1,8 @@
-#include "main.hpp"
+#include "main.h"
 
 int main(int argc, char *argv[]) {
 
-    attacks::initialize_attack_tables();
+    attacks::InitializeAttackTables();
 
     std::string fen = board::INITIAL_FEN;
     try{

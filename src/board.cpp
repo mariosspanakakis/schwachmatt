@@ -1,4 +1,4 @@
-#include "board.hpp"
+#include "board.h"
 
 // TODO: add and update game status (castlings rights, side to move etc.)
 Board::Board(const std::string& fen){
@@ -12,7 +12,7 @@ Board::Board(const std::string& fen){
     m_occupancy_combined_BB = 0ULL;
     
     // split the given FEN into groups that describe the board status           // TODO: this looks horrible
-    std::string* groups = utils::split_fen(fen);
+    std::string* groups = utils::SplitFen(fen);
     std::string fen_pieces = groups[0];
     std::string fen_move_rights = groups[1];
     std::string fen_castling_rights = groups[2];
@@ -40,29 +40,29 @@ Board::Board(const std::string& fen){
             char figure = tolower(symbol);
 
             // obtain square from rank and file
-            int square = bb::coord_to_square(rank, file);
+            int square = bb::ConvertCoordToSquare(rank, file);
 
             int index_offset = 0;
             is_white ? index_offset = 0 : index_offset = 6;
 
             switch (figure){
                 case 'p':
-                    bb::set_bit(m_pieces_BB[bb::PAWN_IDX + index_offset], square);
+                    bb::SetBit(m_pieces_BB[bb::PAWN_IDX + index_offset], square);
                     break;
                 case 'n':
-                    bb::set_bit(m_pieces_BB[bb::KNIGHT_IDX + index_offset], square);
+                    bb::SetBit(m_pieces_BB[bb::KNIGHT_IDX + index_offset], square);
                     break;
                 case 'b':
-                    bb::set_bit(m_pieces_BB[bb::BISHOP_IDX + index_offset], square);
+                    bb::SetBit(m_pieces_BB[bb::BISHOP_IDX + index_offset], square);
                     break;
                 case 'r':
-                    bb::set_bit(m_pieces_BB[bb::ROOK_IDX + index_offset], square);
+                    bb::SetBit(m_pieces_BB[bb::ROOK_IDX + index_offset], square);
                     break;
                 case 'q':
-                    bb::set_bit(m_pieces_BB[bb::QUEEN_IDX + index_offset], square);
+                    bb::SetBit(m_pieces_BB[bb::QUEEN_IDX + index_offset], square);
                     break;
                 case 'k':
-                    bb::set_bit(m_pieces_BB[bb::KING_IDX + index_offset], square);
+                    bb::SetBit(m_pieces_BB[bb::KING_IDX + index_offset], square);
                     break;
             }
 

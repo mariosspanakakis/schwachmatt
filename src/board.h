@@ -1,12 +1,12 @@
-#ifndef BOARD_HPP
-#define BOARD_HPP
+#ifndef BOARD_H
+#define BOARD_H
 
 #include <stdexcept>
 #include <stdint.h>
 #include <cctype>
 #include <ctype.h>
-#include "bitboard.hpp"
-#include "utils.hpp"
+#include "bitboard.h"
+#include "utils.h"
 
 
 namespace board {

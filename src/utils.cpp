@@ -1,12 +1,12 @@
-#include "utils.hpp"
+#include "utils.h"
 
 namespace utils {
 
     // initialize global random state for random number generation
     bb::U64 random_state_64 = 1853193856239832ULL;
     
-    std::string* split_fen(std::string fen){
-        // a FEN consists of 6 groups that are seperated by whitespaces
+    std::string* SplitFen(std::string fen){
+        // a FEN consists of 6 groups that are separated by whitespaces
         static std::string groups[6];
         char delimiter = ' ';
         int current_group = 0;
@@ -30,7 +30,7 @@ namespace utils {
     }
 
     // get pseudo-random 64-bit number through xorshift64 algorithm
-    bb::U64 get_random_64_bit(){
+    bb::U64 GetRandom64(){
         random_state_64 ^= random_state_64 << 13;
         random_state_64 ^= random_state_64 >> 7;
         random_state_64 ^= random_state_64 << 17;
@@ -38,8 +38,8 @@ namespace utils {
     }
 
     // get pseudo-random 64-bit number with few populated bits
-    bb::U64 get_random_sparse_64_bit(){
-        bb::U64 number = get_random_64_bit() & get_random_64_bit();
+    bb::U64 GetRandom64Sparse(){
+        bb::U64 number = GetRandom64() & GetRandom64();
         return number;
     }
 }
