@@ -1,8 +1,7 @@
 #include "board.h"
 
-// TODO: add and update game status (castlings rights, side to move etc.)
-Board::Board(const std::string& fen){
-    // initialize all bitboards as empty
+Board::Board(std::string fen){
+    // initialize empty bitboards for all pieces
     for (int i = 0; i < bb::N_PIECES; i++){
         m_pieces_BB[i] = 0ULL;
     }
@@ -11,18 +10,12 @@ Board::Board(const std::string& fen){
     }
     m_occupancy_combined_BB = 0ULL;
     
-    // split the given FEN into groups that describe the board status           // TODO: this looks horrible
-    std::string* groups = utils::SplitFen(fen);
-    std::string fen_pieces = groups[0];
-    std::string fen_move_rights = groups[1];
-    std::string fen_castling_rights = groups[2];
-    std::string fen_en_passant_square = groups[3];
-    std::string fen_halfmove = groups[4];
-    std::string fen_fullmove = groups[5];
-
+    // split the given FEN into groups that describe the board status
+    std::vector<std::string> fen_groups = utils::SplitFen(fen);
 
     // loop through FEN and set up pieces as specified, note that FEN notation
     // counts ranks downwards but files upwards!
+    std::string fen_pieces = fen_groups[0];
     int rank = bb::RANK_8;
     int file = bb::FILE_A;
     for (uint64_t i = 0; i < fen_pieces.length(); i++){
@@ -42,9 +35,11 @@ Board::Board(const std::string& fen){
             // obtain square from rank and file
             int square = bb::ConvertCoordToSquare(rank, file);
 
+            // set offset for piece referencing
             int index_offset = 0;
             is_white ? index_offset = 0 : index_offset = 6;
 
+            // update the occupancy bitboard in accordance to the pieces
             switch (figure){
                 case 'p':
                     bb::SetBit(m_pieces_BB[bb::PAWN_IDX + index_offset], square);
@@ -65,10 +60,11 @@ Board::Board(const std::string& fen){
                     bb::SetBit(m_pieces_BB[bb::KING_IDX + index_offset], square);
                     break;
             }
-
+            // procesed to next file
             file += 1;
         }
-        // reset file and rank after having completed a rank
+
+        // reset file and rank after having looped through all files of a rank
         if (file > 7) {
             file -= 8;
             rank -= 1;
