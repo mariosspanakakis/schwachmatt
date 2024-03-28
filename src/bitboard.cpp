@@ -21,4 +21,15 @@ namespace bb {
         std::cout << " < Value: " << bitboard << " >";
         std::cout << "\n";
     }
+
+    int CountBits(bb::U64 bitboard) {
+        int r;
+        for(r = 0; bitboard; r++, bitboard &= bitboard - 1);
+        return r;
+    }
+
+    int GetLeastSignificantBitIndex(U64 bitboard) {
+        if (bitboard) return CountBits((bitboard & -bitboard) - 1);
+        else return -1;
+    }
 }

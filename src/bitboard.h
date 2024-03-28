@@ -112,6 +112,10 @@ namespace bb {
         bitboard &= ~(1ULL << square);
     }
 
+    // other bit operations
+    int CountBits(U64 bitboard);
+    int GetLeastSignificantBitIndex(U64 bitboard);
+
     // bit shift operations with range checks
     inline U64 ShiftNorth(U64 bitboard){
         return (bitboard << 8);
