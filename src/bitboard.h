@@ -24,10 +24,7 @@ namespace bb {
     };
     const int N_SQUARES = 64;
 
-    enum Colors {
-        WHITE,
-        BLACK
-    };
+    enum Colors {WHITE, BLACK};
     const int N_COLORS = 2;
 
     // indices to address pieces in bitboards
@@ -40,6 +37,7 @@ namespace bb {
         KING_IDX
     };
 
+    // chess piece indices
     enum Pieces {
         WHITE_PAWN,
         WHITE_KNIGHT,
@@ -56,27 +54,9 @@ namespace bb {
     };
     const int N_PIECES = 12;
 
-    enum Ranks {
-        RANK_1,
-        RANK_2,
-        RANK_3,
-        RANK_4,
-        RANK_5,
-        RANK_6,
-        RANK_7,
-        RANK_8
-    };
-
-    enum Files {
-        FILE_A,
-        FILE_B,
-        FILE_C,
-        FILE_D,
-        FILE_E,
-        FILE_F,
-        FILE_G,
-        FILE_H
-    };
+    // rank and file indices
+    enum Ranks {RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8};
+    enum Files {FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H};
 
     // rank definitions
     constexpr U64 RANK_1_BB = 0x00000000000000FFULL;
@@ -112,10 +92,6 @@ namespace bb {
         bitboard &= ~(1ULL << square);
     }
 
-    // other bit operations
-    int CountBits(U64 bitboard);
-    int GetLeastSignificantBitIndex(U64 bitboard);
-
     // bit shift operations with range checks
     inline U64 ShiftNorth(U64 bitboard){
         return (bitboard << 8);
@@ -142,10 +118,14 @@ namespace bb {
         return (bitboard >> 9) & ~FILE_H_BB;
     }
 
-    // square conversion
+    // convert a rank-file coordinate to a square
     inline int ConvertCoordToSquare(int rank, int file){
         return 8 * rank + file;
     }
+
+    // other bit operations
+    int CountBits(U64 bitboard);
+    int GetLeastSignificantBitIndex(U64 bitboard);
 }
 
 #endif
