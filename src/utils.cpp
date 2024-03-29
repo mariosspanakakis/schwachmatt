@@ -2,8 +2,7 @@
 
 namespace utils {
 
-    // initialize global random state for random number generation
-    bb::U64 random_state_64 = 1853193856239832ULL;
+    uint32_t random_state = 856839613;
     
     std::vector<std::string> SplitFen(std::string fen) {
         // initialize vector to store the subgroups
@@ -19,17 +18,26 @@ namespace utils {
         return groups;
     }
 
-    // get pseudo-random 64-bit number through xorshift64 algorithm
-    bb::U64 GetRandom64(){
-        random_state_64 ^= random_state_64 << 13;
-        random_state_64 ^= random_state_64 >> 7;
-        random_state_64 ^= random_state_64 << 17;
-        return random_state_64;
+    uint32_t GetRandom32(){
+        uint32_t number = random_state;
+        number ^= number << 13;
+        number ^= number >> 17;
+        number ^= number << 5;
+        random_state = number;
+        return number;
     }
 
-    // get pseudo-random 64-bit number with few populated bits
+    bb::U64 GetRandom64(){
+        bb::U64 a, b, c, d;
+        a = (bb::U64) (GetRandom32() & 0xFFFF);
+        b = (bb::U64) (GetRandom32() & 0xFFFF);
+        c = (bb::U64) (GetRandom32() & 0xFFFF);
+        d = (bb::U64) (GetRandom32() & 0xFFFF);
+        return a | (b << 16) | (c << 32) | (d << 48);
+    }
+
     bb::U64 GetRandom64Sparse(){
-        bb::U64 number = GetRandom64() & GetRandom64();
+        bb::U64 number = GetRandom64() & GetRandom64() & GetRandom64();
         return number;
     }
 }

@@ -1,22 +1,23 @@
 #ifndef UTILS_H
 #define UTILS_H
 
-#include <stdint.h>
 #include <iostream>
-#include <vector>
-#include <sstream>
+#include <stdint.h>
 #include <string>
+#include <sstream>
+#include <vector>
 #include "bitboard.h"
 
 namespace utils {
 
     // pseudo random number state
-    extern bb::U64 random_state_64;
+    extern uint32_t random_state;
 
     // split FEN string into subgroups
     std::vector<std::string> SplitFen(std::string fen);
 
     // pseudo random number generation
+    uint32_t GetRandom32();
     bb::U64 GetRandom64();
     bb::U64 GetRandom64Sparse();
 }
