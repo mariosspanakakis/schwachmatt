@@ -6,20 +6,17 @@ namespace attacks {
     bb::U64 knight_attack_table[bb::N_SQUARES];
     bb::U64 king_attack_table[bb::N_SQUARES];
 
-    bb::U64 GetPawnAttacks(bb::Square square, bb::Side side) {
+    bb::U64 GetPawnAttacks(bb::Square square, bb::Color color) {
         // initialize bitboards for pawn position and attacked fields
         bb::U64 bitboard = 0ULL;
         bb::SetBit(bitboard, square);
         bb::U64 attacks = 0ULL;
 
-        // white to move
-        if (!side){
+        if (color == bb::WHITE) {
             attacks |= (
                 bb::ShiftNorthWest(bitboard) | bb::ShiftNorthEast(bitboard)
             );
-        }
-        // black to move
-        else{
+        } else if (color == bb::BLACK) {
             attacks |= (
                 bb::ShiftSouthWest(bitboard) | bb::ShiftSouthEast(bitboard)
             );
@@ -70,34 +67,33 @@ namespace attacks {
         bb::U64 bitboard = 0ULL;
         bb::SetBit(bitboard, square);
         bb::U64 attacks = 0ULL;
+        bb::U64 bb;
         // northeast diagonal
-        for (bb::U64 bb = bitboard; (bb & ~bb::FILE_H_BB) != 0; bb <<= 9) {
+        for (bb = bitboard; (bb & ~bb::FILE_H_BB) != 0; bb <<= 9) {
             bb::U64 attacked_square = bb << 9;
             attacks |= attacked_square;
             if (blockers & attacked_square) break;
         }
         // northwest diagonal
-        for (bb::U64 bb = bitboard; (bb & ~bb::FILE_A_BB) != 0; bb <<= 7) {
+        for (bb = bitboard; (bb & ~bb::FILE_A_BB) != 0; bb <<= 7) {
             bb::U64 attacked_square = bb << 7;
             attacks |= attacked_square;
             if (blockers & attacked_square) break;
         }
         // southeast diagonal
-        for (bb::U64 bb = bitboard; (bb & ~bb::FILE_H_BB) != 0; bb >>= 7) {
+        for (bb = bitboard; (bb & ~bb::FILE_H_BB) != 0; bb >>= 7) {
             bb::U64 attacked_square = bb >> 7;
             attacks |= attacked_square;
             if (blockers & attacked_square) break;
         }
         // southwest diagonal
-        for (bb::U64 bb = bitboard; (bb & ~bb::FILE_A_BB) != 0; bb >>= 9) {
+        for (bb = bitboard; (bb & ~bb::FILE_A_BB) != 0; bb >>= 9) {
             bb::U64 attacked_square = bb >> 9;
             attacks |= attacked_square;
             if (blockers & attacked_square) break;
         }
-
         // mask out the board's outer squares as these are not required
-        attacks &= ~(bb::FILE_A_BB | bb::FILE_H_BB | bb::RANK_1_BB | bb::RANK_8_BB); // TODO: should the outer rim always be excluded??
-
+        attacks &= ~(bb::FILE_A_BB | bb::FILE_H_BB | bb::RANK_1_BB | bb::RANK_8_BB);
         return attacks;
     }
 
@@ -106,6 +102,7 @@ namespace attacks {
         bb::U64 bitboard = 0ULL;
         bb::SetBit(bitboard, square);
         bb::U64 attacks = 0ULL;
+        bb::U64 bb;
         // north line
         for (bb::U64 bb = bitboard; (bb & ~bb::RANK_7_BB) != 0; bb <<= 8) {
             bb::U64 attacked_square = bb << 8;
@@ -113,34 +110,31 @@ namespace attacks {
             if (blockers & attacked_square) break;
         }
         // south line
-        for (bb::U64 bb = bitboard; (bb & ~bb::RANK_2_BB) != 0; bb >>= 8) {
+        for (bb = bitboard; (bb & ~bb::RANK_2_BB) != 0; bb >>= 8) {
             bb::U64 attacked_square = bb >> 8;
             attacks |= attacked_square;
             if (blockers & attacked_square) break;
         }
         // east line
-        for (bb::U64 bb = bitboard; (bb & ~bb::FILE_H_BB & ~bb::FILE_G_BB) != 0; bb <<= 1) {
+        for (bb = bitboard; (bb & ~bb::FILE_H_BB & ~bb::FILE_G_BB) != 0; bb <<= 1) {
             bb::U64 attacked_square = bb << 1;
             attacks |= attacked_square;
             if (blockers & attacked_square) break;
         }
         // west line
-        for (bb::U64 bb = bitboard; (bb & ~bb::FILE_A_BB & ~bb::FILE_B_BB) != 0; bb >>= 1) {
+        for (bb = bitboard; (bb & ~bb::FILE_A_BB & ~bb::FILE_B_BB) != 0; bb >>= 1) {
             bb::U64 attacked_square = bb >> 1;
             attacks |= attacked_square;
             if (blockers & attacked_square) break;
         }
-
-        // TODO: outer squares are masked out anyways, but should they?
-
         return attacks;
     }
 
     void InitializeAttackTables() {
         // generate pawn attack table
-        for (int side=0; side<bb::N_COLORS; ++side){
+        for (int color = bb::WHITE; color < bb::N_COLORS; ++color){
             for (int square = 0; square < bb::N_SQUARES; square++) {
-                pawn_attack_table[side][square] = GetPawnAttacks(square, side);
+                pawn_attack_table[color][square] = GetPawnAttacks(square, color);
             }
         }
         // generate knight and king attack table
@@ -150,21 +144,69 @@ namespace attacks {
         }
     }
 
-    void FindMagicNumber(bb::Square square, int n_bits, bool is_bishop) {
-        
-        // obtain attack mask for current square
-        bb::U64 mask = 0ULL;
-        if (is_bishop) {
-            bb::U64 mask = GetBishopAttacks(square);
-        } else {
-            bb::U64 mask = GetRookAttacks(square);
+    bb::U64 GetBlockerConfiguration(int index, bb::U64 attack_mask) {
+        // get number of relevant bits for the given attack mask
+        int bits = bb::CountBits(attack_mask);
+        // initialize empty configuration
+        bb::U64 configuration = 0ULL;
+        // loop through the attack mask and set the required bits
+        for (int i = 0; i < bits; i++) {
+            // pop least significant 1 bit in attack mask
+            int square = bb::GetLeastSignificantBitIndex(attack_mask);
+            bb::ClearBit(attack_mask, square);
+            // populate the configuration bitboard at the given location
+            if (index & (1 << i)) {
+                bb::SetBit(configuration, square);
+            }
         }
+        return configuration;
+    }
 
-        // test random magic numbers until finding a feasible one
-        // TODO: add termination criterium to avoid endless loop
-        do {
-            bb::U64 candidate = utils::GetRandom64Sparse();
+    bb::U64 FindMagicNumber(bb::Square square, bool is_bishop) {
+        
+        // initialize arrays for blockers, attacks, and used attacks
+        bb::U64 blockers[4096], attacks[4096], used[4096];
+
+        // get attack mask and number of relevant bits
+        bb::U64 attack_mask = is_bishop ? GetBishopAttacks(square) : GetRookAttacks(square);
+        int bits = bb::CountBits(attack_mask);
+        
+        // generate all possible blocker configurations and corresponding attacks
+        for (int i = 0; i < (1 << bits); i++) {
+            blockers[i] = GetBlockerConfiguration(i, attack_mask);
+            attacks[i] = is_bishop ? GetBishopAttacks(square, blockers[i]) : GetRookAttacks(square, blockers[i]);
+        }        
+        // conduct brute-force random search for suitable magic numbers
+        for (int iteration = 0; iteration < 1e6; iteration++) {
+            // get magic number candidate
+            bb::U64 magic_number = utils::GetRandom64Sparse();
+            
+            // discard numbers that do not contain enough bits
+            if (bb::CountBits((attack_mask * magic_number) & 0xFF00000000000000) < 6) continue;
+            
+            // reset array of used attacks
+            memset(used, 0ULL, sizeof(used));
+            
+            // loop through all possible blocker configurations
+            int index;
+            bool collision;
+            for (index = 0, collision = false; !collision && index < (1 << bits); index++) {
+                // use the magic number to hash the masked attacks
+                int magic_index = attacks::MagicTransform(blockers[index], magic_number, bits);
+
+                // the number is invalid if the hashed key is already in use
+                if (used[magic_index] == 0ULL) {
+                    used[magic_index] = attacks[index];
+                // constructive collisions are fine, actual collisions are forbidden
+                } else if (used[magic_index] != attacks[index]) {
+                    collision = true;
+                }
+            }
+            // the magic number is valid if there are no collisions
+            if (!collision) return magic_number;
         }
-        while (true);   // TODO: collision check
+        
+        // return zero if no suitable number has been found
+        return 0ULL;
     }
 }
