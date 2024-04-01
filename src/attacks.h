@@ -7,12 +7,44 @@
 
 namespace attacks {
 
-    // extern variables to hold attack tables
+    // attack lookup tables
     extern bb::U64 pawn_attack_table[bb::N_COLORS][bb::N_SQUARES];
     extern bb::U64 knight_attack_table[bb::N_SQUARES];
     extern bb::U64 king_attack_table[bb::N_SQUARES];
     extern bb::U64 bishop_attack_table[bb::N_SQUARES][4096];
     extern bb::U64 rook_attack_table[bb::N_SQUARES][4096];
+
+    // attack masks for rook and bishop (ignore blockers)
+    extern bb::U64 bishop_attack_mask[bb::N_SQUARES];
+    extern bb::U64 rook_attack_mask[bb::N_SQUARES];
+
+    // magic numbers
+    extern bb::U64 bishop_magics[bb::N_SQUARES];
+    extern bb::U64 rook_magics[bb::N_SQUARES];
+
+    // relevant bishop bits (i.e. number of attacked squares) for each square
+    const int bishop_relevant_bits[64] = {
+        6, 5, 5, 5, 5, 5, 5, 6, 
+        5, 5, 5, 5, 5, 5, 5, 5, 
+        5, 5, 7, 7, 7, 7, 5, 5, 
+        5, 5, 7, 9, 9, 7, 5, 5, 
+        5, 5, 7, 9, 9, 7, 5, 5, 
+        5, 5, 7, 7, 7, 7, 5, 5, 
+        5, 5, 5, 5, 5, 5, 5, 5, 
+        6, 5, 5, 5, 5, 5, 5, 6
+    };
+
+    // relevant rook bits (i.e. number of attacked squares) for each square
+    const int rook_relevant_bits[64] = {
+        12, 11, 11, 11, 11, 11, 11, 12, 
+        11, 10, 10, 10, 10, 10, 10, 11, 
+        11, 10, 10, 10, 10, 10, 10, 11, 
+        11, 10, 10, 10, 10, 10, 10, 11, 
+        11, 10, 10, 10, 10, 10, 10, 11, 
+        11, 10, 10, 10, 10, 10, 10, 11, 
+        11, 10, 10, 10, 10, 10, 10, 11, 
+        12, 11, 11, 11, 11, 11, 11, 12
+    };
 
     /* --- ATTACK GENERATION --- */
 
@@ -29,7 +61,6 @@ namespace attacks {
     bb::U64 GetRookAttacks(bb::Square square, bb::U64 blockers = 0ULL);
 
     /* --- MAGIC NUMBERS --- */
-    // TODO: it makes sense to precalculate the number of relevant bits, since it is also required for the lookup at runtime!
 
     /* @brief Get a possible blocker configuration for a given attack mask. Used
      *        during magic number generation in order to loop through all
@@ -39,7 +70,7 @@ namespace attacks {
      * @param attack_mask Bitboard representing all attacked squares by a piece.
      * @return Bitboard representing the blocker configuration for the given
      *         attack mask. */
-    bb::U64 GetBlockerConfiguration(int index, bb::U64 attack_mask);            // TODO: add validity checks
+    bb::U64 GetBlockerConfiguration(int index, bb::U64 attack_mask);
 
     /* @brief Perform brute-force random search to find a suitable magic number
      *        for sliding piece attack generation from a given square.
@@ -50,19 +81,24 @@ namespace attacks {
      *         configurations to an index in the attack table. */
     bb::U64 FindMagicNumber(bb::Square square, bool is_bishop);                 // TODO: add error handling
     
-    // multiply the blockers configuration, then drop all but the relevant bits
     /* @brief Perform magic transform, i.e. multiply the masked blockers with a
      *        given magic number and then bitshift to discard non-relevant bits.
      * @param masked_blockers Bitboard containing the relevant blockers for the
      *                        attack generation.
      * @param magic Magic number that maps the blocker configuration to a unique
      *              index.
-     * @param n_bits Number of relevant bits, i.e. maximum number of attacked
+     * @param bits Number of relevant bits, i.e. maximum number of attacked
      *               squares for the given piece and square.
      * @return A transformed results that is used as an index for attack lookup. */
-    inline bb::U64 MagicTransform(bb::U64 masked_blockers, bb::U64 magic, int n_bits) {
-        return (masked_blockers * magic) >> (64 - n_bits);
-    }
+    bb::U64 MagicTransform(bb::U64 masked_blockers, bb::U64 magic, int bits);
+
+    /* @brief Initialize the magic attack tables for a given square. Will search
+     *        for a magic number, calculate the attack map for every possible
+     *        blocker configuration, and then store the map in the attack table.
+     * @param square The square for which to calculate and store the attacks.
+     * @param is_bishop Boolean indicating whether to calculate the attacks for
+     *        a bishop or for a rook. */
+    void InitializeMagicAttack(bb::Square square, bool is_bishop);
 }
 
 #endif

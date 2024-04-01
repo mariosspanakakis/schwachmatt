@@ -5,6 +5,38 @@ namespace attacks {
     bb::U64 pawn_attack_table[bb::N_COLORS][bb::N_SQUARES];
     bb::U64 knight_attack_table[bb::N_SQUARES];
     bb::U64 king_attack_table[bb::N_SQUARES];
+    bb::U64 bishop_attack_table[bb::N_SQUARES][4096];
+    bb::U64 rook_attack_table[bb::N_SQUARES][4096];
+
+    bb::U64 bishop_attack_mask[bb::N_SQUARES];
+    bb::U64 rook_attack_mask[bb::N_SQUARES];
+
+    bb::U64 bishop_magics[bb::N_SQUARES];
+    bb::U64 rook_magics[bb::N_SQUARES];
+
+    void InitializeAttackTables() {
+        
+        // loop through all board squares and precalculate attack maps
+        for (int square = 0; square < bb::N_SQUARES; square++) {
+            
+            // generate attack maps for all leaping pieces
+            for (int color = bb::WHITE; color < bb::N_COLORS; ++color){
+                pawn_attack_table[color][square] = GetPawnAttacks(square, color);
+            }
+            knight_attack_table[square] = GetKnightAttacks(square);
+            king_attack_table[square] = GetKingAttacks(square);
+
+            // generate attack masks for bishop and rook
+            bishop_attack_mask[square] = GetBishopAttacks(square);
+            rook_attack_mask[square] = GetRookAttacks(square);
+
+            // generate magic attack tables for the bishops and rooks
+            InitializeMagicAttack(square, true);
+            InitializeMagicAttack(square, false);
+
+            // TODO: generate queen attacks
+        }
+    }
 
     bb::U64 GetPawnAttacks(bb::Square square, bb::Color color) {
         // initialize bitboards for pawn position and attacked fields
@@ -130,20 +162,6 @@ namespace attacks {
         return attacks;
     }
 
-    void InitializeAttackTables() {
-        // generate pawn attack table
-        for (int color = bb::WHITE; color < bb::N_COLORS; ++color){
-            for (int square = 0; square < bb::N_SQUARES; square++) {
-                pawn_attack_table[color][square] = GetPawnAttacks(square, color);
-            }
-        }
-        // generate knight and king attack table
-        for (int square = 0; square < bb::N_SQUARES; square++) {
-            knight_attack_table[square] = GetKnightAttacks(square);
-            king_attack_table[square] = GetKingAttacks(square);
-        }
-    }
-
     bb::U64 GetBlockerConfiguration(int index, bb::U64 attack_mask) {
         // get number of relevant bits for the given attack mask
         int bits = bb::CountBits(attack_mask);
@@ -162,14 +180,17 @@ namespace attacks {
         return configuration;
     }
 
+    bb::U64 MagicTransform(bb::U64 masked_blockers, bb::U64 magic, int bits) {
+        return (masked_blockers * magic) >> (64 - bits);
+    }
+
     bb::U64 FindMagicNumber(bb::Square square, bool is_bishop) {
-        
-        // initialize arrays for blockers, attacks, and used attacks
+        // initialize arrays for blockers, attacks, and used indices
         bb::U64 blockers[4096], attacks[4096], used[4096];
 
         // get attack mask and number of relevant bits
         bb::U64 attack_mask = is_bishop ? GetBishopAttacks(square) : GetRookAttacks(square);
-        int bits = bb::CountBits(attack_mask);
+        int bits = is_bishop ? bishop_relevant_bits[square] : rook_relevant_bits[square];
         
         // generate all possible blocker configurations and corresponding attacks
         for (int i = 0; i < (1 << bits); i++) {
@@ -208,5 +229,33 @@ namespace attacks {
         
         // return zero if no suitable number has been found
         return 0ULL;
+    }
+
+    void InitializeMagicAttack(bb::Square square, bool is_bishop) {
+        // obtain number of relevant bits
+        int bits = is_bishop ? bishop_relevant_bits[square] : rook_relevant_bits[square];
+
+        // find magic number and store it in the table
+        bb::U64 magic = attacks::FindMagicNumber(square, is_bishop);
+
+        // get all possible blocker configurations and attacks
+        bb::U64 blockers, attack;
+        bb::U64 attack_mask = is_bishop? GetBishopAttacks(square) : GetRookAttacks(square);
+
+        for (int i = 0; i < (1 << bits); i++) {
+            // get blocker configuration and calculate attack
+            blockers = GetBlockerConfiguration(i, attack_mask);
+            attack = is_bishop? GetBishopAttacks(square, blockers) : GetRookAttacks(square, blockers);
+
+            // store the attack map at the hashed magic index
+            int magic_index = attacks::MagicTransform(blockers, magic, bits);
+            if (is_bishop) {
+                bishop_magics[square] = magic;
+                bishop_attack_table[square][magic_index] = attack;
+            } else {
+                rook_magics[square] = magic;
+                rook_attack_table[square][magic_index] = attack;
+            }
+        }
     }
 }
