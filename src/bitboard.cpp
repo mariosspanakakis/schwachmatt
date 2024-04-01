@@ -22,6 +22,14 @@ namespace bb {
         std::cout << "\n";
     }
 
+    U64 GetPopulatedBitboard(std::vector<Square> populated_squares) {
+        U64 bitboard = 0ULL;
+        for (auto it = populated_squares.begin(); it != populated_squares.end(); ++it){
+            bb::SetBit(bitboard, *it);
+        }
+        return bitboard;
+    }
+
     int CountBits(bb::U64 bitboard) {
         int r;
         for(r = 0; bitboard; r++, bitboard &= bitboard - 1);

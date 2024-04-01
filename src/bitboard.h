@@ -2,7 +2,9 @@
 #define BITBOARD_H
 
 #include <stdint.h>
+#include <stdio.h>
 #include <iostream>
+#include <vector>
 
 namespace bb {
 
@@ -80,6 +82,9 @@ namespace bb {
 
     // print a readable bitboard representation to the console
     void PrintBitboard(U64 bitboard);
+
+    // get a bitboard with the given squares set for testing purposes
+    U64 GetPopulatedBitboard(std::vector<Square> populated_squares);
     
     // bit manipulation
     inline void SetBit(U64& bitboard, Square square){
