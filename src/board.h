@@ -1,17 +1,12 @@
-#ifndef BOARD_HPP
-#define BOARD_HPP
+#ifndef BOARD_H
+#define BOARD_H
 
 #include <stdexcept>
 #include <stdint.h>
 #include <cctype>
 #include <ctype.h>
-#include "bitboard.hpp"
-#include "utils.hpp"
-
-
-namespace board {
-    const std::string INITIAL_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
-}
+#include "bitboard.h"
+#include "utils.h"
 
 
 class Board {
@@ -23,7 +18,7 @@ private:
     // combined occupancy bitboard
     bb::U64 m_occupancy_combined_BB;
 public:
-    Board(const std::string& fen = board::INITIAL_FEN);
+    Board(std::string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1");
     ~Board() = default;
 };
 

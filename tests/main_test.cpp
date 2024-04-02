@@ -2,17 +2,17 @@
 #include "bitboard.hpp"
 
 
-TEST(BitboardTest, set_bit) {
+TEST(BitboardTest, SetBit) {
     bb::U64 bitboard = 0ULL;
-    bb::set_bit(bitboard, bb::E4);
+    bb::SetBit(bitboard, bb::E4);
     bb::U64 expected = 268435456;
     EXPECT_EQ(bitboard, expected);
 }
 
-TEST(BitboardTest, clear_bit) {
+TEST(BitboardTest, ClearBit) {
     bb::U64 bitboard = 268435456;
     bb::U64 expected = 0ULL;
-    bb::clear_bit(bitboard, bb::E4);
+    bb::ClearBit(bitboard, bb::E4);
     EXPECT_EQ(bitboard, expected);
 }
 

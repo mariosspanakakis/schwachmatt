@@ -1,8 +1,8 @@
-#include "bitboard.hpp"
+#include "bitboard.h"
 
 namespace bb {
 
-    void print_bitboard(U64 bitboard) {
+    void PrintBitboard(U64 bitboard) {
         std::cout << "\n";
         for (int rank = 7; rank >= 0; rank--) {
             std::cout << " " << rank + 1 << "  ";
@@ -20,5 +20,24 @@ namespace bb {
         std::cout << "\n";
         std::cout << " < Value: " << bitboard << " >";
         std::cout << "\n";
+    }
+
+    U64 GetPopulatedBitboard(std::vector<Square> populated_squares) {
+        U64 bitboard = 0ULL;
+        for (auto it = populated_squares.begin(); it != populated_squares.end(); ++it){
+            bb::SetBit(bitboard, *it);
+        }
+        return bitboard;
+    }
+
+    int CountBits(bb::U64 bitboard) {
+        int r;
+        for(r = 0; bitboard; r++, bitboard &= bitboard - 1);
+        return r;
+    }
+
+    int GetLeastSignificantBitIndex(U64 bitboard) {
+        if (bitboard) return CountBits((bitboard & -bitboard) - 1);
+        else return -1;
     }
 }

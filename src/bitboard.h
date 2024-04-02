@@ -1,15 +1,17 @@
-#ifndef BITBOARD_HPP
-#define BITBOARD_HPP
+#ifndef BITBOARD_H
+#define BITBOARD_H
 
 #include <stdint.h>
+#include <stdio.h>
 #include <iostream>
+#include <vector>
 
 namespace bb {
 
     // type aliases
     using U64 = uint64_t;
     using Square = uint8_t;
-    using Side = uint8_t;
+    using Color = uint8_t;
 
     // enumerations
     enum Squares {
@@ -24,10 +26,7 @@ namespace bb {
     };
     const int N_SQUARES = 64;
 
-    enum Colors {
-        WHITE,
-        BLACK
-    };
+    enum Colors {WHITE, BLACK};
     const int N_COLORS = 2;
 
     // indices to address pieces in bitboards
@@ -40,6 +39,7 @@ namespace bb {
         KING_IDX
     };
 
+    // chess piece indices
     enum Pieces {
         WHITE_PAWN,
         WHITE_KNIGHT,
@@ -56,27 +56,9 @@ namespace bb {
     };
     const int N_PIECES = 12;
 
-    enum Ranks {
-        RANK_1,
-        RANK_2,
-        RANK_3,
-        RANK_4,
-        RANK_5,
-        RANK_6,
-        RANK_7,
-        RANK_8
-    };
-
-    enum Files {
-        FILE_A,
-        FILE_B,
-        FILE_C,
-        FILE_D,
-        FILE_E,
-        FILE_F,
-        FILE_G,
-        FILE_H
-    };
+    // rank and file indices
+    enum Ranks {RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8};
+    enum Files {FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H};
 
     // rank definitions
     constexpr U64 RANK_1_BB = 0x00000000000000FFULL;
@@ -99,49 +81,56 @@ namespace bb {
     constexpr U64 FILE_A_BB = FILE_H_BB >> 7;
 
     // print a readable bitboard representation to the console
-    void print_bitboard(U64 bitboard);
+    void PrintBitboard(U64 bitboard);
+
+    // get a bitboard with the given squares set for testing purposes
+    U64 GetPopulatedBitboard(std::vector<Square> populated_squares);
     
     // bit manipulation
-    inline void set_bit(U64& bitboard, Square square){
+    inline void SetBit(U64& bitboard, Square square){
         bitboard |= (1ULL << square);
     }
-    inline bool get_bit(U64& bitboard, Square square){
+    inline bool GetBit(U64& bitboard, Square square){
         return ((bitboard >> square) & 1ULL) == 1;
     }
-    inline void clear_bit(U64& bitboard, Square square){
+    inline void ClearBit(U64& bitboard, Square square){
         bitboard &= ~(1ULL << square);
     }
 
     // bit shift operations with range checks
-    inline U64 shift_north(U64 bitboard){
+    inline U64 ShiftNorth(U64 bitboard){
         return (bitboard << 8);
     }
-    inline U64 shift_south(U64 bitboard){
+    inline U64 ShiftSouth(U64 bitboard){
         return (bitboard >> 8);
     }
-    inline U64 shift_east(U64 bitboard){
+    inline U64 ShiftEast(U64 bitboard){
         return (bitboard << 1) & ~FILE_A_BB;
     }
-    inline U64 shift_west(U64 bitboard){
+    inline U64 ShiftWest(U64 bitboard){
         return (bitboard >> 1) & ~FILE_H_BB;
     }
-    inline U64 shift_northeast(U64 bitboard){
+    inline U64 ShiftNorthEast(U64 bitboard){
         return (bitboard << 9) & ~FILE_A_BB;
     }
-    inline U64 shift_northwest(U64 bitboard){
+    inline U64 ShiftNorthWest(U64 bitboard){
         return (bitboard << 7) & ~FILE_H_BB;
     }
-    inline U64 shift_southeast(U64 bitboard){
+    inline U64 ShiftSouthEast(U64 bitboard){
         return (bitboard >> 7) & ~FILE_A_BB;
     }
-    inline U64 shift_southwest(U64 bitboard){
+    inline U64 ShiftSouthWest(U64 bitboard){
         return (bitboard >> 9) & ~FILE_H_BB;
     }
 
-    // square conversion
-    inline int coord_to_square(int rank, int file){
+    // convert a rank-file coordinate to a square
+    inline int ConvertCoordToSquare(int rank, int file){
         return 8 * rank + file;
     }
+
+    // other bit operations
+    int CountBits(U64 bitboard);
+    int GetLeastSignificantBitIndex(U64 bitboard);
 }
 
 #endif

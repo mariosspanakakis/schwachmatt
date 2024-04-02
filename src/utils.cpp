@@ -1,45 +1,43 @@
-#include "utils.hpp"
+#include "utils.h"
 
 namespace utils {
 
-    // initialize global random state for random number generation
-    bb::U64 random_state_64 = 1853193856239832ULL;
+    uint32_t random_state = 856839613;
     
-    std::string* split_fen(std::string fen){
-        // a FEN consists of 6 groups that are seperated by whitespaces
-        static std::string groups[6];
-        char delimiter = ' ';
-        int current_group = 0;
-
-        // loop through FEN and extract groups
-        int start = 0;
-        int end = 0;
-        for (uint64_t i = 0; i <= fen.length(); i++){
-            if (fen[i] == delimiter || i == fen.length()){
-                // extract substring from last to current index
-                end = i;
-                std::string substring = fen.substr(start, end - start);
-                start = end + 1;
-                // store substring in group array
-                groups[current_group] = substring;
-                current_group += 1;
-            }
+    std::vector<std::string> SplitFen(std::string fen) {
+        // initialize vector to store the subgroups
+        std::vector<std::string> groups;
+        // convert FEN to string stream to conveniently iterate through it
+        std::istringstream iss(fen);
+        // split FEN into substrings that are separated by whitespaces
+        std::string token;
+        while (std::getline(iss, token, ' ')) {
+            groups.push_back(token);
         }
-
+        // return substrings
         return groups;
     }
 
-    // get pseudo-random 64-bit number through xorshift64 algorithm
-    bb::U64 get_random_64_bit(){
-        random_state_64 ^= random_state_64 << 13;
-        random_state_64 ^= random_state_64 >> 7;
-        random_state_64 ^= random_state_64 << 17;
-        return random_state_64;
+    uint32_t GetRandom32(){
+        uint32_t number = random_state;
+        number ^= number << 13;
+        number ^= number >> 17;
+        number ^= number << 5;
+        random_state = number;
+        return number;
     }
 
-    // get pseudo-random 64-bit number with few populated bits
-    bb::U64 get_random_sparse_64_bit(){
-        bb::U64 number = get_random_64_bit() & get_random_64_bit();
+    bb::U64 GetRandom64(){
+        bb::U64 a, b, c, d;
+        a = (bb::U64) (GetRandom32() & 0xFFFF);
+        b = (bb::U64) (GetRandom32() & 0xFFFF);
+        c = (bb::U64) (GetRandom32() & 0xFFFF);
+        d = (bb::U64) (GetRandom32() & 0xFFFF);
+        return a | (b << 16) | (c << 32) | (d << 48);
+    }
+
+    bb::U64 GetRandom64Sparse(){
+        bb::U64 number = GetRandom64() & GetRandom64() & GetRandom64();
         return number;
     }
 }
