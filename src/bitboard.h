@@ -84,7 +84,7 @@ namespace bb {
     void PrintBitboard(U64 bitboard);
 
     // get a bitboard with the given squares set for testing purposes
-    U64 GetPopulatedBitboard(std::vector<Square> populated_squares);
+    U64 GetPopulatedBitboard(const std::vector<Square>& populated_squares);
     
     // bit manipulation
     inline void SetBit(U64& bitboard, Square square){

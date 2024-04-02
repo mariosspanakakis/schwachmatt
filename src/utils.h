@@ -14,7 +14,7 @@ namespace utils {
     extern uint32_t random_state;
 
     // split FEN string into subgroups
-    std::vector<std::string> SplitFen(std::string fen);
+    std::vector<std::string> SplitFen(const std::string& fen);
 
     // pseudo random number generation
     uint32_t GetRandom32();

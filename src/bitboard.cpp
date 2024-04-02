@@ -3,7 +3,7 @@
 namespace bb {
 
     void PrintBitboard(U64 bitboard) {
-        std::cout << "\n";
+        std::cout << std::endl;
         for (int rank = 7; rank >= 0; rank--) {
             std::cout << " " << rank + 1 << "  ";
             for (int file = 0; file < 8; file++) {
@@ -13,16 +13,16 @@ namespace bb {
                     std::cout << " 0";
                 }
             }
-            std::cout << "\n";
+            std::cout << std::endl;
         }
-        std::cout << "\n";
-        std::cout << "     A B C D E F G H\n";
-        std::cout << "\n";
+        std::cout << std::endl;
+        std::cout << "     A B C D E F G H" << std::endl;
+        std::cout << std::endl;
         std::cout << " < Value: " << bitboard << " >";
-        std::cout << "\n";
+        std::cout << std::endl;
     }
 
-    U64 GetPopulatedBitboard(std::vector<Square> populated_squares) {
+    U64 GetPopulatedBitboard(const std::vector<Square>& populated_squares) {
         U64 bitboard = 0ULL;
         for (auto it = populated_squares.begin(); it != populated_squares.end(); ++it){
             bb::SetBit(bitboard, *it);

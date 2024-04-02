@@ -1,6 +1,6 @@
 #include "board.h"
 
-Board::Board(std::string fen){
+Board::Board(const std::string& fen){
     // initialize empty bitboards for all pieces
     for (int i = 0; i < bb::N_PIECES; i++){
         m_pieces_BB[i] = 0ULL;

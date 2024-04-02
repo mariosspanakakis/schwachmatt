@@ -4,7 +4,7 @@ namespace utils {
 
     uint32_t random_state = 856839613;
     
-    std::vector<std::string> SplitFen(std::string fen) {
+    std::vector<std::string> SplitFen(const std::string& fen) {
         // initialize vector to store the subgroups
         std::vector<std::string> groups;
         // convert FEN to string stream to conveniently iterate through it
