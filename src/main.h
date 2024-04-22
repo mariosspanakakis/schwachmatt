@@ -5,5 +5,6 @@
 #include "bitboard.h"
 #include "attacks.h"
 #include "board.h"
+#include "move.h"
 
 #endif
