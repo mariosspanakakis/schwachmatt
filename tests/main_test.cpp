@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "bitboard.hpp"
+#include "bitboard.h"
 
 
 TEST(BitboardTest, SetBit) {
