@@ -18,14 +18,14 @@ with FLAG being
     0011 - queenside castle
     0100 - capture
     0101 - en-passant capture
-    1000 - knight capture
-    1001 - bishop capture
-    1010 - rook capture
-    1011 - queen capture
-    1100 - knight capture with promotion
-    1101 - bishop capture with promotion
-    1110 - rook capture with promotion
-    1111 - queen capture with promotion
+    1000 - knight promotion
+    1001 - bishop promotion
+    1010 - rook promotion
+    1011 - queen promotion
+    1100 - knight promotion with capture
+    1101 - bishop promotion with capture
+    1110 - rook promotion with capture
+    1111 - queen promotion with capture
 */
 
 enum MoveShifts {
