@@ -12,7 +12,7 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    Move move = Move(bb::E4, bb::G4, 0);
+    Move move = Move(bb::E4, bb::G4, CAPTURE);
     move.printMoveDetails();
 
     return 0;

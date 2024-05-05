@@ -6,7 +6,7 @@ Move::Move() {
 }
 
 // general move constructor
-Move::Move(bb::Square from, bb::Square to, uint16_t flag) {
+Move::Move(bb::Square from, bb::Square to, MoveFlag flag) {
     m_move = 0;
     setFrom(from);
     setTo(to);
@@ -29,11 +29,11 @@ void Move::setTo(bb::Square to) {
     m_move |= (to << TO_SHIFT); 
 }
 
-uint8_t Move::getFlag() {
+MoveFlag Move::getFlag() {
     return (m_move >> FLAG_SHIFT) & 0x3f;
 }
 
-void Move::setFlag(uint8_t flag) {
+void Move::setFlag(MoveFlag flag) {
     m_move |= (flag << FLAG_SHIFT);
 }
 

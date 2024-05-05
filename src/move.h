@@ -10,23 +10,10 @@
 The 16 bits of a move are assigned as follows:
     0000 | 000000 | 000000
     FLAG     TO      FROM
-with FLAG being
-    PCSS (promotion - capture - special 1 - special 2)
-    0000 - quiet
-    0001 - double pawn push
-    0010 - kingside castle
-    0011 - queenside castle
-    0100 - capture
-    0101 - en-passant capture
-    1000 - knight promotion
-    1001 - bishop promotion
-    1010 - rook promotion
-    1011 - queen promotion
-    1100 - knight promotion with capture
-    1101 - bishop promotion with capture
-    1110 - rook promotion with capture
-    1111 - queen promotion with capture
 */
+
+// type aliases
+using MoveFlag = uint8_t;
 
 enum MoveShifts {
     FROM_SHIFT = 0,
@@ -39,6 +26,24 @@ enum MoveMasks {
     FROM_MASK = 0xfc0   // 0000 111111 000000
 };
 
+// move type flag encoding (promotion - capture - special 1 - special 2)
+enum MoveFlags {
+    QUIET                    = 0b0000,
+    DOUBLE_PAWN_PUSH         = 0b0001,
+    KINGSIDE_CASTLE          = 0b0010,
+    QUEENSIDE_CASTLE         = 0b0011,
+    CAPTURE                  = 0b0100,
+    EN_PASSANT_CAPTURE       = 0b0101,
+    KNIGHT_PROMOTION         = 0b1000,
+    BISHOP_PROMOTION         = 0b1001,
+    ROOK_PROMOTION           = 0b1010,
+    QUEEN_PROMOTION          = 0b1011,
+    KNIGHT_PROMOTION_CAPTURE = 0b1100,
+    BISHOP_PROMOTION_CAPTURE = 0b1101,
+    ROOK_PROMOTION_CAPTURE   = 0b1110,
+    QUEEN_PROMOTION_CAPTURE  = 0b1111
+};
+
 
 class Move {
 private:
@@ -46,7 +51,7 @@ private:
 
 public:
     Move();
-    Move(bb::Square from, bb::Square to, uint16_t flag);
+    Move(bb::Square from, bb::Square to, MoveFlag flag);
     ~Move() = default;
 
     // move information
@@ -54,8 +59,8 @@ public:
     void setTo(bb::Square to);
     bb::Square getFrom();
     void setFrom(bb::Square from);
-    uint8_t getFlag();
-    void setFlag(uint8_t flag);
+    MoveFlag getFlag();
+    void setFlag(MoveFlag flag);
 
     // print move in standard algebraic notation, e.g. Bxe5
     void printMove();
