@@ -55,18 +55,18 @@ public:
     ~Move() = default;
 
     // move information
-    bb::Square getTo();
-    void setTo(bb::Square to);
-    bb::Square getFrom();
-    void setFrom(bb::Square from);
-    MoveFlag getFlag();
-    void setFlag(MoveFlag flag);
+    bb::Square GetTo();
+    void SetTo(bb::Square to);
+    bb::Square GetFrom();
+    void SetFrom(bb::Square from);
+    MoveFlag GetFlag();
+    void SetFlag(MoveFlag flag);
 
     // print move in standard algebraic notation, e.g. Bxe5
-    void printMove();
+    void PrintMove();
 
     // print detailed move representation
-    void printMoveDetails();
+    void PrintMoveDetails();
 };
 
 #endif
