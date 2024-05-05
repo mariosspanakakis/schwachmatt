@@ -4,7 +4,6 @@ int main(int argc, char *argv[]) {
 
     attacks::InitializeAttackTables();
 
-    //std::string fen = board::INITIAL_FEN;
     try{
         Board board;
     }
@@ -13,10 +12,8 @@ int main(int argc, char *argv[]) {
         return 0;
     }
 
-    Move move = Move(12, 46, 0);
+    Move move = Move(bb::E4, bb::G4, 0);
     move.printMoveDetails();
-    std::cout << std::bitset<16>(move.getFrom()) << std::endl;
-    std::cout << std::bitset<16>(move.getTo()) << std::endl;
 
     return 0;
 }

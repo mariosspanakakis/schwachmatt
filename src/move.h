@@ -4,6 +4,7 @@
 #include <bitset>
 #include <cstdint>
 #include <iostream>
+#include "bitboard.h"
 
 /*
 The 16 bits of a move are assigned as follows:
@@ -27,6 +28,12 @@ with FLAG being
     1111 - queen capture with promotion
 */
 
+enum MoveShifts {
+    FROM_SHIFT = 0,
+    TO_SHIFT = 6,
+    FLAG_SHIFT = 12
+};
+
 enum MoveMasks {
     TO_MASK = 0x3f,     // 0000 000000 111111
     FROM_MASK = 0xfc0   // 0000 111111 000000
@@ -39,14 +46,20 @@ private:
 
 public:
     Move();
-    Move(uint8_t from, uint8_t to, uint8_t flag);
+    Move(bb::Square from, bb::Square to, uint16_t flag);
     ~Move() = default;
 
-    uint8_t getTo();
-    uint8_t getFrom();
+    // move information
+    bb::Square getTo();
+    void setTo(bb::Square to);
+    bb::Square getFrom();
+    void setFrom(bb::Square from);
+    uint8_t getFlag();
+    void setFlag(uint8_t flag);
 
-    // print move in standard notation, e.g. Bxe5
+    // print move in standard algebraic notation, e.g. Bxe5
     void printMove();
+
     // print detailed move representation
     void printMoveDetails();
 };

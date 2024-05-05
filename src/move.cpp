@@ -6,19 +6,44 @@ Move::Move() {
 }
 
 // general move constructor
-Move::Move(uint8_t from, uint8_t to, uint8_t flag) {
-    m_move = from | (to << 6) | (flag << 12);
+Move::Move(bb::Square from, bb::Square to, uint16_t flag) {
+    m_move = 0;
+    setFrom(from);
+    setTo(to);
+    setFlag(flag);
 }
 
-uint8_t Move::getTo() {
-    return m_move & TO_MASK;
+bb::Square Move::getFrom() {
+    return (m_move >> FROM_SHIFT) & 0x3f;
 }
 
-uint8_t Move::getFrom() {
-    return (m_move & FROM_MASK);
+void Move::setFrom(bb::Square from) {
+    m_move |= (from << FROM_SHIFT);
 }
 
-// print move in readable format
+bb::Square Move::getTo() {
+    return (m_move >> TO_SHIFT) & 0x3f;
+}
+
+void Move::setTo(bb::Square to) {
+    m_move |= (to << TO_SHIFT); 
+}
+
+uint8_t Move::getFlag() {
+    return (m_move >> FLAG_SHIFT) & 0x3f;
+}
+
+void Move::setFlag(uint8_t flag) {
+    m_move |= (flag << FLAG_SHIFT);
+}
+
 void Move::printMoveDetails() {
-    std::cout << std::bitset<16>(m_move) << std::endl;
+    // print move bitsets
+    std::cout << std::bitset<4>(getFlag()) << " ";
+    std::cout << std::bitset<6>(getTo()) << " ";
+    std::cout << std::bitset<6>(getFrom()) << std::endl;
+
+    // print readable move information
+    std::cout << "FROM: " << bb::SQUARE_NAMES[getFrom()] << std::endl;
+    std::cout << "TO:   " << bb::SQUARE_NAMES[getTo()] << std::endl;
 }

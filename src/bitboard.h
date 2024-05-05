@@ -13,7 +13,7 @@ namespace bb {
     using Square = uint8_t;
     using Color = uint8_t;
 
-    // enumerations
+    // board squares
     enum Squares {
         A1, B1, C1, D1, E1, F1, G1, H1,
         A2, B2, C2, D2, E2, F2, G2, H2,
@@ -25,6 +25,18 @@ namespace bb {
         A8, B8, C8, D8, E8, F8, G8, H8
     };
     const int N_SQUARES = 64;
+
+    // names of the board squares
+    constexpr char const* SQUARE_NAMES[] {
+        "a1", "b1", "c1", "d1", "e1", "f1", "g1", "h1",
+        "a2", "b2", "c2", "d2", "e2", "f2", "g2", "h2",
+        "a3", "b3", "c3", "d3", "e3", "f3", "g3", "h3",
+        "a4", "b4", "c4", "d4", "e4", "f4", "g4", "h4",
+        "a5", "b5", "c5", "d5", "e5", "f5", "g5", "h5",
+        "a6", "b6", "c6", "d6", "e6", "f6", "g6", "h6",
+        "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
+        "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
+    };
 
     enum Colors {WHITE, BLACK};
     const int N_COLORS = 2;
