@@ -11,6 +11,7 @@ namespace bb {
     // type aliases
     using U64 = uint64_t;
     using Square = uint8_t;
+    using Piece = int8_t;
     using Color = uint8_t;
 
     // board squares
