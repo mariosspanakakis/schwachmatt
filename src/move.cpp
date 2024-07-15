@@ -6,7 +6,7 @@ Move::Move() {
 }
 
 // general move constructor
-Move::Move(bb::Square from, bb::Square to, MoveFlag flag) {
+Move::Move(bb::Square from, bb::Square to, mv::MoveFlag flag) {
     m_move = 0;
     SetFrom(from);
     SetTo(to);
@@ -14,27 +14,27 @@ Move::Move(bb::Square from, bb::Square to, MoveFlag flag) {
 }
 
 bb::Square Move::GetFrom() {
-    return (m_move >> FROM_SHIFT) & 0x3f;
+    return (m_move >> mv::FROM_SHIFT) & 0x3f;
 }
 
 void Move::SetFrom(bb::Square from) {
-    m_move |= (from << FROM_SHIFT);
+    m_move |= (from << mv::FROM_SHIFT);
 }
 
 bb::Square Move::GetTo() {
-    return (m_move >> TO_SHIFT) & 0x3f;
+    return (m_move >> mv::TO_SHIFT) & 0x3f;
 }
 
 void Move::SetTo(bb::Square to) {
-    m_move |= (to << TO_SHIFT); 
+    m_move |= (to << mv::TO_SHIFT); 
 }
 
-MoveFlag Move::GetFlag() {
-    return (m_move >> FLAG_SHIFT) & 0x3f;
+mv::MoveFlag Move::GetFlag() {
+    return (m_move >> mv::FLAG_SHIFT) & 0x3f;
 }
 
-void Move::SetFlag(MoveFlag flag) {
-    m_move |= (flag << FLAG_SHIFT);
+void Move::SetFlag(mv::MoveFlag flag) {
+    m_move |= (flag << mv::FLAG_SHIFT);
 }
 
 void Move::PrintMoveDetails() {
