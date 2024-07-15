@@ -162,6 +162,42 @@ namespace attacks {
         return attacks;
     }
 
+    bb::U64 LookupBishopAttacks(bb::Square square, bb::U64 blockers) {
+        // get attack mask and mas kthe given blockers
+        bb::U64 attack_mask = attacks::bishop_attack_mask[square];
+        bb::U64 masked_blockers = blockers & attack_mask;
+
+        // lookup magic number for the given square
+        bb::U64 magic = attacks::bishop_magics[square];
+
+        // lookup relevant bits
+        int bits = attacks::bishop_relevant_bits[square];
+
+        // transform the blockers to obtain the index for the final lookup
+        bb::U64 blockers_index = attacks::MagicTransform(masked_blockers, magic, bits);
+
+        // lookup the actual attack pattern from the pregenerated attack table
+        return attacks::bishop_attack_table[square][blockers_index];
+    }
+
+    bb::U64 LookupRookAttacks(bb::Square square, bb::U64 blockers) {
+        // get attack mask and mas kthe given blockers
+        bb::U64 attack_mask = attacks::rook_attack_mask[square];
+        bb::U64 masked_blockers = blockers & attack_mask;
+
+        // lookup magic number for the given square
+        bb::U64 magic = attacks::rook_magics[square];
+
+        // lookup relevant bits
+        int bits = attacks::rook_relevant_bits[square];
+
+        // transform the blockers to obtain the index for the final lookup
+        bb::U64 blockers_index = attacks::MagicTransform(masked_blockers, magic, bits);
+
+        // lookup the actual attack pattern from the pregenerated attack table
+        return attacks::rook_attack_table[square][blockers_index];
+    }
+
     bb::U64 GetBlockerConfiguration(int index, bb::U64 attack_mask) {
         // get number of relevant bits for the given attack mask
         int bits = bb::CountBits(attack_mask);

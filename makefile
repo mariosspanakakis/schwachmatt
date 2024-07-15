@@ -10,18 +10,17 @@ GTEST_DIR = lib/googletest
 GTEST_LIBS = -lgtest -lgtest_main -lpthread
 GTEST_INCLUDE = -I$(GTEST_DIR)/include -I$(SRCDIR)
 
-
-# executable name
+# executable names
 EXEC = main
-TEST_EXEC = test_main
+TEST_EXEC = tests
 
 # source files
 MAIN_SOURCES  = $(SRCDIR)/main.cpp $(SRCDIR)/bitboard.cpp $(SRCDIR)/attacks.cpp $(SRCDIR)/board.cpp $(SRCDIR)/utils.cpp $(SRCDIR)/move.cpp
-TEST_SOURCES = $(TESTDIR)/main_test.cpp
+TEST_SOURCES = $(TESTDIR)/unit_test.cpp
 
 # object files
 MAIN_OBJECTS  = $(MAIN_SOURCES:.cpp=.o)
-TEST_OBJECTS = $(TEST_SOURCES:.cpp=.o)
+TEST_OBJECTS = $(TEST_SOURCES:.cpp=.o) $(SRCDIR)/bitboard.o $(SRCDIR)/attacks.o $(SRCDIR)/board.o $(SRCDIR)/utils.o $(SRCDIR)/move.o
 
 # header dependencies
 HEADERS  = $(SRCDIR)/main.h $(SRCDIR)/bitboard.h $(SRCDIR)/attacks.h $(SRCDIR)/board.h $(SRCDIR)/utils.h $(SRCDIR)/move.h

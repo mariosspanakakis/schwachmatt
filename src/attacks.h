@@ -60,6 +60,10 @@ namespace attacks {
     bb::U64 GetBishopAttacks(bb::Square square, bb::U64 blockers = 0ULL);
     bb::U64 GetRookAttacks(bb::Square square, bb::U64 blockers = 0ULL);
 
+    // lookup the sliding attacks for given blockers using the attack table     // <- these are the ones to actually use during move generation
+    bb::U64 LookupBishopAttacks(bb::Square square, bb::U64 blockers = 0ULL);
+    bb::U64 LookupRookAttacks(bb::Square square, bb::U64 blockers = 0ULL);
+
     /* --- MAGIC NUMBERS --- */
 
     /* @brief Get a possible blocker configuration for a given attack mask. Used
