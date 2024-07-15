@@ -24,6 +24,7 @@ public:
     ~Board() = default;
 
     bb::U64 GetPieceBitboard(bb::Piece, bb::Color);
+    bb::U64 GetOccupancyBitboard(bb::Color);
 };
 
 #endif

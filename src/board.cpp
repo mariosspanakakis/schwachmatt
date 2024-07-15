@@ -88,3 +88,7 @@ Board::Board(const std::string& fen){
 bb::U64 Board::GetPieceBitboard(bb::Piece piece, bb::Color color) {
     return m_pieces_BB[color][piece];
 }
+
+bb::U64 Board::GetOccupancyBitboard(bb::Color color) {
+    return m_occupancy_BB[color];
+}
