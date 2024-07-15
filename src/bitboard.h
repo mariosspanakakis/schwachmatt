@@ -11,7 +11,7 @@ namespace bb {
     // type aliases
     using U64 = uint64_t;
     using Square = uint8_t;
-    using Piece = int8_t;
+    using Piece = uint8_t;
     using Color = uint8_t;
 
     // board squares
@@ -39,35 +39,22 @@ namespace bb {
         "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
     };
 
-    enum Colors {WHITE, BLACK};
+    enum Colors {
+        WHITE,
+        BLACK
+    };
     const int N_COLORS = 2;
 
-    // indices to address pieces in bitboards
-    enum PieceIndices {
-        PAWN_IDX,
-        KNIGHT_IDX,
-        BISHOP_IDX,
-        ROOK_IDX,
-        QUEEN_IDX,
-        KING_IDX
-    };
-
-    // chess piece indices
+    // chess pieces
     enum Pieces {
-        WHITE_PAWN,
-        WHITE_KNIGHT,
-        WHITE_BISHOP,
-        WHITE_ROOK,
-        WHITE_QUEEN,
-        WHITE_KING,
-        BLACK_PAWN,
-        BLACK_KNIGHT,
-        BLACK_BISHOP,
-        BLACK_ROOK,
-        BLACK_QUEEN,
-        BLACK_KING,
+        PAWN,
+        KNIGHT,
+        BISHOP,
+        ROOK,
+        QUEEN,
+        KING
     };
-    const int N_PIECES = 12;
+    const int N_PIECES = 6;
 
     // rank and file indices
     enum Ranks {RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8};

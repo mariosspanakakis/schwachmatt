@@ -2,11 +2,11 @@
 
 Board::Board(const std::string& fen){
     // initialize empty bitboards for all pieces
-    for (int i = 0; i < bb::N_PIECES; i++){
-        m_pieces_BB[i] = 0ULL;
-    }
-    for (int i = 0; i < bb::N_COLORS; i++){
-        m_occupancy_BB[i] = 0ULL;
+    for (bb::Color color = 0; color < bb::N_COLORS; color++){
+        for (bb::Piece piece = 0; piece < bb::N_PIECES; piece++) {
+            m_pieces_BB[color][piece] = 0ULL;
+        }
+        m_occupancy_BB[color] = 0ULL;
     }
     m_occupancy_combined_BB = 0ULL;
     
@@ -36,28 +36,27 @@ Board::Board(const std::string& fen){
             int square = bb::ConvertCoordToSquare(rank, file);
 
             // set offset for piece referencing
-            int index_offset = 0;
-            is_white ? index_offset = 0 : index_offset = 6;
+            bb::Color color = is_white ? bb::WHITE : bb::BLACK;
 
             // update the occupancy bitboard in accordance to the pieces
             switch (figure){
                 case 'p':
-                    bb::SetBit(m_pieces_BB[bb::PAWN_IDX + index_offset], square);
+                    bb::SetBit(m_pieces_BB[color][bb::PAWN], square);
                     break;
                 case 'n':
-                    bb::SetBit(m_pieces_BB[bb::KNIGHT_IDX + index_offset], square);
+                    bb::SetBit(m_pieces_BB[color][bb::KNIGHT], square);
                     break;
                 case 'b':
-                    bb::SetBit(m_pieces_BB[bb::BISHOP_IDX + index_offset], square);
+                    bb::SetBit(m_pieces_BB[color][bb::BISHOP], square);
                     break;
                 case 'r':
-                    bb::SetBit(m_pieces_BB[bb::ROOK_IDX + index_offset], square);
+                    bb::SetBit(m_pieces_BB[color][bb::ROOK], square);
                     break;
                 case 'q':
-                    bb::SetBit(m_pieces_BB[bb::QUEEN_IDX + index_offset], square);
+                    bb::SetBit(m_pieces_BB[color][bb::QUEEN], square);
                     break;
                 case 'k':
-                    bb::SetBit(m_pieces_BB[bb::KING_IDX + index_offset], square);
+                    bb::SetBit(m_pieces_BB[color][bb::KING], square);
                     break;
             }
             // procesed to next file
@@ -77,17 +76,15 @@ Board::Board(const std::string& fen){
     }
 
     // update the occupancy bitboards
-    for (int i = 0; i < 6; i++){
-        bb::U64 bb = m_pieces_BB[i];
-        m_occupancy_BB[0] |= bb;
+    for (bb::Color color = 0; color < bb::N_COLORS; color++) {
+        for (bb::Piece piece = 0; piece < bb::N_PIECES; piece++) {
+            bb::U64 bb = m_pieces_BB[color][piece];
+            m_occupancy_BB[color] |= bb;
+        }
+        m_occupancy_combined_BB |= m_occupancy_BB[color];
     }
-    for (int i = 6; i < 12; i++){
-        bb::U64 bb = m_pieces_BB[i];
-        m_occupancy_BB[1] |= bb;
-    }
-    m_occupancy_combined_BB = m_occupancy_BB[0] | m_occupancy_BB[1];
 };
 
-bb::U64 Board::GetPieceBitboard(bb::Piece piece) {
-    return m_pieces_BB[piece];
+bb::U64 Board::GetPieceBitboard(bb::Piece piece, bb::Color color) {
+    return m_pieces_BB[color][piece];
 }

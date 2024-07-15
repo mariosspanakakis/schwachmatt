@@ -6,5 +6,6 @@
 #include "attacks.h"
 #include "board.h"
 #include "move.h"
+#include "movegen.h"
 
 #endif

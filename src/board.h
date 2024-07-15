@@ -13,9 +13,9 @@ const std::string initial_fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w K
 
 class Board {
 private:
-    // bitboards for all pieces; white starts at ID 0, black starts at ID 6
-    bb::U64 m_pieces_BB[bb::N_PIECES];
-    // occupancy bitboards for each side
+    // separate occupancy bitboards for all pieces
+    bb::U64 m_pieces_BB[bb::N_COLORS][bb::N_PIECES];
+    // total occupancy bitboards for each side
     bb::U64 m_occupancy_BB[bb::N_COLORS];
     // combined occupancy bitboard
     bb::U64 m_occupancy_combined_BB;
@@ -23,7 +23,7 @@ public:
     Board(const std::string& fen = initial_fen);
     ~Board() = default;
 
-    bb::U64 GetPieceBitboard(bb::Piece);
+    bb::U64 GetPieceBitboard(bb::Piece, bb::Color);
 };
 
 #endif
