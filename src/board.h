@@ -23,7 +23,7 @@ public:
     Board(const std::string& fen = initial_fen);
     ~Board() = default;
 
-    bb::U64 GetPieceBitboard(bb::Piece, bb::Color);
+    bb::U64 GetPieceBitboard(bb::Piece);
 };
 
 #endif

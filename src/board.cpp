@@ -87,3 +87,7 @@ Board::Board(const std::string& fen){
     }
     m_occupancy_combined_BB = m_occupancy_BB[0] | m_occupancy_BB[1];
 };
+
+bb::U64 Board::GetPieceBitboard(bb::Piece piece) {
+    return m_pieces_BB[piece];
+}
