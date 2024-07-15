@@ -2,14 +2,16 @@
 
 int main(int argc, char *argv[]) {
 
+    // initialize attack tables for rapid lookup
     attacks::InitializeAttackTables();
 
-    try{
-        Board board;
-    }
-    catch(std::runtime_error &err){
+    // initialize and setup chess board
+    Board board;
+    try {
+        board = Board();
+    } catch(std::runtime_error &err){
         std::cerr << "Exception caught: " << err.what();
-        return 0;
+        return 1;
     }
 
     Move move = Move(bb::E4, bb::G4, CAPTURE);
