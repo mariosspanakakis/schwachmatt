@@ -14,8 +14,7 @@ int main(int argc, char *argv[]) {
         return 1;
     }
 
-    Move move = Move(bb::E4, bb::G4, CAPTURE);
-    move.PrintMoveDetails();
+    movegen::GenerateKnightMoves(board, bb::WHITE);
 
     return 0;
 }
