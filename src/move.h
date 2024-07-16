@@ -5,7 +5,10 @@
 #include <cstdint>
 #include <iostream>
 #include "bitboard.h"
+#include "board.h"
 
+// forward declaration of move class
+class Move;
 /*
 The 16 bits of a move are assigned as follows:
     0000 | 000000 | 000000
@@ -49,6 +52,12 @@ namespace mv {
         ROOK_PROMOTION_CAPTURE   = 0b1110,
         QUEEN_PROMOTION_CAPTURE  = 0b1111
     };
+
+    // print move in standard algebraic notation, e.g. Bxe5                     // TODO: implement
+    void PrintMove(Move move, Board board);
+
+    // print readable move representation for debugging purposes
+    void PrintMoveDetails(Move move);
 }
 
 
@@ -68,12 +77,6 @@ public:
     void SetFrom(bb::Square from);
     mv::MoveFlag GetFlag();
     void SetFlag(mv::MoveFlag flag);
-
-    // print move in standard algebraic notation, e.g. Bxe5
-    void PrintMove();
-
-    // print detailed move representation
-    void PrintMoveDetails();
 };
 
 #endif
