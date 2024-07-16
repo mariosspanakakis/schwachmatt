@@ -10,6 +10,11 @@
 The 16 bits of a move are assigned as follows:
     0000 | 000000 | 000000
     FLAG     TO      FROM
+
+Note:
+This move representation does not specify the moving or captured piece. It is
+therefore necessary to look at the board that the move has been made on in
+order to obtain this information.
 */
 
 namespace mv {
