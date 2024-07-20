@@ -2,7 +2,7 @@
 
 Board::Board(const std::string& fen){
     // initialize empty bitboards for all pieces
-    for (bb::Color color = 0; color < bb::N_COLORS; color++){
+    for (bool color : {bb::WHITE, bb::BLACK}){
         for (bb::Piece piece = 0; piece < bb::N_PIECES; piece++) {
             m_pieces_BB[color][piece] = 0ULL;
         }
@@ -76,7 +76,7 @@ Board::Board(const std::string& fen){
     }
 
     // update the occupancy bitboards
-    for (bb::Color color = 0; color < bb::N_COLORS; color++) {
+    for (bool color : {bb::WHITE, bb::BLACK}) {
         for (bb::Piece piece = 0; piece < bb::N_PIECES; piece++) {
             bb::U64 bb = m_pieces_BB[color][piece];
             m_occupancy_BB[color] |= bb;
@@ -91,4 +91,8 @@ bb::U64 Board::GetPieceBitboard(bb::Piece piece, bb::Color color) {
 
 bb::U64 Board::GetOccupancyBitboard(bb::Color color) {
     return m_occupancy_BB[color];
+}
+
+bb::U64 Board::GetCombinedOccupancyBitboard() {
+    return m_occupancy_combined_BB;
 }

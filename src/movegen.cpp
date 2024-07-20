@@ -2,29 +2,89 @@
 
 namespace movegen {
 
-    void GenerateMoves(Board& board, bb::Color color) {
+    std::vector<Move> GenerateMoves(Board& board, bb::Color color) {
+        // initialize vector to contain moves
+        std::vector<Move> moves;
 
+        return moves; 
     }
 
     // each pawn has three possible move types: single push, double push, and capture
-    void GeneratePawnMoves(Board& board, bb::Color color) {
-        // TODO: implement pawn move generation
-        //bb::U64 pieces = board.GetPieceBitboard(bb::PAWN, color);
+    std::vector<Move> GeneratePawnMoves(Board& board, bb::Color color) {                    // TODO: implement pawn promotions and en-passant
+        
+        // get piece bitboards
+        bb::U64 their_pieces = board.GetOccupancyBitboard(!color);
+        bb::U64 all_pieces = board.GetCombinedOccupancyBitboard();
+
+        // extract pawn locations
+        bb::U64 pawns = board.GetPieceBitboard(bb::PAWN, color);
+
+        // define move directions and get the target squares for all possible pawn moves
+        bb::U64 single_pushes, double_pushes, right_captures, left_captures;
+        bb::Direction forward_dir, right_capture_dir, left_capture_dir;
+        if (color == bb::WHITE) {
+            // define the move directions for white
+            forward_dir = bb::NORTH;
+            right_capture_dir = bb::NORTHEAST;
+            left_capture_dir = bb::NORTHWEST;
+            // get all possible target squares
+            single_pushes = bb::ShiftNorth(pawns) & ~all_pieces;
+            double_pushes = bb::ShiftNorth(single_pushes & bb::RANK_3_BB) & ~all_pieces;
+            right_captures = bb::ShiftNorthEast(pawns) & their_pieces;
+            left_captures = bb::ShiftNorthWest(pawns) & their_pieces;
+        } else {
+            // define the move directions for black
+            forward_dir = bb::SOUTH;
+            right_capture_dir = bb::SOUTHWEST;
+            left_capture_dir = bb::SOUTHEAST;
+            // get all possible target squares
+            single_pushes = bb::ShiftSouth(pawns) & ~all_pieces;
+            double_pushes = bb::ShiftSouth(single_pushes & bb::RANK_6_BB) & ~all_pieces;
+            right_captures = bb::ShiftSouthWest(pawns) & their_pieces;
+            left_captures = bb::ShiftSouthEast(pawns) & their_pieces;
+        }
+
+        // initialize vector to contain moves
+        std::vector<Move> moves;
+
+        // lambda function to generate the corresponding move for each target square
+        auto GatherMoves {[&moves] (bb::U64 targets, bb::Direction dir, mv::MoveFlag flag) {
+            while(targets) {
+                // extract a target square and the corresponding origin square
+                int to_square = bb::GetLeastSignificantBitIndex(targets);
+                bb::ClearBit(targets, to_square);
+                int from_square = to_square - dir;
+                // add the move to the moves list
+                moves.push_back(Move(from_square, to_square, flag));
+            }
+        }
+        };
+
+        // gather all moves based on the identified target squares
+        GatherMoves(single_pushes, forward_dir, mv::QUIET);
+        GatherMoves(double_pushes, 2 * forward_dir, mv::DOUBLE_PAWN_PUSH);
+        GatherMoves(right_captures, right_capture_dir, mv::CAPTURE);
+        GatherMoves(left_captures, left_capture_dir, mv::CAPTURE);
+
+        return moves;
     }
 
-    void GenerateKnightMoves(Board& board, bb::Color color) {
+    std::vector<Move> GenerateKnightMoves(Board& board, bb::Color color) {
 
         bb::U64 our_pieces = board.GetOccupancyBitboard(color);
-        bb::U64 their_pieces = board.GetOccupancyBitboard(color ^ 1);
+        bb::U64 their_pieces = board.GetOccupancyBitboard(!color);
         
         // get knight locations
-        bb::U64 pieces = board.GetPieceBitboard(bb::KNIGHT, color);
+        bb::U64 knights = board.GetPieceBitboard(bb::KNIGHT, color);
+
+        // initialize vector to contain moves
+        std::vector<Move> moves;
         
         // for each knight, get the attacked squares
-        while (pieces) {
+        while (knights) {
             // extract one of the knights
-            int from_square = bb::GetLeastSignificantBitIndex(pieces);
-            bb::ClearBit(pieces, from_square);
+            int from_square = bb::GetLeastSignificantBitIndex(knights);
+            bb::ClearBit(knights, from_square);
 
             // lookup the squares which are attacked by this piece
             bb::U64 attacks = attacks::knight_attack_table[from_square];
@@ -40,10 +100,11 @@ namespace movegen {
                 // test whether this move captures a piece and set the flag accordingly
                 mv::MoveFlag flag = bb::GetBit(their_pieces, to_square) ? mv::CAPTURE : mv::QUIET;
 
-                // generate a move object
+                // add the move to the collection of moves
                 Move move = Move(from_square, to_square, flag);
-                move.PrintMoveDetails();
+                moves.push_back(move);
             }
         }
+        return moves;
     }
 }
