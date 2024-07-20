@@ -39,13 +39,20 @@ void Move::SetFlag(mv::MoveFlag flag) {
 
 namespace mv {
     void PrintMoveDetails(Move move) {
-        // print move bitsets
-        std::cout << std::bitset<4>(move.GetFlag()) << " ";
-        std::cout << std::bitset<6>(move.GetTo()) << " ";
-        std::cout << std::bitset<6>(move.GetFrom()) << std::endl;
+        // print origin and target square
+        std::cout << bb::SQUARE_NAMES[move.GetFrom()];
+        std::cout << " -> ";
+        std::cout << bb::SQUARE_NAMES[move.GetTo()];
+        std::cout << " ";
 
-        // print readable move information
-        std::cout << "FROM: " << bb::SQUARE_NAMES[move.GetFrom()] << std::endl;
-        std::cout << "TO:   " << bb::SQUARE_NAMES[move.GetTo()] << std::endl;
+        // print move bitsets
+        std::cout << "[" << std::bitset<4>(move.GetFlag()) << " ";
+        std::cout << std::bitset<6>(move.GetTo()) << " ";
+        std::cout << std::bitset<6>(move.GetFrom()) << "]";
+        std::cout << " ";
+
+        // print move flag
+        std::cout << mv::FLAG_NAMES[move.GetFlag()];
+        std::cout << std::endl;
     }
 }

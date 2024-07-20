@@ -4,6 +4,7 @@
 #include <bitset>
 #include <cstdint>
 #include <iostream>
+#include <map>
 #include "bitboard.h"
 #include "board.h"
 
@@ -51,6 +52,25 @@ namespace mv {
         BISHOP_PROMOTION_CAPTURE = 0b1101,
         ROOK_PROMOTION_CAPTURE   = 0b1110,
         QUEEN_PROMOTION_CAPTURE  = 0b1111
+    };
+
+    constexpr char const* FLAG_NAMES[] = {
+        "QUIET",
+        "DOUBLE_PAWN_PUSH",
+        "KINGSIDE_CASTLE",
+        "QUEENSIDE_CASTLE",
+        "CAPTURE",
+        "EN_PASSANT_CAPTURE",
+        "",     // unused
+        "",     // unused
+        "KNIGHT_PROMOTION",
+        "BISHOP_PROMOTION",
+        "ROOK_PROMOTION",
+        "QUEEN_PROMOTION",
+        "KNIGHT_PROMOTION_CAPTURE",
+        "BISHOP_PROMOTION_CAPTURE",
+        "ROOK_PROMOTION_CAPTURE",
+        "QUEEN_PROMOTION_CAPTURE"
     };
 
     // print move in standard algebraic notation, e.g. Bxe5                     // TODO: implement
