@@ -12,7 +12,8 @@ namespace bb {
     using U64 = uint64_t;
     using Square = uint8_t;
     using Piece = uint8_t;
-    using Color = uint8_t;
+    using Color = bool;
+    using Direction = int8_t;
 
     // board squares
     enum Squares {
@@ -55,6 +56,19 @@ namespace bb {
         KING
     };
     const int N_PIECES = 6;
+
+    // move directions
+    enum Directions {
+        NORTH = 8,
+        SOUTH = -8,
+        EAST = 1,
+        WEST = -1,
+        NORTHEAST = 9,
+        NORTHWEST = 7,
+        SOUTHEAST = -7,
+        SOUTHWEST = -9
+    };
+    const int N_DIRECTIONS = 8;
 
     // rank and file indices
     enum Ranks {RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8};
