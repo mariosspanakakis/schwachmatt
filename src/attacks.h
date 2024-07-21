@@ -57,8 +57,8 @@ namespace attacks {
     bb::U64 GetKingAttacks(bb::Square square);
 
     // get attacks for sliding pieces
-    bb::U64 GetBishopAttacks(bb::Square square, bb::U64 blockers = 0ULL);
-    bb::U64 GetRookAttacks(bb::Square square, bb::U64 blockers = 0ULL);
+    bb::U64 GetBishopAttacks(bb::Square square, bb::U64 blockers = 0ULL, bool mask_mode = false);   // mask mode: used for magics initialization which require to ignore board edges
+    bb::U64 GetRookAttacks(bb::Square square, bb::U64 blockers = 0ULL, bool mask_mode = false);
 
     // lookup the sliding attacks for given blockers using the attack table     // <- these are the ones to actually use during move generation
     bb::U64 LookupBishopAttacks(bb::Square square, bb::U64 blockers = 0ULL);

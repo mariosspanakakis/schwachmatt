@@ -94,11 +94,10 @@ namespace movegen {
             return;
         }
 
+        // get piece locations
         bb::U64 our_pieces = board.GetOccupancyBitboard(color);
         bb::U64 their_pieces = board.GetOccupancyBitboard(!color);
         bb::U64 all_pieces = board.GetCombinedOccupancyBitboard();
-        
-        // get piece locations
         bb::U64 pieces = board.GetPieceBitboard(piece, color);
         
         // for each piece, get the attacked squares
@@ -115,6 +114,9 @@ namespace movegen {
                     break;
                 case bb::BISHOP:
                     attacks = attacks::LookupBishopAttacks(from_square, all_pieces);
+                    break;
+                case bb::ROOK:
+                    attacks = attacks::LookupRookAttacks(from_square, all_pieces);
                     break;
             }
 

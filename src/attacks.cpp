@@ -27,14 +27,12 @@ namespace attacks {
             king_attack_table[square] = GetKingAttacks(square);
 
             // generate attack masks for bishop and rook
-            bishop_attack_mask[square] = GetBishopAttacks(square) & ~bb::EDGE_BB;           // NOTE: treat this with care, what about the rook attack mask?
-            rook_attack_mask[square] = GetRookAttacks(square);
+            bishop_attack_mask[square] = GetBishopAttacks(square, 0ULL, true);
+            rook_attack_mask[square] = GetRookAttacks(square, 0ULL, true);
 
             // generate magic attack tables for the bishops and rooks
             InitializeMagicAttack(square, true);
             InitializeMagicAttack(square, false);
-
-            // TODO: generate queen attacks
         }
     }
 
@@ -76,7 +74,7 @@ namespace attacks {
     }
 
     bb::U64 GetKingAttacks(bb::Square square) {
-        // initialize bitboards for pawn position and attacked fields
+        // initialize bitboards for king position and attacked fields
         bb::U64 bitboard = 0ULL;
         bb::SetBit(bitboard, square);
         bb::U64 attacks = 0ULL;
@@ -94,7 +92,7 @@ namespace attacks {
         return attacks;
     }
 
-    bb::U64 GetBishopAttacks(bb::Square square, bb::U64 blockers) {
+    bb::U64 GetBishopAttacks(bb::Square square, bb::U64 blockers, bool mask_mode) {
         // initialize bitboards for bishop position and attacked fields
         bb::U64 bitboard = 0ULL;
         bb::SetBit(bitboard, square);
@@ -124,38 +122,68 @@ namespace attacks {
             attacks |= attacked_square;
             if (blockers & attacked_square) break;
         }
+        if (mask_mode) {
+            attacks &= ~bb::EDGE_BB;
+        }
         return attacks;
     }
 
-    bb::U64 GetRookAttacks(bb::Square square, bb::U64 blockers) {
-        // initialize bitboards for pawn position and attacked fields
+    bb::U64 GetRookAttacks(bb::Square square, bb::U64 blockers, bool mask_mode) {
+        // initialize bitboards for rook position and attacked fields
         bb::U64 bitboard = 0ULL;
         bb::SetBit(bitboard, square);
         bb::U64 attacks = 0ULL;
         bb::U64 bb;
-        // north line
-        for (bb::U64 bb = bitboard; (bb & ~bb::RANK_7_BB) != 0; bb <<= 8) {
-            bb::U64 attacked_square = bb << 8;
-            attacks |= attacked_square;
-            if (blockers & attacked_square) break;
-        }
-        // south line
-        for (bb = bitboard; (bb & ~bb::RANK_2_BB) != 0; bb >>= 8) {
-            bb::U64 attacked_square = bb >> 8;
-            attacks |= attacked_square;
-            if (blockers & attacked_square) break;
-        }
-        // east line
-        for (bb = bitboard; (bb & ~bb::FILE_H_BB & ~bb::FILE_G_BB) != 0; bb <<= 1) {
-            bb::U64 attacked_square = bb << 1;
-            attacks |= attacked_square;
-            if (blockers & attacked_square) break;
-        }
-        // west line
-        for (bb = bitboard; (bb & ~bb::FILE_A_BB & ~bb::FILE_B_BB) != 0; bb >>= 1) {
-            bb::U64 attacked_square = bb >> 1;
-            attacks |= attacked_square;
-            if (blockers & attacked_square) break;
+        if (mask_mode) {
+            // north line
+            for (bb::U64 bb = bitboard; (bb & ~bb::RANK_7_BB) != 0; bb <<= 8) {
+                bb::U64 attacked_square = bb << 8;
+                attacks |= attacked_square;
+                if (blockers & attacked_square) break;
+            }
+            // south line
+            for (bb = bitboard; (bb & ~bb::RANK_2_BB) != 0; bb >>= 8) {
+                bb::U64 attacked_square = bb >> 8;
+                attacks |= attacked_square;
+                if (blockers & attacked_square) break;
+            }
+            // east line
+            for (bb = bitboard; (bb & ~bb::FILE_H_BB & ~bb::FILE_G_BB) != 0; bb <<= 1) {
+                bb::U64 attacked_square = bb << 1;
+                attacks |= attacked_square;
+                if (blockers & attacked_square) break;
+            }
+            // west line
+            for (bb = bitboard; (bb & ~bb::FILE_A_BB & ~bb::FILE_B_BB) != 0; bb >>= 1) {
+                bb::U64 attacked_square = bb >> 1;
+                attacks |= attacked_square;
+                if (blockers & attacked_square) break;
+            }
+        } else {
+            // north line
+            for (bb::U64 bb = bitboard; (bb & ~bb::RANK_8_BB) != 0; bb <<= 8) {
+                bb::U64 attacked_square = bb << 8;
+                attacks |= attacked_square;
+                if (blockers & attacked_square) break;
+            }
+            // south line
+            for (bb = bitboard; (bb & ~bb::RANK_1_BB) != 0; bb >>= 8) {
+                bb::U64 attacked_square = bb >> 8;
+                attacks |= attacked_square;
+                if (blockers & attacked_square) break;
+            }
+            // east line
+            for (bb = bitboard; (bb & ~bb::FILE_H_BB) != 0; bb <<= 1) {
+                bb::U64 attacked_square = bb << 1;
+                attacks |= attacked_square;
+                if (blockers & attacked_square) break;
+            }
+            // west line
+            for (bb = bitboard; (bb & ~bb::FILE_A_BB) != 0; bb >>= 1) {
+                bb::U64 attacked_square = bb >> 1;
+                attacks |= attacked_square;
+                if (blockers & attacked_square) break;
+            }
         }
         return attacks;
     }
@@ -277,7 +305,7 @@ namespace attacks {
         for (int i = 0; i < (1 << bits); i++) {
             // get blocker configuration and calculate attack
             blockers = GetBlockerConfiguration(i, attack_mask);
-            attack = is_bishop? GetBishopAttacks(square, blockers) : GetRookAttacks(square, blockers);
+            attack = is_bishop ? GetBishopAttacks(square, blockers) : GetRookAttacks(square, blockers);
 
             // store the attack map at the hashed magic index
             int magic_index = attacks::MagicTransform(blockers, magic, bits);
