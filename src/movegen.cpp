@@ -118,6 +118,15 @@ namespace movegen {
                 case bb::ROOK:
                     attacks = attacks::LookupRookAttacks(from_square, all_pieces);
                     break;
+                case bb::QUEEN:
+                    attacks = (
+                        attacks::LookupBishopAttacks(from_square, all_pieces)
+                        | attacks::LookupRookAttacks(from_square, all_pieces)
+                    );
+                    break;
+                case bb::KING:
+                    attacks = attacks::king_attack_table[from_square];
+                    break;
             }
 
             // remove the attacked squares which are occupied by friendly pieces
