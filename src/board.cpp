@@ -83,6 +83,9 @@ Board::Board(const std::string& fen){
         }
         m_occupancy_combined_BB |= m_occupancy_BB[color];
     }
+
+    // push the initial game state onto the game state history stack
+    m_game_state_history.push_back(initial_game_state);
 };
 
 bb::U64 Board::GetPieceBitboard(bb::Piece piece, bb::Color color) {
@@ -95,4 +98,8 @@ bb::U64 Board::GetOccupancyBitboard(bb::Color color) {
 
 bb::U64 Board::GetCombinedOccupancyBitboard() {
     return m_occupancy_combined_BB;
+}
+
+GameState Board::GetCurrentGameState() {
+    return m_game_state_history.back();
 }
