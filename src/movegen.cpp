@@ -8,9 +8,9 @@ namespace movegen {
 
         return moves; 
     }
-
+                                                                                // NOTE: this is not using attack tables, so they could be removed
     // each pawn has three possible move types: single push, double push, and capture
-    std::vector<Move> GeneratePawnMoves(Board& board, bb::Color color) {                    // TODO: implement en-passant captures
+    std::vector<Move> GeneratePawnMoves(Board& board, bb::Color color) {
         
         // get piece bitboards
         bb::U64 their_pieces = board.GetOccupancyBitboard(!color);
@@ -19,30 +19,17 @@ namespace movegen {
         // extract pawn locations
         bb::U64 pawns = board.GetPieceBitboard(bb::PAWN, color);
 
-        // define move directions and get the target squares for all possible pawn moves
-        bb::U64 single_pushes, double_pushes, right_captures, left_captures;
-        bb::Direction forward_dir, right_capture_dir, left_capture_dir;
-        if (color == bb::WHITE) {
-            // define the move directions for white
-            forward_dir = bb::NORTH;
-            right_capture_dir = bb::NORTHEAST;
-            left_capture_dir = bb::NORTHWEST;
-            // get all possible target squares
-            single_pushes = bb::ShiftNorth(pawns) & ~all_pieces;
-            double_pushes = bb::ShiftNorth(single_pushes & bb::RANK_3_BB) & ~all_pieces;
-            right_captures = bb::ShiftNorthEast(pawns) & their_pieces;
-            left_captures = bb::ShiftNorthWest(pawns) & their_pieces;
-        } else {
-            // define the move directions for black
-            forward_dir = bb::SOUTH;
-            right_capture_dir = bb::SOUTHWEST;
-            left_capture_dir = bb::SOUTHEAST;
-            // get all possible target squares
-            single_pushes = bb::ShiftSouth(pawns) & ~all_pieces;
-            double_pushes = bb::ShiftSouth(single_pushes & bb::RANK_6_BB) & ~all_pieces;
-            right_captures = bb::ShiftSouthWest(pawns) & their_pieces;
-            left_captures = bb::ShiftSouthEast(pawns) & their_pieces;
-        }
+        bool is_white = (color == bb::WHITE);
+
+        // define the move directions
+        bb::Direction forward_dir = is_white ? bb::NORTH : bb::SOUTH;
+        bb::Direction right_capture_dir = is_white ? bb::NORTHEAST : bb::SOUTHWEST;
+        bb::Direction left_capture_dir = is_white ? bb::NORTHWEST : bb::SOUTHEAST;
+        // get all possible target squares
+        bb::U64 single_pushes = is_white ? bb::ShiftNorth(pawns) : bb::ShiftSouth(pawns);
+        bb::U64 double_pushes = is_white ? bb::ShiftNorth(single_pushes & bb::RANK_3_BB) : bb::ShiftSouth(single_pushes & bb::RANK_6_BB);
+        bb::U64 right_captures = is_white ? bb::ShiftNorthEast(pawns) : bb::ShiftSouthWest(pawns);
+        bb::U64 left_captures = is_white ? bb::ShiftNorthWest(pawns) : bb::ShiftSouthEast(pawns);
 
         // initialize vector to contain moves
         std::vector<Move> moves;
@@ -70,6 +57,7 @@ namespace movegen {
                 bb::ClearBit(promotions, to_square);
                 int from_square = to_square - dir;
 
+                // generate a separate move for promoting to any possible piece
                 for (mv::MoveFlag promotion_flag : {mv::KNIGHT_PROMOTION, mv::BISHOP_PROMOTION, mv::ROOK_PROMOTION, mv::QUEEN_PROMOTION}) {
                     // combine the existing flag with the promotion flag to conserve the capture bit, and add the move to the moves list
                     moves.push_back(Move(from_square, to_square, flag | promotion_flag));
@@ -79,11 +67,27 @@ namespace movegen {
         };
 
         // gather all moves based on the identified target squares
-        GatherMoves(single_pushes, forward_dir, mv::QUIET);
-        GatherMoves(double_pushes, 2 * forward_dir, mv::DOUBLE_PAWN_PUSH);
-        GatherMoves(right_captures, right_capture_dir, mv::CAPTURE);
-        GatherMoves(left_captures, left_capture_dir, mv::CAPTURE);
+        GatherMoves(single_pushes & ~all_pieces, forward_dir, mv::QUIET);
+        GatherMoves(double_pushes & ~all_pieces, 2 * forward_dir, mv::DOUBLE_PAWN_PUSH);
+        GatherMoves(right_captures & their_pieces, right_capture_dir, mv::CAPTURE);
+        GatherMoves(left_captures & their_pieces, left_capture_dir, mv::CAPTURE);
 
+        // check for possible en-passant captures
+        bb::U64 en_passant_target = board.GetCurrentGameState().en_passant_target;
+        if (en_passant_target) {
+            bb::PrintBitboard(en_passant_target);
+            int to_square = bb::GetLeastSignificantBitIndex(en_passant_target);
+            mv::MoveFlag en_passant_flag = mv::EN_PASSANT_CAPTURE;
+            if (right_captures & en_passant_target) {
+                int from_square = to_square - right_capture_dir;
+                moves.push_back(Move(from_square, to_square, en_passant_flag));
+            }
+            if (left_captures & en_passant_target) {
+                int from_square = to_square - left_capture_dir;
+                moves.push_back(Move(from_square, to_square, en_passant_flag));
+            }
+        }
+        
         return moves;
     }
 
