@@ -1,11 +1,9 @@
 #include "move.h"
 
-// null move constructor
 Move::Move() {
     m_move = 0;
 }
 
-// general move constructor
 Move::Move(bb::Square from, bb::Square to, mv::MoveFlag flag) {
     m_move = 0;
     SetFrom(from);
@@ -36,6 +34,21 @@ mv::MoveFlag Move::GetFlag() {
 void Move::SetFlag(mv::MoveFlag flag) {
     m_move |= (flag << mv::FLAG_SHIFT);
 }
+
+
+// move list to store moves during move generation
+void MoveList::Add(Move move) {
+    m_moves[m_size++] = move;
+}
+
+Move MoveList::GetMove(int index) {                                             // TODO: this is lacking range checks!
+    return m_moves[index];
+}
+
+int MoveList::GetSize() {
+    return m_size;
+}
+
 
 namespace mv {
     void PrintMoveDetails(Move move) {

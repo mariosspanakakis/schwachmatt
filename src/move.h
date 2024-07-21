@@ -82,21 +82,31 @@ namespace mv {
 
 
 class Move {
-private:
+    private:
     uint16_t m_move;
 
-public:
+    public:
     Move();
     Move(bb::Square from, bb::Square to, mv::MoveFlag flag);
     ~Move() = default;
-
-    // move information
     bb::Square GetTo();
     void SetTo(bb::Square to);
     bb::Square GetFrom();
     void SetFrom(bb::Square from);
     mv::MoveFlag GetFlag();
     void SetFlag(mv::MoveFlag flag);
+};
+
+
+class MoveList {
+    private:
+    Move m_moves[256];
+    int m_size;
+
+    public:
+    void Add(Move move);
+    Move GetMove(int index);
+    int GetSize();
 };
 
 #endif
