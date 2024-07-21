@@ -27,7 +27,7 @@ namespace attacks {
             king_attack_table[square] = GetKingAttacks(square);
 
             // generate attack masks for bishop and rook
-            bishop_attack_mask[square] = GetBishopAttacks(square);
+            bishop_attack_mask[square] = GetBishopAttacks(square) & ~bb::EDGE_BB;           // NOTE: treat this with care, what about the rook attack mask?
             rook_attack_mask[square] = GetRookAttacks(square);
 
             // generate magic attack tables for the bishops and rooks
@@ -124,8 +124,6 @@ namespace attacks {
             attacks |= attacked_square;
             if (blockers & attacked_square) break;
         }
-        // mask out the board's outer squares as these are not required
-        attacks &= ~(bb::FILE_A_BB | bb::FILE_H_BB | bb::RANK_1_BB | bb::RANK_8_BB);
         return attacks;
     }
 
@@ -163,9 +161,8 @@ namespace attacks {
     }
 
     bb::U64 LookupBishopAttacks(bb::Square square, bb::U64 blockers) {
-        // get attack mask and mas kthe given blockers
-        bb::U64 attack_mask = attacks::bishop_attack_mask[square];
-        bb::U64 masked_blockers = blockers & attack_mask;
+        // get attack mask and mask the given blockers
+        bb::U64 masked_blockers = blockers & attacks::bishop_attack_mask[square];
 
         // lookup magic number for the given square
         bb::U64 magic = attacks::bishop_magics[square];
@@ -182,8 +179,7 @@ namespace attacks {
 
     bb::U64 LookupRookAttacks(bb::Square square, bb::U64 blockers) {
         // get attack mask and mas kthe given blockers
-        bb::U64 attack_mask = attacks::rook_attack_mask[square];
-        bb::U64 masked_blockers = blockers & attack_mask;
+        bb::U64 masked_blockers = blockers & attacks::rook_attack_mask[square];
 
         // lookup magic number for the given square
         bb::U64 magic = attacks::rook_magics[square];
@@ -225,7 +221,7 @@ namespace attacks {
         bb::U64 blockers[4096], attacks[4096], used[4096];
 
         // get attack mask and number of relevant bits
-        bb::U64 attack_mask = is_bishop ? GetBishopAttacks(square) : GetRookAttacks(square);
+        bb::U64 attack_mask = is_bishop ? bishop_attack_mask[square] : rook_attack_mask[square];
         int bits = is_bishop ? bishop_relevant_bits[square] : rook_relevant_bits[square];
         
         // generate all possible blocker configurations and corresponding attacks
@@ -276,7 +272,7 @@ namespace attacks {
 
         // get all possible blocker configurations and attacks
         bb::U64 blockers, attack;
-        bb::U64 attack_mask = is_bishop? GetBishopAttacks(square) : GetRookAttacks(square);
+        bb::U64 attack_mask = is_bishop ? bishop_attack_mask[square] : rook_attack_mask[square];
 
         for (int i = 0; i < (1 << bits); i++) {
             // get blocker configuration and calculate attack

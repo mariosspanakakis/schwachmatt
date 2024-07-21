@@ -94,6 +94,9 @@ namespace bb {
     constexpr U64 FILE_B_BB = FILE_H_BB >> 6;
     constexpr U64 FILE_A_BB = FILE_H_BB >> 7;
 
+    // other relevant bitboard representations
+    constexpr U64 EDGE_BB = 0xFF818181818181FF;
+
     // print a readable bitboard representation to the console
     void PrintBitboard(U64 bitboard);
 
