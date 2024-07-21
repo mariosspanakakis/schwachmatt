@@ -10,7 +10,7 @@ namespace movegen {
     }
 
     // each pawn has three possible move types: single push, double push, and capture
-    std::vector<Move> GeneratePawnMoves(Board& board, bb::Color color) {                    // TODO: implement pawn promotions and en-passant
+    std::vector<Move> GeneratePawnMoves(Board& board, bb::Color color) {                    // TODO: implement en-passant captures
         
         // get piece bitboards
         bb::U64 their_pieces = board.GetOccupancyBitboard(!color);
@@ -49,13 +49,31 @@ namespace movegen {
 
         // lambda function to generate the corresponding move for each target square
         auto GatherMoves {[&moves] (bb::U64 targets, bb::Direction dir, mv::MoveFlag flag) {
-            while(targets) {
+            // separate the target bitboard into non-promotion and promotion targets
+            bb::U64 promotions = targets & (bb::RANK_1_BB | bb::RANK_8_BB);
+            bb::U64 non_promotions = targets - promotions;
+
+            // generate all non-promotion moves
+            while(non_promotions) {
                 // extract a target square and the corresponding origin square
-                int to_square = bb::GetLeastSignificantBitIndex(targets);
-                bb::ClearBit(targets, to_square);
+                int to_square = bb::GetLeastSignificantBitIndex(non_promotions);
+                bb::ClearBit(non_promotions, to_square);
                 int from_square = to_square - dir;
+
                 // add the move to the moves list
                 moves.push_back(Move(from_square, to_square, flag));
+            }
+            // generate all promotion moves
+            while(promotions) {
+                // extract a target square and the corresponding origin square
+                int to_square = bb::GetLeastSignificantBitIndex(promotions);
+                bb::ClearBit(promotions, to_square);
+                int from_square = to_square - dir;
+
+                for (mv::MoveFlag promotion_flag : {mv::KNIGHT_PROMOTION, mv::BISHOP_PROMOTION, mv::ROOK_PROMOTION, mv::QUEEN_PROMOTION}) {
+                    // combine the existing flag with the promotion flag to conserve the capture bit, and add the move to the moves list
+                    moves.push_back(Move(from_square, to_square, flag | promotion_flag));
+                }
             }
         }
         };
