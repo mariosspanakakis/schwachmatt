@@ -96,6 +96,10 @@ namespace bb {
 
     // other relevant bitboard representations
     constexpr U64 EDGE_BB = 0xFF818181818181FF;
+    constexpr U64 WHITE_KINGSIDE_CASTLE_SQUARES = 0x0000000000000060;
+    constexpr U64 WHITE_QUEENSIDE_CASTLE_SQUARES = 0x000000000000000E;
+    constexpr U64 BLACK_KINGSIDE_CASTLE_SQUARES = 0x6000000000000000;
+    constexpr U64 BLACK_QUEENSIDE_CASTLE_SQUARES = 0x0E00000000000000;
 
     // print a readable bitboard representation to the console
     void printBitboard(U64 bitboard);

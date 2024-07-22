@@ -26,9 +26,9 @@ struct GameState {
     uint8_t castlingRights;
 };
 
-const GameState initial_game_state = GameState {
-    .enPassantTarget = 0ULL,          // no en passant square
-    .castlingRights = 0b00001111       // full castling rights for both sides
+const GameState initialGameState = GameState {
+    .enPassantTarget = 0ULL,            // no en passant square
+    .castlingRights = 0b00001111        // full castling rights for both sides
 };
 
 class Board {

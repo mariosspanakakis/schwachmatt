@@ -86,7 +86,7 @@ Board::Board(const std::string& fen){
 
     // push the initial game state onto the game state history stack
     m_game_state_history.reserve(512);
-    m_game_state_history.push_back(initial_game_state);
+    m_game_state_history.push_back(initialGameState);
 };
 
 bb::U64 Board::getPieceBitboard(bb::Piece piece, bb::Color color) {

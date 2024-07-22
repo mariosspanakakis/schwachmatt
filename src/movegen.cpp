@@ -66,9 +66,13 @@ namespace movegen {
                 movelist.add(Move(from_square, to_square, flag));
             }
         }
+
+        // add castling moves for the king
+        if (piece == bb::KING) {
+            generateCastlingMoves(board, color, movelist);
+        }
     }
-                                                                                // NOTE: this is not using attack tables, so they could be removed
-    // each pawn has three possible move types: single push, double push, and capture
+    
     void generatePawnMoves(Board& board, bb::Color color, MoveList &movelist) {
         
         // get piece bitboards
@@ -147,6 +151,29 @@ namespace movegen {
     }
 
     void generateCastlingMoves(Board& board, bb::Color color, MoveList &movelist) {
-        
+        // prerequisites for castling:
+        // - castling generally permitted (king and rook have not been moved)
+        // - no pieces on the squares between king and rook
+        // - the squares between king and rook are not under attack             -> this is tested during legality test
+        bb::U64 all_pieces = board.getCombinedOccupancyBitboard();
+        if (color == bb::WHITE) {
+            if (board.getCastlingRight(WHITE_KINGSIDE_CASTLE)
+                && ((all_pieces & bb::WHITE_KINGSIDE_CASTLE_SQUARES) == 0)) {
+                    movelist.add(Move(bb::E1, bb::G1, mv::KINGSIDE_CASTLE));
+            }
+            if (board.getCastlingRight(WHITE_QUEENSIDE_CASTLE)
+                && ((all_pieces & bb::WHITE_QUEENSIDE_CASTLE_SQUARES) == 0)) {
+                    movelist.add(Move(bb::E1, bb::C1, mv::QUEENSIDE_CASTLE));
+            }
+        } else {
+            if (board.getCastlingRight(BLACK_KINGSIDE_CASTLE)
+                && ((all_pieces & bb::BLACK_KINGSIDE_CASTLE_SQUARES) == 0)) {
+                    movelist.add(Move(bb::E8, bb::G8, mv::KINGSIDE_CASTLE));
+            }
+            if (board.getCastlingRight(BLACK_QUEENSIDE_CASTLE)
+                && ((all_pieces & bb::BLACK_QUEENSIDE_CASTLE_SQUARES) == 0)) {
+                    movelist.add(Move(bb::E8, bb::C8, mv::QUEENSIDE_CASTLE));
+            }
+        }
     }
 }

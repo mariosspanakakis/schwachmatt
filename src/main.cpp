@@ -10,14 +10,14 @@ int main(int argc, char *argv[]) {
     // initialize and setup chess board
     Board board;
     try {
-        board = Board("3q2nr/1P1NkpP1/1rp3n1/p2p3p/2pP1P2/P3Pb2/2QB3P/R3KBNR b KQ - 4 23");
+        board = Board("r3kbnr/ppp2ppp/2np1q2/4p3/2BPP1b1/2N2N2/PPP2PPP/R1BQK2R w KQkq - 4 6");
     } catch(std::runtime_error &err){
         std::cerr << "Exception caught: " << err.what();
         return 1;
     }
 
     // generate moves
-    bb::Color color = bb::BLACK;
+    bb::Color color = bb::WHITE;
     bb::Piece piece = bb::KING;
     MoveList movelist;
     movegen::generatePieceMoves(board, piece, color, movelist);
