@@ -9,10 +9,10 @@ int main(int argc, char *argv[]) {
         
         // initialize chess board
         Board board;
-        board = Board("r3kb1r/p4ppp/2pp1q1n/1p1Np1B1/Q2PP1b1/3B1N2/PP3PPP/2R1K2R b Kkq - 1 11");
+        board = Board("r3kb1r/p1N2ppp/2pp1q1n/1p2p1B1/Q2PP3/3B1b2/PP3PPP/2R1K2R b Kkq - 1 12");
 
         // generate moves
-        bb::Color color = bb::WHITE;
+        bb::Color color = bb::BLACK;
         /*bb::Piece piece = bb::ROOK;
         MoveList movelist;
         movegen::generatePieceMoves(board, piece, color, movelist);*/
@@ -20,6 +20,14 @@ int main(int argc, char *argv[]) {
         std::cout << "Found " << movelist.getSize() << " moves:" << std::endl;
         for (int i = 0; i < movelist.getSize(); i++) {
             mv::printMoveDetails(movelist.getMove(i));
+        }
+
+        bb::Square kingSquare = bb::getLeastSignificantBitIndex(board.getPieceBitboard(bb::KING, color));
+        bool inCheck = board.isAttackedBy(kingSquare, !color);
+        if (inCheck) {
+            std::cout << "King is in check." << std::endl;
+        } else {
+            std::cout << "King is not in check." << std::endl;
         }
 
         return 0;

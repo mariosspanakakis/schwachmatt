@@ -5,6 +5,7 @@
 #include <stdint.h>
 #include <cctype>
 #include <ctype.h>
+#include "attacks.h"
 #include "bitboard.h"
 #include "utils.h"
 
@@ -46,9 +47,18 @@ class Board {
     Board(const std::string& fen = initialFEN);
     ~Board() = default;
 
+    // piece bitboards
     bb::U64 getPieceBitboard(bb::Piece, bb::Color);
     bb::U64 getOccupancyBitboard(bb::Color);
     bb::U64 getCombinedOccupancyBitboard();
+
+    /* @brief Test if a square is under attack by a piece of the given color.
+     * @param square The square for which to test for attacks.
+     * @param color The attacking color.
+     * @return A boolean indicating whether the square is under attack. */
+    bool isAttackedBy(bb::Square square, bb::Color color);
+
+    // game state information
     bb::U64 getCurrentEnPassantTarget();
     bool getCastlingRight(uint8_t castling_right);
 };

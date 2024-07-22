@@ -100,6 +100,37 @@ bb::U64 Board::getOccupancyBitboard(bb::Color color) {
 bb::U64 Board::getCombinedOccupancyBitboard() {
     return m_occupancy_combined_BB;
 }
+
+// NOTE: there are more efficient approaches than this
+bool Board::isAttackedBy(bb::Square square, bb::Color color) {
+    bool us = color;
+    bool them = !color;
+
+    // following the I-see-you-you-see-me approach, calculate piece attacks from
+    // the initial square and check if the corresponding pieces can be attacked
+    bb::U64 theirPawns = m_pieces_BB[them][bb::PAWN];
+    if (attacks::pawnAttackTable[us][square] & theirPawns) {
+        return true;
+    }
+    bb::U64 theirKnights = m_pieces_BB[them][bb::KNIGHT];
+    if (attacks::knightAttackTable[square] & theirKnights) {
+        return true;
+    }
+    bb::U64 theirKing = m_pieces_BB[them][bb::KING];
+    if (attacks::kingAttackTable[square] & theirKing) {
+        return true;
+    }
+    bb::U64 theirBishopsAndQueens = m_pieces_BB[them][bb::BISHOP] | m_pieces_BB[them][bb::QUEEN];
+    if (attacks::lookupBishopAttacks(square, m_occupancy_combined_BB) & theirBishopsAndQueens) {
+        return true;
+    }
+    bb::U64 theirRooksAndQueens = m_pieces_BB[them][bb::BISHOP] | m_pieces_BB[them][bb::QUEEN];
+    if (attacks::lookupRookAttacks(square, m_occupancy_combined_BB) & theirRooksAndQueens) {
+        return true;
+    }
+    
+    return false;
+}
     
 bb::U64 Board::getCurrentEnPassantTarget() {
     return m_game_state_history.back().enPassantTarget;
