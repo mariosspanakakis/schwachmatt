@@ -11,7 +11,7 @@ Board::Board(const std::string& fen){
     m_occupancy_combined_BB = 0ULL;
     
     // split the given FEN into groups that describe the board status
-    std::vector<std::string> fen_groups = utils::SplitFen(fen);
+    std::vector<std::string> fen_groups = utils::splitFen(fen);
 
     // loop through FEN and set up pieces as specified, note that FEN notation
     // counts ranks downwards but files upwards!
@@ -33,7 +33,7 @@ Board::Board(const std::string& fen){
             char figure = tolower(symbol);
 
             // obtain square from rank and file
-            int square = bb::ConvertCoordToSquare(rank, file);
+            int square = bb::convertCoordToSquare(rank, file);
 
             // set offset for piece referencing
             bb::Color color = is_white ? bb::WHITE : bb::BLACK;
@@ -41,22 +41,22 @@ Board::Board(const std::string& fen){
             // update the occupancy bitboard in accordance to the pieces
             switch (figure){
                 case 'p':
-                    bb::SetBit(m_pieces_BB[color][bb::PAWN], square);
+                    bb::setBit(m_pieces_BB[color][bb::PAWN], square);
                     break;
                 case 'n':
-                    bb::SetBit(m_pieces_BB[color][bb::KNIGHT], square);
+                    bb::setBit(m_pieces_BB[color][bb::KNIGHT], square);
                     break;
                 case 'b':
-                    bb::SetBit(m_pieces_BB[color][bb::BISHOP], square);
+                    bb::setBit(m_pieces_BB[color][bb::BISHOP], square);
                     break;
                 case 'r':
-                    bb::SetBit(m_pieces_BB[color][bb::ROOK], square);
+                    bb::setBit(m_pieces_BB[color][bb::ROOK], square);
                     break;
                 case 'q':
-                    bb::SetBit(m_pieces_BB[color][bb::QUEEN], square);
+                    bb::setBit(m_pieces_BB[color][bb::QUEEN], square);
                     break;
                 case 'k':
-                    bb::SetBit(m_pieces_BB[color][bb::KING], square);
+                    bb::setBit(m_pieces_BB[color][bb::KING], square);
                     break;
             }
             // procesed to next file
@@ -89,22 +89,22 @@ Board::Board(const std::string& fen){
     m_game_state_history.push_back(initial_game_state);
 };
 
-bb::U64 Board::GetPieceBitboard(bb::Piece piece, bb::Color color) {
+bb::U64 Board::getPieceBitboard(bb::Piece piece, bb::Color color) {
     return m_pieces_BB[color][piece];
 }
 
-bb::U64 Board::GetOccupancyBitboard(bb::Color color) {
+bb::U64 Board::getOccupancyBitboard(bb::Color color) {
     return m_occupancy_BB[color];
 }
 
-bb::U64 Board::GetCombinedOccupancyBitboard() {
+bb::U64 Board::getCombinedOccupancyBitboard() {
     return m_occupancy_combined_BB;
 }
     
-bb::U64 Board::GetCurrentEnPassantTarget() {
-    return m_game_state_history.back().en_passant_target;
+bb::U64 Board::getCurrentEnPassantTarget() {
+    return m_game_state_history.back().enPassantTarget;
 }
 
-bool Board::GetCastlingRight(uint8_t castling_right) {
-    return (m_game_state_history.back().castling_rights & castling_right);
+bool Board::getCastlingRight(uint8_t castling_right) {
+    return (m_game_state_history.back().castlingRights & castling_right);
 }

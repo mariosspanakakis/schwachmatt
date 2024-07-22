@@ -74,10 +74,10 @@ namespace mv {
     };
 
     // print move in standard algebraic notation, e.g. Bxe5                     // TODO: implement
-    void PrintMove(Move move, Board board);
+    void printMove(Move move, Board board);
 
     // print readable move representation for debugging purposes
-    void PrintMoveDetails(Move move);
+    void printMoveDetails(Move move);
 }
 
 
@@ -89,12 +89,12 @@ class Move {
     Move();
     Move(bb::Square from, bb::Square to, mv::MoveFlag flag);
     ~Move() = default;
-    bb::Square GetTo();
-    void SetTo(bb::Square to);
-    bb::Square GetFrom();
-    void SetFrom(bb::Square from);
-    mv::MoveFlag GetFlag();
-    void SetFlag(mv::MoveFlag flag);
+    bb::Square getTo();
+    void setTo(bb::Square to);
+    bb::Square getFrom();
+    void setFrom(bb::Square from);
+    mv::MoveFlag getFlag();
+    void setFlag(mv::MoveFlag flag);
 };
 
 
@@ -104,9 +104,9 @@ class MoveList {
     int m_size;
 
     public:
-    void Add(Move move);
-    Move GetMove(int index);
-    int GetSize();
+    void add(Move move);
+    Move getMove(int index);
+    int getSize();
 };
 
 #endif

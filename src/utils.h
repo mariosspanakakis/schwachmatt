@@ -11,15 +11,15 @@
 namespace utils {
 
     // pseudo random number state
-    extern uint32_t random_state;
+    extern uint32_t randomState;
 
     // split FEN string into subgroups
-    std::vector<std::string> SplitFen(const std::string& fen);
+    std::vector<std::string> splitFen(const std::string& fen);
 
     // pseudo random number generation
-    uint32_t GetRandom32();
-    bb::U64 GetRandom64();
-    bb::U64 GetRandom64Sparse();
+    uint32_t getRandom32();
+    bb::U64 getRandom64();
+    bb::U64 getRandom64Sparse();
 }
 
 #endif

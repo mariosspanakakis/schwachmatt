@@ -2,7 +2,7 @@
 
 namespace bb {
 
-    void PrintBitboard(U64 bitboard) {
+    void printBitboard(U64 bitboard) {
         std::cout << std::endl;
         for (int rank = 7; rank >= 0; rank--) {
             std::cout << " " << rank + 1 << "  ";
@@ -22,22 +22,22 @@ namespace bb {
         std::cout << std::endl;
     }
 
-    U64 GetPopulatedBitboard(const std::vector<Square>& populated_squares) {
+    U64 getPopulatedBitboard(const std::vector<Square>& populatedSquares) {
         U64 bitboard = 0ULL;
-        for (auto it = populated_squares.begin(); it != populated_squares.end(); ++it){
-            bb::SetBit(bitboard, *it);
+        for (auto it = populatedSquares.begin(); it != populatedSquares.end(); ++it){
+            bb::setBit(bitboard, *it);
         }
         return bitboard;
     }
 
-    int CountBits(bb::U64 bitboard) {
+    int countBits(bb::U64 bitboard) {
         int r;
         for(r = 0; bitboard; r++, bitboard &= bitboard - 1);
         return r;
     }
 
-    int GetLeastSignificantBitIndex(U64 bitboard) {
-        if (bitboard) return CountBits((bitboard & -bitboard) - 1);
+    int getLeastSignificantBitIndex(U64 bitboard) {
+        if (bitboard) return countBits((bitboard & -bitboard) - 1);
         else return -1;
     }
 }

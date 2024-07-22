@@ -4,7 +4,7 @@ int main(int argc, char *argv[]) {
 
     // initialize attack tables for rapid lookup of attacked squares
     std::cout << "Initializing attack tables...";
-    attacks::InitializeAttackTables();
+    attacks::initializeAttackTables();
     std::cout << " done!" << std::endl;
 
     // initialize and setup chess board
@@ -20,10 +20,10 @@ int main(int argc, char *argv[]) {
     bb::Color color = bb::BLACK;
     bb::Piece piece = bb::KING;
     MoveList movelist;
-    movegen::GeneratePieceMoves(board, piece, color, movelist);
-    std::cout << "Found " << movelist.GetSize() << " moves:" << std::endl;
-    for (int i = 0; i < movelist.GetSize(); i++) {
-        mv::PrintMoveDetails(movelist.GetMove(i));
+    movegen::generatePieceMoves(board, piece, color, movelist);
+    std::cout << "Found " << movelist.getSize() << " moves:" << std::endl;
+    for (int i = 0; i < movelist.getSize(); i++) {
+        mv::printMoveDetails(movelist.getMove(i));
     }
 
     return 0;

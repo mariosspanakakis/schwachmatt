@@ -9,7 +9,7 @@
 #include "utils.h"
 
 // standard initial board configuration
-const std::string initial_fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
+const std::string initialFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
 // castling rights, used as indices to set the corresponding bits in the game state
 enum CastlingRights {
@@ -22,13 +22,13 @@ enum CastlingRights {
 // game state, containing all non-visible board information
 struct GameState {
     public:
-    bb::U64 en_passant_target;
-    uint8_t castling_rights;
+    bb::U64 enPassantTarget;
+    uint8_t castlingRights;
 };
 
-const GameState initial_game_state = GameState{
-    .en_passant_target = 0ULL,          // no en passant square
-    .castling_rights = 0b00001111       // full castling rights for both sides
+const GameState initial_game_state = GameState {
+    .enPassantTarget = 0ULL,          // no en passant square
+    .castlingRights = 0b00001111       // full castling rights for both sides
 };
 
 class Board {
@@ -43,14 +43,14 @@ class Board {
     std::vector<GameState> m_game_state_history;
     
     public:
-    Board(const std::string& fen = initial_fen);
+    Board(const std::string& fen = initialFEN);
     ~Board() = default;
 
-    bb::U64 GetPieceBitboard(bb::Piece, bb::Color);
-    bb::U64 GetOccupancyBitboard(bb::Color);
-    bb::U64 GetCombinedOccupancyBitboard();
-    bb::U64 GetCurrentEnPassantTarget();
-    bool GetCastlingRight(uint8_t castling_right);
+    bb::U64 getPieceBitboard(bb::Piece, bb::Color);
+    bb::U64 getOccupancyBitboard(bb::Color);
+    bb::U64 getCombinedOccupancyBitboard();
+    bb::U64 getCurrentEnPassantTarget();
+    bool getCastlingRight(uint8_t castling_right);
 };
 
 #endif
