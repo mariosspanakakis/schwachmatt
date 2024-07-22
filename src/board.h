@@ -34,20 +34,19 @@ const GameState initialGameState = GameState {
 
 class Board {
     private:
-    // separate occupancy bitboards for all pieces
-    bb::U64 m_pieces_BB[bb::N_COLORS][bb::N_PIECES];
-    // total occupancy bitboards for each side
-    bb::U64 m_occupancy_BB[bb::N_COLORS];
-    // combined occupancy bitboard
-    bb::U64 m_occupancy_combined_BB;
-    // stack containing the game's state history
-    std::vector<GameState> m_game_state_history;
+    /* Separate occupancy bitboards for all pieces. */
+    bb::U64 m_pieceBB[bb::N_COLORS][bb::N_PIECES];
+    /* Total occupancy bitboards for each side. */
+    bb::U64 m_occupancyBB[bb::N_COLORS];
+    /* Combined occupancy bitboard for both sides. */
+    bb::U64 m_occupancyCombinedBB;
+    /* Stack containing the game's state history. */
+    std::vector<GameState> m_gameStateHistory;
     
     public:
     Board(const std::string& fen = initialFEN);
     ~Board() = default;
 
-    // piece bitboards
     bb::U64 getPieceBitboard(bb::Piece, bb::Color);
     bb::U64 getOccupancyBitboard(bb::Color);
     bb::U64 getCombinedOccupancyBitboard();
@@ -58,7 +57,6 @@ class Board {
      * @return A boolean indicating whether the square is under attack. */
     bool isAttackedBy(bb::Square square, bb::Color color);
 
-    // game state information
     bb::U64 getCurrentEnPassantTarget();
     bool getCastlingRight(uint8_t castling_right);
 };
