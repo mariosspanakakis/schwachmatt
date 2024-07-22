@@ -11,7 +11,7 @@
 // standard initial board configuration
 const std::string initialFEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
-// castling rights, used as indices to set the corresponding bits in the game state
+// masks for the castling rights, each represented as a single bit
 enum CastlingRights {
     WHITE_KINGSIDE_CASTLE   = 0b0001,
     WHITE_QUEENSIDE_CASTLE  = 0b0010,
@@ -27,8 +27,8 @@ struct GameState {
 };
 
 const GameState initialGameState = GameState {
-    .enPassantTarget = 0ULL,            // no en passant square
-    .castlingRights = 0b00001111        // full castling rights for both sides
+    0ULL,                   // no en passant square
+    0b00001111              // full castling rights for both sides
 };
 
 class Board {
