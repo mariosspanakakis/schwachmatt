@@ -5,7 +5,11 @@ namespace movegen {
     MoveList generateMoves(Board& board, bb::Color color) {
         // initialize move list
         MoveList movelist;
-
+        // add moves for all pieces
+        for (bb::Piece piece : {bb::PAWN, bb::KNIGHT, bb::BISHOP, bb::ROOK, bb::QUEEN, bb::KING}) {
+            generatePieceMoves(board, piece, color, movelist);
+        }
+        // return the list of all possible moves
         return movelist; 
     }
 
@@ -90,8 +94,8 @@ namespace movegen {
         bb::Direction right_capture_dir = is_white ? bb::NORTHEAST : bb::SOUTHWEST;
         bb::Direction left_capture_dir = is_white ? bb::NORTHWEST : bb::SOUTHEAST;
         // get all possible target squares
-        bb::U64 single_pushes = is_white ? bb::shiftNorth(pawns) : bb::shiftSouth(pawns);
-        bb::U64 double_pushes = is_white ? bb::shiftNorth(single_pushes & bb::RANK_3_BB) : bb::shiftSouth(single_pushes & bb::RANK_6_BB);
+        bb::U64 single_pushes = ((is_white ? bb::shiftNorth(pawns) : bb::shiftSouth(pawns)) & ~all_pieces);
+        bb::U64 double_pushes = ((is_white ? bb::shiftNorth(single_pushes & bb::RANK_3_BB) : bb::shiftSouth(single_pushes & bb::RANK_6_BB)) & ~all_pieces);
         bb::U64 right_captures = is_white ? bb::shiftNorthEast(pawns) : bb::shiftSouthWest(pawns);
         bb::U64 left_captures = is_white ? bb::shiftNorthWest(pawns) : bb::shiftSouthEast(pawns);
 

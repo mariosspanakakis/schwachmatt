@@ -13,9 +13,10 @@ int main(int argc, char *argv[]) {
 
         // generate moves
         bb::Color color = bb::WHITE;
-        bb::Piece piece = bb::ROOK;
+        /*bb::Piece piece = bb::ROOK;
         MoveList movelist;
-        movegen::generatePieceMoves(board, piece, color, movelist);
+        movegen::generatePieceMoves(board, piece, color, movelist);*/
+        MoveList movelist = movegen::generateMoves(board, color);
         std::cout << "Found " << movelist.getSize() << " moves:" << std::endl;
         for (int i = 0; i < movelist.getSize(); i++) {
             mv::printMoveDetails(movelist.getMove(i));
