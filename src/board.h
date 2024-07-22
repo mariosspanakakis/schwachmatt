@@ -53,4 +53,10 @@ class Board {
     bool getCastlingRight(uint8_t castling_right);
 };
 
+class InvalidFENException : public std::runtime_error {
+public:
+    InvalidFENException(const std::string& message)
+        : std::runtime_error(message) {}
+};
+
 #endif

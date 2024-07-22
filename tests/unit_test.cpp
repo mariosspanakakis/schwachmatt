@@ -28,9 +28,8 @@ TEST(AttackTest, MagicNumberGeneration) {
 
     for (int is_bishop = 0; is_bishop < 2; is_bishop++) {
         for (int square = 0; square < bb::N_SQUARES; square++) {
-
             // get attack mask and number of relevant bits
-            bb::U64 attack_mask = is_bishop ? attacks::calculateBishopAttacks(square) : attacks::calculateRookAttacks(square);
+            bb::U64 attack_mask = is_bishop ? attacks::bishopAttackMask[square] : attacks::rookAttackMask[square];
             int bits = is_bishop ? attacks::bishopRelevantBits[square] : attacks::rookRelevantBits[square];
 
             // manually generate the attack mask for each blocker configuration

@@ -72,7 +72,7 @@ Board::Board(const std::string& fen){
 
     // throw an exception for invalid FEN
     if (rank != -1 || file != 0){
-        throw std::runtime_error(std::string("Invalid FEN"));
+        throw InvalidFENException(std::string("The specified FEN is invalid."));
     }
 
     // update the occupancy bitboards

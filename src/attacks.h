@@ -103,4 +103,10 @@ namespace attacks {
     void initializeMagicAttack(bb::Square square, bool is_bishop);
 }
 
+class MagicNotFoundException : public std::runtime_error {
+public:
+    MagicNotFoundException(const std::string& message)
+        : std::runtime_error(message) {}
+};
+
 #endif

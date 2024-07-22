@@ -258,7 +258,7 @@ namespace attacks {
             attacks[i] = is_bishop ? calculateBishopAttacks(square, blockers[i]) : calculateRookAttacks(square, blockers[i]);
         }        
         // conduct brute-force random search for suitable magic numbers
-        for (int iteration = 0; iteration < 1e6; iteration++) {
+        for (int iteration = 0; iteration < 1e7; iteration++) {
             // get magic number candidate
             bb::U64 magic_number = utils::getRandom64Sparse();
             
@@ -287,8 +287,8 @@ namespace attacks {
             if (!collision) return magic_number;
         }
         
-        // return zero if no suitable number has been found
-        return 0ULL;
+        // throw an exception if no magic number has been found
+        throw MagicNotFoundException("No magic number found for square " + std::to_string(square) + ".");
     }
 
     void initializeMagicAttack(bb::Square square, bool is_bishop) {
@@ -296,7 +296,8 @@ namespace attacks {
         int bits = is_bishop ? bishopRelevantBits[square] : rookRelevantBits[square];
 
         // find magic number and store it in the table
-        bb::U64 magic = attacks::findMagicNumber(square, is_bishop);
+        bb::U64 magic;
+        magic = attacks::findMagicNumber(square, is_bishop);
 
         // get all possible blocker configurations and attacks
         bb::U64 blockers, attack;

@@ -12,7 +12,7 @@ GTEST_INCLUDE = -I$(GTEST_DIR)/include -I$(SRCDIR)
 
 # executable names
 EXEC = main
-TEST_EXEC = tests
+TEST_EXEC = test
 
 # source files
 MAIN_SOURCES  = $(SRCDIR)/main.cpp $(SRCDIR)/bitboard.cpp $(SRCDIR)/attacks.cpp $(SRCDIR)/board.cpp $(SRCDIR)/utils.cpp $(SRCDIR)/move.cpp $(SRCDIR)/movegen.cpp
