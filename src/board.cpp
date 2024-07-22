@@ -100,7 +100,11 @@ bb::U64 Board::GetOccupancyBitboard(bb::Color color) {
 bb::U64 Board::GetCombinedOccupancyBitboard() {
     return m_occupancy_combined_BB;
 }
+    
+bb::U64 Board::GetCurrentEnPassantTarget() {
+    return m_game_state_history.back().en_passant_target;
+}
 
-GameState Board::GetCurrentGameState() {
-    return m_game_state_history.back();
+bool Board::GetCastlingRight(uint8_t castling_right) {
+    return (m_game_state_history.back().castling_rights & castling_right);
 }

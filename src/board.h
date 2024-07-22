@@ -11,14 +11,24 @@
 // standard initial board configuration
 const std::string initial_fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
+// castling rights, used as indices to set the corresponding bits in the game state
+enum CastlingRights {
+    WHITE_KINGSIDE_CASTLE   = 0b0001,
+    WHITE_QUEENSIDE_CASTLE  = 0b0010,
+    BLACK_KINGSIDE_CASTLE   = 0b0100,
+    BLACK_QUEENSIDE_CASTLE  = 0b1000
+};
+
 // game state, containing all non-visible board information
 struct GameState {
     public:
     bb::U64 en_passant_target;
+    uint8_t castling_rights;
 };
 
 const GameState initial_game_state = GameState{
-    .en_passant_target = 0ULL
+    .en_passant_target = 0ULL,          // no en passant square
+    .castling_rights = 0b00001111       // full castling rights for both sides
 };
 
 class Board {
@@ -39,7 +49,8 @@ class Board {
     bb::U64 GetPieceBitboard(bb::Piece, bb::Color);
     bb::U64 GetOccupancyBitboard(bb::Color);
     bb::U64 GetCombinedOccupancyBitboard();
-    GameState GetCurrentGameState();
+    bb::U64 GetCurrentEnPassantTarget();
+    bool GetCastlingRight(uint8_t castling_right);
 };
 
 #endif

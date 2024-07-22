@@ -8,6 +8,65 @@ namespace movegen {
 
         return movelist; 
     }
+
+    void GeneratePieceMoves(Board& board, bb::Piece piece, bb::Color color, MoveList &movelist) {
+        // for pawns, call the separate pawn move generation function
+        if (piece == bb::PAWN) {
+            GeneratePawnMoves(board, color, movelist);
+            return;
+        }
+
+        // get piece locations
+        bb::U64 our_pieces = board.GetOccupancyBitboard(color);
+        bb::U64 their_pieces = board.GetOccupancyBitboard(!color);
+        bb::U64 all_pieces = board.GetCombinedOccupancyBitboard();
+        bb::U64 pieces = board.GetPieceBitboard(piece, color);
+        
+        // for each piece, get the attacked squares
+        while (pieces) {
+            // extract one of the pieces
+            int from_square = bb::GetLeastSignificantBitIndex(pieces);
+            bb::ClearBit(pieces, from_square);
+
+            // lookup the squares which are attacked by this piece
+            bb::U64 attacks;
+            switch (piece) {
+                case bb::KNIGHT:
+                    attacks = attacks::knight_attack_table[from_square];
+                    break;
+                case bb::BISHOP:
+                    attacks = attacks::LookupBishopAttacks(from_square, all_pieces);
+                    break;
+                case bb::ROOK:
+                    attacks = attacks::LookupRookAttacks(from_square, all_pieces);
+                    break;
+                case bb::QUEEN:
+                    attacks = (
+                        attacks::LookupBishopAttacks(from_square, all_pieces)
+                        | attacks::LookupRookAttacks(from_square, all_pieces)
+                    );
+                    break;
+                case bb::KING:
+                    attacks = attacks::king_attack_table[from_square];
+                    break;
+            }
+
+            // remove the attacked squares which are occupied by friendly pieces
+            attacks &= ~our_pieces;
+
+            // loop through all attacked squares
+            while (attacks) {
+                int to_square = bb::GetLeastSignificantBitIndex(attacks);
+                bb::ClearBit(attacks, to_square);
+
+                // test whether this move captures a piece and set the flag accordingly
+                mv::MoveFlag flag = bb::GetBit(their_pieces, to_square) ? mv::CAPTURE : mv::QUIET;
+
+                // add the move to the list of moves
+                movelist.Add(Move(from_square, to_square, flag));
+            }
+        }
+    }
                                                                                 // NOTE: this is not using attack tables, so they could be removed
     // each pawn has three possible move types: single push, double push, and capture
     void GeneratePawnMoves(Board& board, bb::Color color, MoveList &movelist) {
@@ -71,7 +130,7 @@ namespace movegen {
         GatherMoves(left_captures & their_pieces, left_capture_dir, mv::CAPTURE);
 
         // check for possible en-passant captures
-        bb::U64 en_passant_target = board.GetCurrentGameState().en_passant_target;
+        bb::U64 en_passant_target = board.GetCurrentEnPassantTarget();
         if (en_passant_target) {
             bb::PrintBitboard(en_passant_target);
             int to_square = bb::GetLeastSignificantBitIndex(en_passant_target);
@@ -87,62 +146,7 @@ namespace movegen {
         }
     }
 
-    void GeneratePieceMoves(Board& board, bb::Piece piece, bb::Color color, MoveList &movelist) {
-        // for pawns, call the separate pawn move generation function
-        if (piece == bb::PAWN) {
-            GeneratePawnMoves(board, color, movelist);
-            return;
-        }
-
-        // get piece locations
-        bb::U64 our_pieces = board.GetOccupancyBitboard(color);
-        bb::U64 their_pieces = board.GetOccupancyBitboard(!color);
-        bb::U64 all_pieces = board.GetCombinedOccupancyBitboard();
-        bb::U64 pieces = board.GetPieceBitboard(piece, color);
+    void GenerateCastlingMoves(Board& board, bb::Color color, MoveList &movelist) {
         
-        // for each piece, get the attacked squares
-        while (pieces) {
-            // extract one of the pieces
-            int from_square = bb::GetLeastSignificantBitIndex(pieces);
-            bb::ClearBit(pieces, from_square);
-
-            // lookup the squares which are attacked by this piece
-            bb::U64 attacks;
-            switch (piece) {
-                case bb::KNIGHT:
-                    attacks = attacks::knight_attack_table[from_square];
-                    break;
-                case bb::BISHOP:
-                    attacks = attacks::LookupBishopAttacks(from_square, all_pieces);
-                    break;
-                case bb::ROOK:
-                    attacks = attacks::LookupRookAttacks(from_square, all_pieces);
-                    break;
-                case bb::QUEEN:
-                    attacks = (
-                        attacks::LookupBishopAttacks(from_square, all_pieces)
-                        | attacks::LookupRookAttacks(from_square, all_pieces)
-                    );
-                    break;
-                case bb::KING:
-                    attacks = attacks::king_attack_table[from_square];
-                    break;
-            }
-
-            // remove the attacked squares which are occupied by friendly pieces
-            attacks &= ~our_pieces;
-
-            // loop through all attacked squares
-            while (attacks) {
-                int to_square = bb::GetLeastSignificantBitIndex(attacks);
-                bb::ClearBit(attacks, to_square);
-
-                // test whether this move captures a piece and set the flag accordingly
-                mv::MoveFlag flag = bb::GetBit(their_pieces, to_square) ? mv::CAPTURE : mv::QUIET;
-
-                // add the move to the list of moves
-                movelist.Add(Move(from_square, to_square, flag));
-            }
-        }
     }
 }
