@@ -1,9 +1,11 @@
 #include "board.h"
 
+namespace chess {
+
 Board::Board(const std::string& fen){
     // initialize empty bitboards for all pieces
-    for (bool color : {bb::WHITE, bb::BLACK}){
-        for (bb::Piece piece = 0; piece < bb::N_PIECES; piece++) {
+    for (bool color : {WHITE, BLACK}){
+        for (Piece piece = 0; piece < N_PIECES; piece++) {
             m_pieceBB[color][piece] = 0ULL;
         }
         m_occupancyBB[color] = 0ULL;
@@ -16,8 +18,8 @@ Board::Board(const std::string& fen){
     // loop through FEN and set up pieces as specified, note that FEN notation
     // counts ranks downwards but files upwards!
     std::string fen_pieces = fen_groups[0];
-    int rank = bb::RANK_8;
-    int file = bb::FILE_A;
+    int rank = RANK_8;
+    int file = FILE_A;
     for (uint64_t i = 0; i < fen_pieces.length(); i++){
         char symbol = fen_pieces[i];
 
@@ -36,27 +38,27 @@ Board::Board(const std::string& fen){
             int square = bb::convertCoordToSquare(rank, file);
 
             // set offset for piece referencing
-            bb::Color color = is_white ? bb::WHITE : bb::BLACK;
+            Color color = is_white ? WHITE : BLACK;
 
             // update the occupancy bitboard in accordance to the pieces
             switch (figure){
                 case 'p':
-                    bb::setBit(m_pieceBB[color][bb::PAWN], square);
+                    bb::setBit(m_pieceBB[color][PAWN], square);
                     break;
                 case 'n':
-                    bb::setBit(m_pieceBB[color][bb::KNIGHT], square);
+                    bb::setBit(m_pieceBB[color][KNIGHT], square);
                     break;
                 case 'b':
-                    bb::setBit(m_pieceBB[color][bb::BISHOP], square);
+                    bb::setBit(m_pieceBB[color][BISHOP], square);
                     break;
                 case 'r':
-                    bb::setBit(m_pieceBB[color][bb::ROOK], square);
+                    bb::setBit(m_pieceBB[color][ROOK], square);
                     break;
                 case 'q':
-                    bb::setBit(m_pieceBB[color][bb::QUEEN], square);
+                    bb::setBit(m_pieceBB[color][QUEEN], square);
                     break;
                 case 'k':
-                    bb::setBit(m_pieceBB[color][bb::KING], square);
+                    bb::setBit(m_pieceBB[color][KING], square);
                     break;
             }
             // procesed to next file
@@ -76,9 +78,9 @@ Board::Board(const std::string& fen){
     }
 
     // update the occupancy bitboards
-    for (bool color : {bb::WHITE, bb::BLACK}) {
-        for (bb::Piece piece = 0; piece < bb::N_PIECES; piece++) {
-            bb::U64 bb = m_pieceBB[color][piece];
+    for (bool color : {WHITE, BLACK}) {
+        for (Piece piece = 0; piece < N_PIECES; piece++) {
+            Bitboard bb = m_pieceBB[color][piece];
             m_occupancyBB[color] |= bb;
         }
         m_occupancyCombinedBB |= m_occupancyBB[color];
@@ -86,45 +88,45 @@ Board::Board(const std::string& fen){
 
     // push the initial game state onto the game state history stack
     m_gameStateHistory.reserve(512);
-    m_gameStateHistory.push_back(initialGameState);
+    m_gameStateHistory.push_back(INITIAL_GAME_STATE);
 };
 
-bb::U64 Board::getPieceBitboard(bb::Piece piece, bb::Color color) {
+Bitboard Board::getPieceBitboard(Piece piece, Color color) {
     return m_pieceBB[color][piece];
 }
 
-bb::U64 Board::getOccupancyBitboard(bb::Color color) {
+Bitboard Board::getOccupancyBitboard(Color color) {
     return m_occupancyBB[color];
 }
 
-bb::U64 Board::getCombinedOccupancyBitboard() {
+Bitboard Board::getCombinedOccupancyBitboard() {
     return m_occupancyCombinedBB;
 }
 
 // NOTE: there are more efficient approaches than this
-bool Board::isAttackedBy(bb::Square square, bb::Color color) {
+bool Board::isAttackedBy(Square square, Color color) {
     bool us = color;
     bool them = !color;
 
     // following the I-see-you-you-see-me approach, calculate piece attacks from
     // the initial square and check if the corresponding pieces can be attacked
-    bb::U64 theirPawns = m_pieceBB[them][bb::PAWN];
-    if (attacks::pawnAttackTable[us][square] & theirPawns) {
+    Bitboard theirPawns = m_pieceBB[them][PAWN];
+    if (attacks::PAWN_ATTACKS[us][square] & theirPawns) {
         return true;
     }
-    bb::U64 theirKnights = m_pieceBB[them][bb::KNIGHT];
-    if (attacks::knightAttackTable[square] & theirKnights) {
+    Bitboard theirKnights = m_pieceBB[them][KNIGHT];
+    if (attacks::KNIGHT_ATTACKS[square] & theirKnights) {
         return true;
     }
-    bb::U64 theirKing = m_pieceBB[them][bb::KING];
-    if (attacks::kingAttackTable[square] & theirKing) {
+    Bitboard theirKing = m_pieceBB[them][KING];
+    if (attacks::KING_ATTACKS[square] & theirKing) {
         return true;
     }
-    bb::U64 theirBishopsAndQueens = m_pieceBB[them][bb::BISHOP] | m_pieceBB[them][bb::QUEEN];
+    Bitboard theirBishopsAndQueens = m_pieceBB[them][BISHOP] | m_pieceBB[them][QUEEN];
     if (attacks::lookupBishopAttacks(square, m_occupancyCombinedBB) & theirBishopsAndQueens) {
         return true;
     }
-    bb::U64 theirRooksAndQueens = m_pieceBB[them][bb::BISHOP] | m_pieceBB[them][bb::QUEEN];
+    Bitboard theirRooksAndQueens = m_pieceBB[them][BISHOP] | m_pieceBB[them][QUEEN];
     if (attacks::lookupRookAttacks(square, m_occupancyCombinedBB) & theirRooksAndQueens) {
         return true;
     }
@@ -142,10 +144,12 @@ void Board::makeMove(Move move) {
     // - castling
 }
     
-bb::U64 Board::getCurrentEnPassantTarget() {
+Bitboard Board::getCurrentEnPassantTarget() {
     return m_gameStateHistory.back().enPassantTarget;
 }
 
 bool Board::getCastlingRight(uint8_t castling_right) {
     return (m_gameStateHistory.back().castlingRights & castling_right);
 }
+
+}   // namespace chess
