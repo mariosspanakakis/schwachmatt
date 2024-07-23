@@ -54,30 +54,20 @@ inline void clearBit(Bitboard& bitboard, Square square){
     bitboard &= ~(1ULL << square);
 }
 
-// bit shift operations with range checks
-inline Bitboard shiftNorth(Bitboard bitboard){
-    return (bitboard << 8);
-}
-inline Bitboard shiftSouth(Bitboard bitboard){
-    return (bitboard >> 8);
-}
-inline Bitboard shiftEast(Bitboard bitboard){
-    return (bitboard << 1) & ~FILE_A_BB;
-}
-inline Bitboard shiftWest(Bitboard bitboard){
-    return (bitboard >> 1) & ~FILE_H_BB;
-}
-inline Bitboard shiftNorthEast(Bitboard bitboard){
-    return (bitboard << 9) & ~FILE_A_BB;
-}
-inline Bitboard shiftNorthWest(Bitboard bitboard){
-    return (bitboard << 7) & ~FILE_H_BB;
-}
-inline Bitboard shiftSouthEast(Bitboard bitboard){
-    return (bitboard >> 7) & ~FILE_A_BB;
-}
-inline Bitboard shiftSouthWest(Bitboard bitboard){
-    return (bitboard >> 9) & ~FILE_H_BB;
+/* Shifts a bitboard as specified by direction D. */
+template <Direction D>
+constexpr Bitboard shift(Bitboard b) {
+    return D == NORTH         ? b << 8
+         : D == SOUTH         ? b >> 8
+         : D == NORTH + NORTH ? b << 16
+         : D == SOUTH + SOUTH ? b >> 16
+         : D == EAST          ? (b & ~FILE_H_BB) << 1
+         : D == WEST          ? (b & ~FILE_A_BB) >> 1
+         : D == NORTHEAST     ? (b & ~FILE_H_BB) << 9
+         : D == NORTHWEST     ? (b & ~FILE_A_BB) << 7
+         : D == SOUTHEAST     ? (b & ~FILE_H_BB) >> 7
+         : D == SOUTHWEST     ? (b & ~FILE_A_BB) >> 9
+         : 0;
 }
 
 // convert a rank-file coordinate to a square

@@ -44,11 +44,11 @@ Bitboard calculatePawnAttacks(Square square, Color color) {
 
     if (color == WHITE) {
         attacks |= (
-            bb::shiftNorthWest(bitboard) | bb::shiftNorthEast(bitboard)
+            bb::shift<NORTHWEST>(bitboard) | bb::shift<NORTHEAST>(bitboard)
         );
     } else if (color == BLACK) {
         attacks |= (
-            bb::shiftSouthWest(bitboard) | bb::shiftSouthEast(bitboard)
+            bb::shift<SOUTHWEST>(bitboard) | bb::shift<SOUTHEAST>(bitboard)
         );
     }
     return attacks;
@@ -80,14 +80,14 @@ Bitboard calculateKingAttacks(Square square) {
     Bitboard attacks = 0ULL;
     // generate attacks
     attacks |= (
-          bb::shiftNorth(bitboard)
-        | bb::shiftNorthEast(bitboard)
-        | bb::shiftEast(bitboard)
-        | bb::shiftSouthEast(bitboard)
-        | bb::shiftSouth(bitboard)
-        | bb::shiftSouthWest(bitboard)
-        | bb::shiftWest(bitboard)
-        | bb::shiftNorthWest(bitboard)
+          bb::shift<NORTH>(bitboard)
+        | bb::shift<NORTHEAST>(bitboard)
+        | bb::shift<EAST>(bitboard)
+        | bb::shift<SOUTHEAST>(bitboard)
+        | bb::shift<SOUTH>(bitboard)
+        | bb::shift<SOUTHWEST>(bitboard)
+        | bb::shift<WEST>(bitboard)
+        | bb::shift<NORTHWEST>(bitboard)
     );
     return attacks;
 }
