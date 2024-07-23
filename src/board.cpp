@@ -131,6 +131,16 @@ bool Board::isAttackedBy(bb::Square square, bb::Color color) {
     
     return false;
 }
+
+void Board::makeMove(Move move) {
+    // things to take care of:
+    // - remove the piece from its old location
+    // - add the piece to the new location
+    // - captures
+    // - en passant
+    // - promotions
+    // - castling
+}
     
 bb::U64 Board::getCurrentEnPassantTarget() {
     return m_gameStateHistory.back().enPassantTarget;

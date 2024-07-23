@@ -7,6 +7,7 @@
 #include <ctype.h>
 #include "attacks.h"
 #include "bitboard.h"
+#include "move.h"
 #include "utils.h"
 
 // standard initial board configuration
@@ -56,6 +57,8 @@ class Board {
      * @param color The attacking color.
      * @return A boolean indicating whether the square is under attack. */
     bool isAttackedBy(bb::Square square, bb::Color color);
+
+    void makeMove(Move move);
 
     bb::U64 getCurrentEnPassantTarget();
     bool getCastlingRight(uint8_t castling_right);

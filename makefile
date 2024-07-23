@@ -3,7 +3,7 @@ SRCDIR=src
 TESTDIR=tests
 
 CXX      = g++
-CXXFLAGS = -Wall -std=c++14
+CXXFLAGS = -Wall -std=c++17
 LDFLAGS  =
 
 GTEST_DIR = lib/googletest

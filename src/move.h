@@ -6,10 +6,11 @@
 #include <iostream>
 #include <map>
 #include "bitboard.h"
-#include "board.h"
 
-// forward declaration of move class
+// forward declaration of move and board class
 class Move;
+class Board;
+
 /*
 The 16 bits of a move are assigned as follows:
     0000 | 000000 | 000000

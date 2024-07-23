@@ -2,8 +2,8 @@
 #define MAIN_H
 
 #include <stdio.h>
-#include "bitboard.h"
 #include "attacks.h"
+#include "bitboard.h"
 #include "board.h"
 #include "move.h"
 #include "movegen.h"
