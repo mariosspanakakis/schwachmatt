@@ -37,17 +37,4 @@ void Move::setFlag(MoveFlag flag) {
     m_move |= (flag << FLAG_SHIFT);
 }
 
-
-void MoveList::add(Move move) {
-    m_moves[m_size++] = move;
-}
-
-Move MoveList::getMove(int index) {                                             // TODO: this is lacking range checks!
-    return m_moves[index];
-}
-
-int MoveList::getSize() {
-    return m_size;
-}
-
 }   // namespace chess

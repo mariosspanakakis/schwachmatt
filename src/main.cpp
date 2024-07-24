@@ -9,14 +9,13 @@ int main(int argc, char *argv[]) {
         
         // initialize chess board
         chess::Board board;
-        board = chess::Board("r3kb1r/p1N2ppp/2pp1q1n/1p2p1B1/Q2PP3/3B1b2/PP3PPP/2R1K2R b Kkq - 1 12");
+        //board = chess::Board("r3kb1r/p1N2ppp/2pp1q1n/1p2p1B1/Q2PP3/3B1b2/PP3PPP/2R1K2R b Kkq - 1 12");
+        board = chess::Board();
 
-        const chess::Color color = chess::BLACK;
-        chess::MoveList movelist = chess::movegen::generateMoves<color>(board);
-
-        std::cout << "Found " << movelist.getSize() << " moves:" << std::endl;
-        for (int i = 0; i < movelist.getSize(); i++) {
-            chess::Move move = movelist.getMove(i);
+        // generate moves
+        chess::MoveList movelist = chess::MoveList<chess::BLACK>(board);
+        std::cout << "Found " << movelist.size() << " moves:" << std::endl;
+        for (const chess::Move& move : movelist) {
             chess::utils::printMove(move);
         }
 

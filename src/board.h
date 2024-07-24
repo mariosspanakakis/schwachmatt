@@ -43,20 +43,20 @@ class Board {
     Board(const std::string& fen = INITIAL_FEN);
     ~Board() = default;
 
-    Bitboard getPieceBitboard(Piece, Color);
-    Bitboard getOccupancyBitboard(Color);
-    Bitboard getCombinedOccupancyBitboard();
+    Bitboard getPieceBitboard(Piece, Color) const;
+    Bitboard getOccupancyBitboard(Color) const;
+    Bitboard getCombinedOccupancyBitboard() const;
 
     /* @brief Test if a square is under attack by a piece of the given color.
      * @param square The square for which to test for attacks.
      * @param color The attacking color.
      * @return A boolean indicating whether the square is under attack. */
-    bool isAttackedBy(Square square, Color color);
+    bool isAttackedBy(Square square, Color color) const;
 
     void makeMove(Move move);
 
-    Bitboard getCurrentEnPassantTarget();
-    bool getCastlingRight(CastlingRight castling_right);
+    Bitboard getCurrentEnPassantTarget() const;
+    bool getCastlingRight(CastlingRight castling_right) const;
 };
 
 }   // namespace chess

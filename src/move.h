@@ -36,18 +36,6 @@ class Move {
     void setFlag(MoveFlag flag);
 };
 
-
-class MoveList {
-    private:
-    Move m_moves[256];
-    int m_size;
-
-    public:
-    void add(Move move);
-    Move getMove(int index);
-    int getSize();
-};
-
 }   // namespace chess
 
 #endif

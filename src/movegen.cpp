@@ -4,23 +4,21 @@ namespace chess {
 namespace movegen {
 
 template <Color TColor>
-MoveList generateMoves(Board& board) {
-    // initialize move list
-    MoveList movelist;
+Move* generateMoves(const Board& board, Move* movelist) {
     // add moves for all pieces
     for (Piece piece : {PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING}) {
-        generatePieceMoves<TColor>(board, piece, movelist);
+        movelist = generatePieceMoves<TColor>(board, piece, movelist);
     }
     // return the list of all possible moves
     return movelist;
 }
 
 template <Color TColor>
-void generatePieceMoves(Board& board, Piece piece, MoveList &movelist) {
+Move* generatePieceMoves(const Board& board, Piece piece, Move* movelist) {
     // for pawns, call the separate pawn move generation function
     if (piece == PAWN) {
-        generatePawnMoves<TColor>(board, movelist);
-        return;
+        movelist = generatePawnMoves<TColor>(board, movelist);
+        return movelist;
     }
 
     // get piece locations
@@ -37,7 +35,7 @@ void generatePieceMoves(Board& board, Piece piece, MoveList &movelist) {
 
         // lookup the squares which are attacked by this piece
         Bitboard attacks;
-        switch (piece) {
+        switch (piece) {                                                        // TODO: replace this by a template
             case KNIGHT:
                 attacks = attacks::KNIGHT_ATTACKS[from_square];
                 break;
@@ -70,18 +68,20 @@ void generatePieceMoves(Board& board, Piece piece, MoveList &movelist) {
             MoveFlag flag = bb::getBit(their_pieces, to_square) ? CAPTURE : QUIET;
 
             // add the move to the list of moves
-            movelist.add(Move(from_square, to_square, flag));
+            *movelist++ = Move(from_square, to_square, flag);
         }
     }
 
     // add castling moves for the king
     if (piece == KING) {
-        generateCastlingMoves<TColor>(board, movelist);
+        movelist = generateCastlingMoves<TColor>(board, movelist);
     }
+
+    return movelist;
 }
 
 template <Color TColor>
-void generatePawnMoves(Board& board, MoveList &movelist) {
+Move* generatePawnMoves(const Board& board, Move* movelist) {
     
     // get piece bitboards
     Bitboard theirPieces = board.getOccupancyBitboard(!TColor);
@@ -114,7 +114,7 @@ void generatePawnMoves(Board& board, MoveList &movelist) {
             int from_square = to_square - dir;
 
             // add the move to the moves list
-            movelist.add(Move(from_square, to_square, flag));
+            *movelist++ = Move(from_square, to_square, flag);
         }
         // generate all promotion moves
         while(promotions) {
@@ -125,8 +125,8 @@ void generatePawnMoves(Board& board, MoveList &movelist) {
 
             // generate a separate move for promoting to any possible piece
             for (MoveFlag promotion_flag : {KNIGHT_PROMOTION, BISHOP_PROMOTION, ROOK_PROMOTION, QUEEN_PROMOTION}) {
-                // combine the existing flag with the promotion flag to conserve the capture bit, and add the move to the moves list
-                movelist.add(Move(from_square, to_square, flag | promotion_flag));
+                // combine the existing flag with the promotion flag to conserve the capture bit
+                *movelist++ = Move(from_square, to_square, flag | promotion_flag);
             }
         }
     }
@@ -141,22 +141,23 @@ void generatePawnMoves(Board& board, MoveList &movelist) {
     // check for possible en-passant captures
     Bitboard en_passant_target = board.getCurrentEnPassantTarget();
     if (en_passant_target) {
-        bb::printBitboard(en_passant_target);
         int to_square = bb::getLeastSignificantBitIndex(en_passant_target);
         MoveFlag en_passant_flag = EN_PASSANT_CAPTURE;
         if (right_captures & en_passant_target) {
             int from_square = to_square - right_capture_dir;
-            movelist.add(Move(from_square, to_square, en_passant_flag));
+            *movelist++ = Move(from_square, to_square, en_passant_flag);
         }
         if (left_captures & en_passant_target) {
             int from_square = to_square - left_capture_dir;
-            movelist.add(Move(from_square, to_square, en_passant_flag));
+            *movelist++ = Move(from_square, to_square, en_passant_flag);
         }
     }
+
+    return movelist;
 }
 
 template <Color TColor>
-void generateCastlingMoves(Board& board, MoveList &movelist) {
+Move* generateCastlingMoves(const Board& board, Move* movelist) {
     // prerequisites for castling:
     // - castling generally permitted (king and rook have not been moved)
     // - no pieces on the squares between king and rook
@@ -165,27 +166,29 @@ void generateCastlingMoves(Board& board, MoveList &movelist) {
     if (TColor == WHITE) {
         if (board.getCastlingRight(WHITE_KINGSIDE_CASTLE)
             && ((all_pieces & bb::WHITE_KINGSIDE_CASTLE_SQUARES) == 0)) {
-                movelist.add(Move(E1, G1, KINGSIDE_CASTLE));
+                *movelist++ = Move(E1, G1, KINGSIDE_CASTLE);
         }
         if (board.getCastlingRight(WHITE_QUEENSIDE_CASTLE)
             && ((all_pieces & bb::WHITE_QUEENSIDE_CASTLE_SQUARES) == 0)) {
-                movelist.add(Move(E1, C1, QUEENSIDE_CASTLE));
+                *movelist++ = Move(E1, C1, QUEENSIDE_CASTLE);
         }
     } else {
         if (board.getCastlingRight(BLACK_KINGSIDE_CASTLE)
             && ((all_pieces & bb::BLACK_KINGSIDE_CASTLE_SQUARES) == 0)) {
-                movelist.add(Move(E8, G8, KINGSIDE_CASTLE));
+                *movelist++ = Move(E8, G8, KINGSIDE_CASTLE);
         }
         if (board.getCastlingRight(BLACK_QUEENSIDE_CASTLE)
             && ((all_pieces & bb::BLACK_QUEENSIDE_CASTLE_SQUARES) == 0)) {
-                movelist.add(Move(E8, C8, QUEENSIDE_CASTLE));
+                *movelist++ = Move(E8, C8, QUEENSIDE_CASTLE);
         }
     }
+
+    return movelist;
 }
 
 /* Explicit template instantiations. */
-template MoveList generateMoves<WHITE>(Board& board);
-template MoveList generateMoves<BLACK>(Board& board);
+template Move* generateMoves<WHITE>(const Board& board, Move* movelist);
+template Move* generateMoves<BLACK>(const Board& board, Move* movelist);
 
 }   // namespace movegen
 }   // namespace chess

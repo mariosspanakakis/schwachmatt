@@ -88,23 +88,23 @@ Board::Board(const std::string& fen){
 
     // push the initial game state onto the game state history stack
     m_gameStateHistory.reserve(512);
-    m_gameStateHistory.push_back(INITIAL_GAME_STATE);
+    m_gameStateHistory.push_back(INITIAL_GAME_STATE);                           // this must only be done for the standard FEN!
 };
 
-Bitboard Board::getPieceBitboard(Piece piece, Color color) {
+Bitboard Board::getPieceBitboard(Piece piece, Color color) const {
     return m_pieceBB[color][piece];
 }
 
-Bitboard Board::getOccupancyBitboard(Color color) {
+Bitboard Board::getOccupancyBitboard(Color color) const {
     return m_occupancyBB[color];
 }
 
-Bitboard Board::getCombinedOccupancyBitboard() {
+Bitboard Board::getCombinedOccupancyBitboard() const {
     return m_occupancyCombinedBB;
 }
 
 // NOTE: there are more efficient approaches than this
-bool Board::isAttackedBy(Square square, Color color) {
+bool Board::isAttackedBy(Square square, Color color) const {
     bool us = color;
     bool them = !color;
 
@@ -144,11 +144,11 @@ void Board::makeMove(Move move) {
     // - castling
 }
     
-Bitboard Board::getCurrentEnPassantTarget() {
+Bitboard Board::getCurrentEnPassantTarget() const {
     return m_gameStateHistory.back().enPassantTarget;
 }
 
-bool Board::getCastlingRight(uint8_t castling_right) {
+bool Board::getCastlingRight(uint8_t castling_right) const {
     return (m_gameStateHistory.back().castlingRights & castling_right);
 }
 
