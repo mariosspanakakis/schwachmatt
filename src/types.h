@@ -8,12 +8,14 @@ namespace chess {
 using Bitboard = uint64_t;
 using Square = uint8_t;
 using Piece = uint8_t;
+using PieceType = uint8_t;
 using Direction = int8_t;
 using Color = bool;
 using CastlingRight = uint8_t;
 using MoveFlag = uint8_t;
 
-const int MAX_NUMBER_OF_MOVES = 256;            // would actually be 218
+const int MAX_NUMBER_OF_MOVES = 256;            // is actually 218
+const int GAME_STATE_HISTORY_LENGTH = 512;
 
 enum Squares {
     A1, B1, C1, D1, E1, F1, G1, H1,
@@ -44,7 +46,8 @@ enum Colors {
 };
 const int N_COLORS = 2;
 
-enum Pieces {
+enum PieceTypes {
+    NO_PIECE_TYPE = 0,
     PAWN,
     KNIGHT,
     BISHOP,
@@ -52,7 +55,52 @@ enum Pieces {
     QUEEN,
     KING
 };
-const int N_PIECES = 6;
+const int N_PIECE_TYPES = 7;
+
+constexpr char const* PIECE_TYPE_NAMES[] {
+    "NO_PIECE_TYPE",
+    "PAWN",
+    "KNIGHT",
+    "BISHOP",
+    "ROOK",
+    "QUEEN",
+    "KING",
+};
+
+enum Pieces {
+    NO_PIECE = 0,
+    WHITE_PAWN = PAWN,
+    WHITE_KNIGHT,
+    WHITE_BISHOP,
+    WHITE_ROOK,
+    WHITE_QUEEN,
+    WHITE_KING,
+    BLACK_PAWN = PAWN + 8,
+    BLACK_KNIGHT,
+    BLACK_BISHOP,
+    BLACK_ROOK,
+    BLACK_QUEEN,
+    BLACK_KING,
+};
+const int N_PIECES = 13;
+
+constexpr char const* PIECE_SYMBOLS[] {
+    "#",
+    "P",
+    "N",
+    "B",
+    "R",
+    "Q",
+    "K",
+    "",     // unused
+    "",     // unused
+    "p",
+    "n",
+    "b",
+    "r",
+    "q",
+    "k",
+};
 
 enum Directions {
     NORTH = 8,

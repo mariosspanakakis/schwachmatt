@@ -31,11 +31,13 @@ const GameState INITIAL_GAME_STATE = GameState {
 class Board {
     private:
     /* Separate occupancy bitboards for all pieces. */
-    Bitboard m_pieceBB[N_COLORS][N_PIECES];
+    Bitboard m_pieceBB[N_COLORS][N_PIECE_TYPES];
     /* Total occupancy bitboards for each side. */
     Bitboard m_occupancyBB[N_COLORS];
     /* Combined occupancy bitboard for both sides. */
     Bitboard m_occupancyCombinedBB;
+    /* PieceTypes by square. */
+    PieceType m_pieces[N_SQUARES];
     /* Stack containing the game's state history. */
     std::vector<GameState> m_gameStateHistory;
     
@@ -46,6 +48,7 @@ class Board {
     Bitboard getPieceBitboard(Piece, Color) const;
     Bitboard getOccupancyBitboard(Color) const;
     Bitboard getCombinedOccupancyBitboard() const;
+    Piece getPieceOnSquare(Square square) const;
 
     /* @brief Test if a square is under attack by a piece of the given color.
      * @param square The square for which to test for attacks.
@@ -57,6 +60,8 @@ class Board {
 
     Bitboard getCurrentEnPassantTarget() const;
     bool getCastlingRight(CastlingRight castling_right) const;
+
+    void print();
 };
 
 }   // namespace chess

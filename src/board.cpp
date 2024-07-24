@@ -5,12 +5,17 @@ namespace chess {
 Board::Board(const std::string& fen){
     // initialize empty bitboards for all pieces
     for (bool color : {WHITE, BLACK}){
-        for (Piece piece = 0; piece < N_PIECES; piece++) {
-            m_pieceBB[color][piece] = 0ULL;
+        for (PieceType pieceType = 0; pieceType < N_PIECE_TYPES; pieceType++) {
+            m_pieceBB[color][pieceType] = 0ULL;
         }
         m_occupancyBB[color] = 0ULL;
     }
     m_occupancyCombinedBB = 0ULL;
+
+    // initialize the array of pieces
+    for (Square square = 0; square < N_SQUARES; square++) {
+        m_pieces[square] = NO_PIECE_TYPE;
+    }
     
     // split the given FEN into groups that describe the board status
     std::vector<std::string> fen_groups = utils::splitFen(fen);
@@ -44,24 +49,30 @@ Board::Board(const std::string& fen){
             switch (figure){
                 case 'p':
                     bb::setBit(m_pieceBB[color][PAWN], square);
+                    m_pieces[square] = is_white ? WHITE_PAWN : BLACK_PAWN;
                     break;
                 case 'n':
                     bb::setBit(m_pieceBB[color][KNIGHT], square);
+                    m_pieces[square] = is_white ? WHITE_KNIGHT : BLACK_KNIGHT;
                     break;
                 case 'b':
                     bb::setBit(m_pieceBB[color][BISHOP], square);
+                    m_pieces[square] = is_white ? WHITE_BISHOP : BLACK_BISHOP;
                     break;
                 case 'r':
                     bb::setBit(m_pieceBB[color][ROOK], square);
+                    m_pieces[square] = is_white ? WHITE_ROOK : BLACK_ROOK;
                     break;
                 case 'q':
                     bb::setBit(m_pieceBB[color][QUEEN], square);
+                    m_pieces[square] = is_white ? WHITE_QUEEN : BLACK_QUEEN;
                     break;
                 case 'k':
                     bb::setBit(m_pieceBB[color][KING], square);
+                    m_pieces[square] = is_white ? WHITE_KING : BLACK_KING;
                     break;
             }
-            // procesed to next file
+            // proceed to next file
             file += 1;
         }
 
@@ -79,16 +90,16 @@ Board::Board(const std::string& fen){
 
     // update the occupancy bitboards
     for (bool color : {WHITE, BLACK}) {
-        for (Piece piece = 0; piece < N_PIECES; piece++) {
-            Bitboard bb = m_pieceBB[color][piece];
+        for (PieceType pieceType = 0; pieceType < N_PIECE_TYPES; pieceType++) {
+            Bitboard bb = m_pieceBB[color][pieceType];
             m_occupancyBB[color] |= bb;
         }
         m_occupancyCombinedBB |= m_occupancyBB[color];
     }
 
     // push the initial game state onto the game state history stack
-    m_gameStateHistory.reserve(512);
-    m_gameStateHistory.push_back(INITIAL_GAME_STATE);                           // this must only be done for the standard FEN!
+    m_gameStateHistory.reserve(GAME_STATE_HISTORY_LENGTH);
+    m_gameStateHistory.push_back(INITIAL_GAME_STATE);                           // TODO: take care of castling rights etc. as defined in FEN!
 };
 
 Bitboard Board::getPieceBitboard(Piece piece, Color color) const {
@@ -101,6 +112,10 @@ Bitboard Board::getOccupancyBitboard(Color color) const {
 
 Bitboard Board::getCombinedOccupancyBitboard() const {
     return m_occupancyCombinedBB;
+}
+
+Piece Board::getPieceOnSquare(Square square) const {
+    return m_pieces[square];
 }
 
 // NOTE: there are more efficient approaches than this
@@ -142,14 +157,34 @@ void Board::makeMove(Move move) {
     // - en passant
     // - promotions
     // - castling
+
+    Square fromSquare = move.getFrom();
+    Square toSquare = move.getTo();
+    Piece movingPiece = m_pieces[fromSquare];
 }
     
 Bitboard Board::getCurrentEnPassantTarget() const {
     return m_gameStateHistory.back().enPassantTarget;
 }
 
-bool Board::getCastlingRight(uint8_t castling_right) const {
+bool Board::getCastlingRight(CastlingRight castling_right) const {
     return (m_gameStateHistory.back().castlingRights & castling_right);
+}
+
+void Board::print() {
+    std::cout << std::endl;
+    for (int rank = 7; rank >= 0; rank--) {
+        std::cout << " " << rank + 1 << "  ";
+        for (int file = 0; file < 8; file++) {
+            int square = (rank * 8 + file);
+            Piece piece = m_pieces[square];
+            std::cout << " " << PIECE_SYMBOLS[piece];
+        }
+        std::cout << std::endl;
+    }
+    std::cout << std::endl;
+    std::cout << "     A B C D E F G H" << std::endl;
+    std::cout << std::endl;
 }
 
 }   // namespace chess

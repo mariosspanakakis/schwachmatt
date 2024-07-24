@@ -6,17 +6,17 @@ namespace movegen {
 template <Color TColor>
 Move* generateMoves(const Board& board, Move* movelist) {
     // add moves for all pieces
-    for (Piece piece : {PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING}) {
-        movelist = generatePieceMoves<TColor>(board, piece, movelist);
+    for (PieceType pieceType : {PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING}) {
+        movelist = generatePieceMoves<TColor>(board, pieceType, movelist);
     }
     // return the list of all possible moves
     return movelist;
 }
 
 template <Color TColor>
-Move* generatePieceMoves(const Board& board, Piece piece, Move* movelist) {
+Move* generatePieceMoves(const Board& board, PieceType pieceType, Move* movelist) {
     // for pawns, call the separate pawn move generation function
-    if (piece == PAWN) {
+    if (pieceType == PAWN) {
         movelist = generatePawnMoves<TColor>(board, movelist);
         return movelist;
     }
@@ -25,7 +25,7 @@ Move* generatePieceMoves(const Board& board, Piece piece, Move* movelist) {
     Bitboard our_pieces = board.getOccupancyBitboard(TColor);
     Bitboard their_pieces = board.getOccupancyBitboard(!TColor);
     Bitboard all_pieces = board.getCombinedOccupancyBitboard();
-    Bitboard pieces = board.getPieceBitboard(piece, TColor);
+    Bitboard pieces = board.getPieceBitboard(pieceType, TColor);
     
     // for each piece, get the attacked squares
     while (pieces) {
@@ -35,7 +35,7 @@ Move* generatePieceMoves(const Board& board, Piece piece, Move* movelist) {
 
         // lookup the squares which are attacked by this piece
         Bitboard attacks;
-        switch (piece) {                                                        // TODO: replace this by a template
+        switch (pieceType) {                                                        // TODO: replace this by a template
             case KNIGHT:
                 attacks = attacks::KNIGHT_ATTACKS[from_square];
                 break;
@@ -73,7 +73,7 @@ Move* generatePieceMoves(const Board& board, Piece piece, Move* movelist) {
     }
 
     // add castling moves for the king
-    if (piece == KING) {
+    if (pieceType == KING) {
         movelist = generateCastlingMoves<TColor>(board, movelist);
     }
 

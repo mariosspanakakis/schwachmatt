@@ -25,7 +25,7 @@ Move* generateMoves(const Board& board, Move* movelist);
  * @param movelist Reference to move list that the moves are stored in.
  * @return Pointer to the last element of the move list. */
 template <Color TColor>
-Move* generatePieceMoves(const Board& board, Piece piece, Move* movelist);
+Move* generatePieceMoves(const Board& board, PieceType pieceType, Move* movelist);
 
 /* @brief Find all possible pseudo-legal pawn moves on the board.
  * @tparam TColor The side to move.
