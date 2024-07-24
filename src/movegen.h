@@ -49,8 +49,6 @@ struct MoveList {
     Move* m_last;
 
     public:
-    /* Constructor for an empty move list. */
-    MoveList() : m_last(m_moves) {}
     /* Constructor to conveniently generate a move list from a given board. */
     explicit MoveList(const Board& board) : m_last(movegen::generateMoves<TColor>(board, m_moves)) {}
     
