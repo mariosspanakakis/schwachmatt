@@ -48,45 +48,25 @@ static Move* generatePieceMoves(const Board& board, Move* movelist) {
     // for each piece, get the attacked squares
     while (pieces) {
         // extract one of the pieces
-        int from_square = bb::getLeastSignificantBitIndex(pieces);
-        bb::clearBit(pieces, from_square);
+        int from = bb::getLeastSignificantBitIndex(pieces);
+        bb::clearBit(pieces, from);
 
         // lookup the squares which are attacked by this piece
-        Bitboard attacks;
-        switch (TPieceType) {                                                        // TODO: replace this by a template
-            case KNIGHT:
-                attacks = attacks::KNIGHT_ATTACKS[from_square];
-                break;
-            case BISHOP:
-                attacks = attacks::lookupBishopAttacks(from_square, all_pieces);
-                break;
-            case ROOK:
-                attacks = attacks::lookupRookAttacks(from_square, all_pieces);
-                break;
-            case QUEEN:
-                attacks = (
-                    attacks::lookupBishopAttacks(from_square, all_pieces)
-                    | attacks::lookupRookAttacks(from_square, all_pieces)
-                );
-                break;
-            case KING:
-                attacks = attacks::KING_ATTACKS[from_square];
-                break;
-        }
+        Bitboard attacks = attacks::getPieceAttacks<TPieceType>(from, all_pieces);
 
         // remove the attacked squares which are occupied by friendly pieces
         attacks &= ~our_pieces;
 
         // loop through all attacked squares
         while (attacks) {
-            int to_square = bb::getLeastSignificantBitIndex(attacks);
-            bb::clearBit(attacks, to_square);
+            int to = bb::getLeastSignificantBitIndex(attacks);
+            bb::clearBit(attacks, to);
 
             // test whether this move captures a piece and set the flag accordingly
-            MoveFlag flag = bb::getBit(their_pieces, to_square) ? CAPTURE : QUIET;
+            MoveFlag flag = bb::getBit(their_pieces, to) ? CAPTURE : QUIET;
 
             // add the move to the list of moves
-            *movelist++ = Move(from_square, to_square, flag);
+            *movelist++ = Move(from, to, flag);
         }
     }
 

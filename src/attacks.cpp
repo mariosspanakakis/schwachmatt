@@ -3,6 +3,18 @@
 namespace chess {
 namespace attacks {
 
+static Bitboard calculatePawnAttacks(Square square, Color color);
+static Bitboard calculateKnightAttacks(Square square);
+static Bitboard calculateKingAttacks(Square square);
+static Bitboard calculateBishopAttacks(Square square, Bitboard blockers = 0ULL, bool mask_mode = false);   // mask mode: used for magics initialization which require to ignore board edges
+static Bitboard calculateRookAttacks(Square square, Bitboard blockers = 0ULL, bool mask_mode = false);
+static Bitboard getBlockerConfiguration(int index, Bitboard attack_mask);
+static Bitboard findMagicNumber(Square square, bool is_bishop);
+static Bitboard magicTransform(Bitboard masked_blockers, Bitboard magic, int bits);
+static void initializeMagicAttack(Square square, bool is_bishop);
+static Bitboard lookupBishopAttacks(Square square, Bitboard blockers = 0ULL);
+static Bitboard lookupRookAttacks(Square square, Bitboard blockers = 0ULL);
+
 Bitboard PAWN_ATTACKS[N_COLORS][N_SQUARES];
 Bitboard KNIGHT_ATTACKS[N_SQUARES];
 Bitboard KING_ATTACKS[N_SQUARES];
@@ -14,6 +26,30 @@ Bitboard ROOK_MASK[N_SQUARES];
 
 Bitboard BISHOP_MAGICS[N_SQUARES];
 Bitboard ROOK_MAGICS[N_SQUARES];
+
+// relevant bishop bits (i.e. number of attacked squares) for each square
+const int BISHOP_BITS[64] = {
+    6, 5, 5, 5, 5, 5, 5, 6,
+    5, 5, 5, 5, 5, 5, 5, 5,
+    5, 5, 7, 7, 7, 7, 5, 5,
+    5, 5, 7, 9, 9, 7, 5, 5,
+    5, 5, 7, 9, 9, 7, 5, 5,
+    5, 5, 7, 7, 7, 7, 5, 5,
+    5, 5, 5, 5, 5, 5, 5, 5,
+    6, 5, 5, 5, 5, 5, 5, 6
+};
+
+// relevant rook bits (i.e. number of attacked squares) for each square
+const int ROOK_BITS[64] = {
+    12, 11, 11, 11, 11, 11, 11, 12,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    11, 10, 10, 10, 10, 10, 10, 11,
+    12, 11, 11, 11, 11, 11, 11, 12
+};
 
 void initializeAttackTables() {
     // loop through all board squares and precalculate attack maps
@@ -36,7 +72,33 @@ void initializeAttackTables() {
     }
 }
 
-Bitboard calculatePawnAttacks(Square square, Color color) {
+template <PieceType TPieceType>
+Bitboard getPieceAttacks(Square square, Bitboard blockers) {
+    assert(TPieceType != PAWN);  // this function is not used for pawns
+    
+    switch (TPieceType) {
+        case KNIGHT:
+            return KNIGHT_ATTACKS[square];
+            break;
+        case BISHOP:
+            return lookupBishopAttacks(square, blockers);
+            break;
+        case ROOK:
+            return lookupRookAttacks(square, blockers);
+            break;
+        case QUEEN:
+            return lookupBishopAttacks(square, blockers) | lookupRookAttacks(square, blockers);
+            break;
+        case KING:
+            return KING_ATTACKS[square];
+    }
+}
+
+Bitboard getPawnAttacks(Square square, Color color) {
+    return PAWN_ATTACKS[color][square];
+}
+
+static Bitboard calculatePawnAttacks(Square square, Color color) {
     // initialize bitboards for pawn position and attacked fields
     Bitboard bitboard = 0ULL;
     bb::setBit(bitboard, square);
@@ -54,7 +116,7 @@ Bitboard calculatePawnAttacks(Square square, Color color) {
     return attacks;
 }
 
-Bitboard calculateKnightAttacks(Square square) {
+static Bitboard calculateKnightAttacks(Square square) {
     // initialize bitboards for knight position and attacked fields
     Bitboard bitboard = 0ULL;
     bb::setBit(bitboard, square);
@@ -73,7 +135,7 @@ Bitboard calculateKnightAttacks(Square square) {
     return attacks;
 }
 
-Bitboard calculateKingAttacks(Square square) {
+static Bitboard calculateKingAttacks(Square square) {
     // initialize bitboards for king position and attacked fields
     Bitboard bitboard = 0ULL;
     bb::setBit(bitboard, square);
@@ -92,7 +154,7 @@ Bitboard calculateKingAttacks(Square square) {
     return attacks;
 }
 
-Bitboard calculateBishopAttacks(Square square, Bitboard blockers, bool mask_mode) {
+static Bitboard calculateBishopAttacks(Square square, Bitboard blockers, bool mask_mode) {
     // initialize bitboards for bishop position and attacked fields
     Bitboard bitboard = 0ULL;
     bb::setBit(bitboard, square);
@@ -128,7 +190,7 @@ Bitboard calculateBishopAttacks(Square square, Bitboard blockers, bool mask_mode
     return attacks;
 }
 
-Bitboard calculateRookAttacks(Square square, Bitboard blockers, bool mask_mode) {
+static Bitboard calculateRookAttacks(Square square, Bitboard blockers, bool mask_mode) {
     // initialize bitboards for rook position and attacked fields
     Bitboard bitboard = 0ULL;
     bb::setBit(bitboard, square);
@@ -188,7 +250,7 @@ Bitboard calculateRookAttacks(Square square, Bitboard blockers, bool mask_mode) 
     return attacks;
 }
 
-Bitboard lookupBishopAttacks(Square square, Bitboard blockers) {
+static Bitboard lookupBishopAttacks(Square square, Bitboard blockers) {
     // get attack mask and mask the given blockers
     Bitboard masked_blockers = blockers & attacks::BISHOP_MASK[square];
 
@@ -205,7 +267,7 @@ Bitboard lookupBishopAttacks(Square square, Bitboard blockers) {
     return attacks::BISHOP_ATTACKS[square][blockers_index];
 }
 
-Bitboard lookupRookAttacks(Square square, Bitboard blockers) {
+static Bitboard lookupRookAttacks(Square square, Bitboard blockers) {
     // get attack mask and mas kthe given blockers
     Bitboard masked_blockers = blockers & attacks::ROOK_MASK[square];
 
@@ -222,7 +284,7 @@ Bitboard lookupRookAttacks(Square square, Bitboard blockers) {
     return attacks::ROOK_ATTACKS[square][blockers_index];
 }
 
-Bitboard getBlockerConfiguration(int index, Bitboard attack_mask) {
+static Bitboard getBlockerConfiguration(int index, Bitboard attack_mask) {
     // get number of relevant bits for the given attack mask
     int bits = bb::countBits(attack_mask);
     // initialize empty configuration
@@ -240,11 +302,11 @@ Bitboard getBlockerConfiguration(int index, Bitboard attack_mask) {
     return configuration;
 }
 
-Bitboard magicTransform(Bitboard masked_blockers, Bitboard magic, int bits) {
+static Bitboard magicTransform(Bitboard masked_blockers, Bitboard magic, int bits) {
     return (masked_blockers * magic) >> (64 - bits);
 }
 
-Bitboard findMagicNumber(Square square, bool is_bishop) {
+static Bitboard findMagicNumber(Square square, bool is_bishop) {
     // initialize arrays for blockers, attacks, and used indices
     Bitboard blockers[4096], attacks[4096], used[4096];
 
@@ -293,7 +355,7 @@ Bitboard findMagicNumber(Square square, bool is_bishop) {
     );
 }
 
-void initializeMagicAttack(Square square, bool is_bishop) {
+static void initializeMagicAttack(Square square, bool is_bishop) {
     // obtain number of relevant bits
     int bits = is_bishop ? BISHOP_BITS[square] : ROOK_BITS[square];
 
@@ -321,6 +383,12 @@ void initializeMagicAttack(Square square, bool is_bishop) {
         }
     }
 }
+
+template Bitboard getPieceAttacks<KNIGHT>(Square square, Bitboard blockers);
+template Bitboard getPieceAttacks<BISHOP>(Square square, Bitboard blockers);
+template Bitboard getPieceAttacks<ROOK>(Square square, Bitboard blockers);
+template Bitboard getPieceAttacks<QUEEN>(Square square, Bitboard blockers);
+template Bitboard getPieceAttacks<KING>(Square square, Bitboard blockers);
 
 }   // namespace attacks
 }   // namespace chess

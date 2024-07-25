@@ -165,23 +165,23 @@ bool Board::isAttackedBy(Square square, Color color) const {
     // following the I-see-you-you-see-me approach, calculate piece attacks from
     // the initial square and check if the corresponding pieces can be attacked
     Bitboard theirPawns = m_occupancies.pieces[them][PAWN];
-    if (attacks::PAWN_ATTACKS[us][square] & theirPawns) {
+    if (attacks::getPawnAttacks(square, us) & theirPawns) {
         return true;
     }
     Bitboard theirKnights = m_occupancies.pieces[them][KNIGHT];
-    if (attacks::KNIGHT_ATTACKS[square] & theirKnights) {
+    if (attacks::getPieceAttacks<KNIGHT>(square, 0ULL) & theirKnights) {
         return true;
     }
     Bitboard theirKing = m_occupancies.pieces[them][KING];
-    if (attacks::KING_ATTACKS[square] & theirKing) {
+    if (attacks::getPieceAttacks<KING>(square, 0ULL) & theirKing) {
         return true;
     }
     Bitboard theirBishopsAndQueens = m_occupancies.pieces[them][BISHOP] | m_occupancies.pieces[them][QUEEN];
-    if (attacks::lookupBishopAttacks(square, m_occupancies.all) & theirBishopsAndQueens) {
+    if (attacks::getPieceAttacks<BISHOP>(square, m_occupancies.all) & theirBishopsAndQueens) {
         return true;
     }
     Bitboard theirRooksAndQueens = m_occupancies.pieces[them][BISHOP] | m_occupancies.pieces[them][QUEEN];
-    if (attacks::lookupRookAttacks(square, m_occupancies.all) & theirRooksAndQueens) {
+    if (attacks::getPieceAttacks<ROOK>(square, m_occupancies.all) & theirRooksAndQueens) {
         return true;
     }
     
@@ -208,7 +208,7 @@ void Board::makeMove(Move move) {
         replacePiece(to, movingPieceType, movingPieceColor);
     } else {
         // handle promotions
-        if (move.isPromotion()) {
+        if (move.isPromotion()) {                                               // TODO: promotions don't work so far
             // get piece type that the pawn promotes to
             PieceType promotionPieceType = move.getPromotionPieceType();
             setPiece(to, promotionPieceType, movingPieceColor);
