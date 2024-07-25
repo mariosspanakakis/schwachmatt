@@ -3,14 +3,14 @@
 namespace chess {
 
 Board::Board(const std::string& fen){
-    // initialize empty bitboards for all pieces
+    // initialize empty bitboards
     for (bool color : {WHITE, BLACK}){
         for (PieceType pieceType = 0; pieceType < N_PIECE_TYPES; pieceType++) {
-            m_pieceBB[color][pieceType] = 0ULL;
+            m_occupancies.pieces[color][pieceType] = 0ULL;
         }
-        m_occupancyBB[color] = 0ULL;
+        m_occupancies.colors[color] = 0ULL;
     }
-    m_occupancyCombinedBB = 0ULL;
+    m_occupancies.all = 0ULL;
 
     // initialize the array of pieces
     for (Square square = 0; square < N_SQUARES; square++) {
@@ -48,27 +48,27 @@ Board::Board(const std::string& fen){
             // update the occupancy bitboard in accordance to the pieces
             switch (figure){
                 case 'p':
-                    bb::setBit(m_pieceBB[color][PAWN], square);
+                    bb::setBit(m_occupancies.pieces[color][PAWN], square);
                     m_pieces[square] = is_white ? WHITE_PAWN : BLACK_PAWN;
                     break;
                 case 'n':
-                    bb::setBit(m_pieceBB[color][KNIGHT], square);
+                    bb::setBit(m_occupancies.pieces[color][KNIGHT], square);
                     m_pieces[square] = is_white ? WHITE_KNIGHT : BLACK_KNIGHT;
                     break;
                 case 'b':
-                    bb::setBit(m_pieceBB[color][BISHOP], square);
+                    bb::setBit(m_occupancies.pieces[color][BISHOP], square);
                     m_pieces[square] = is_white ? WHITE_BISHOP : BLACK_BISHOP;
                     break;
                 case 'r':
-                    bb::setBit(m_pieceBB[color][ROOK], square);
+                    bb::setBit(m_occupancies.pieces[color][ROOK], square);
                     m_pieces[square] = is_white ? WHITE_ROOK : BLACK_ROOK;
                     break;
                 case 'q':
-                    bb::setBit(m_pieceBB[color][QUEEN], square);
+                    bb::setBit(m_occupancies.pieces[color][QUEEN], square);
                     m_pieces[square] = is_white ? WHITE_QUEEN : BLACK_QUEEN;
                     break;
                 case 'k':
-                    bb::setBit(m_pieceBB[color][KING], square);
+                    bb::setBit(m_occupancies.pieces[color][KING], square);
                     m_pieces[square] = is_white ? WHITE_KING : BLACK_KING;
                     break;
             }
@@ -91,10 +91,10 @@ Board::Board(const std::string& fen){
     // update the occupancy bitboards
     for (bool color : {WHITE, BLACK}) {
         for (PieceType pieceType = 0; pieceType < N_PIECE_TYPES; pieceType++) {
-            Bitboard bb = m_pieceBB[color][pieceType];
-            m_occupancyBB[color] |= bb;
+            Bitboard bb = m_occupancies.pieces[color][pieceType];
+            m_occupancies.colors[color] |= bb;
         }
-        m_occupancyCombinedBB |= m_occupancyBB[color];
+        m_occupancies.all |= m_occupancies.colors[color];
     }
 
     // push the initial game state onto the game state history stack
@@ -103,20 +103,42 @@ Board::Board(const std::string& fen){
 };
 
 Bitboard Board::getPieceBitboard(Piece piece, Color color) const {
-    return m_pieceBB[color][piece];
+    return m_occupancies.pieces[color][piece];
 }
 
 Bitboard Board::getOccupancyBitboard(Color color) const {
-    return m_occupancyBB[color];
+    return m_occupancies.colors[color];
 }
 
 Bitboard Board::getCombinedOccupancyBitboard() const {
-    return m_occupancyCombinedBB;
+    return m_occupancies.all;
 }
 
 Piece Board::getPieceOnSquare(Square square) const {
     return m_pieces[square];
 }
+
+Bitboard Board::getCurrentEnPassantTarget() const {
+    return m_gameStateHistory.back().enPassantTarget;
+}
+
+bool Board::getCastlingRight(CastlingRight castling_right) const {
+    return (m_gameStateHistory.back().castlingRights & castling_right);
+}
+
+
+void Board::setPiece(Square square, Piece piece) {
+    
+}
+
+void Board::unsetPiece(Square square) {
+
+}
+
+void Board::replacePiece(Square square, Piece piece) {
+
+}
+
 
 // NOTE: there are more efficient approaches than this
 bool Board::isAttackedBy(Square square, Color color) const {
@@ -125,24 +147,24 @@ bool Board::isAttackedBy(Square square, Color color) const {
 
     // following the I-see-you-you-see-me approach, calculate piece attacks from
     // the initial square and check if the corresponding pieces can be attacked
-    Bitboard theirPawns = m_pieceBB[them][PAWN];
+    Bitboard theirPawns = m_occupancies.pieces[them][PAWN];
     if (attacks::PAWN_ATTACKS[us][square] & theirPawns) {
         return true;
     }
-    Bitboard theirKnights = m_pieceBB[them][KNIGHT];
+    Bitboard theirKnights = m_occupancies.pieces[them][KNIGHT];
     if (attacks::KNIGHT_ATTACKS[square] & theirKnights) {
         return true;
     }
-    Bitboard theirKing = m_pieceBB[them][KING];
+    Bitboard theirKing = m_occupancies.pieces[them][KING];
     if (attacks::KING_ATTACKS[square] & theirKing) {
         return true;
     }
-    Bitboard theirBishopsAndQueens = m_pieceBB[them][BISHOP] | m_pieceBB[them][QUEEN];
-    if (attacks::lookupBishopAttacks(square, m_occupancyCombinedBB) & theirBishopsAndQueens) {
+    Bitboard theirBishopsAndQueens = m_occupancies.pieces[them][BISHOP] | m_occupancies.pieces[them][QUEEN];
+    if (attacks::lookupBishopAttacks(square, m_occupancies.all) & theirBishopsAndQueens) {
         return true;
     }
-    Bitboard theirRooksAndQueens = m_pieceBB[them][BISHOP] | m_pieceBB[them][QUEEN];
-    if (attacks::lookupRookAttacks(square, m_occupancyCombinedBB) & theirRooksAndQueens) {
+    Bitboard theirRooksAndQueens = m_occupancies.pieces[them][BISHOP] | m_occupancies.pieces[them][QUEEN];
+    if (attacks::lookupRookAttacks(square, m_occupancies.all) & theirRooksAndQueens) {
         return true;
     }
     
@@ -161,14 +183,6 @@ void Board::makeMove(Move move) {
     Square fromSquare = move.getFrom();
     Square toSquare = move.getTo();
     Piece movingPiece = m_pieces[fromSquare];
-}
-    
-Bitboard Board::getCurrentEnPassantTarget() const {
-    return m_gameStateHistory.back().enPassantTarget;
-}
-
-bool Board::getCastlingRight(CastlingRight castling_right) const {
-    return (m_gameStateHistory.back().castlingRights & castling_right);
 }
 
 void Board::print() {

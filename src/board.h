@@ -28,17 +28,23 @@ const GameState INITIAL_GAME_STATE = GameState {
     0b00001111              // full castling rights for both sides
 };
 
+struct OccupancyBitboards {
+    public:
+    Bitboard pieces[N_COLORS][N_PIECE_TYPES];   // piece-wise occupancy         // NOTE: N_PIECE_TYPES is 7, one is not needed
+    Bitboard colors[N_COLORS];                  // color-wise occupancy
+    Bitboard all;                               // total occupancy
+};
+
 class Board {
     private:
-    /* Separate occupancy bitboards for all pieces. */
-    Bitboard m_pieceBB[N_COLORS][N_PIECE_TYPES];
-    /* Total occupancy bitboards for each side. */
-    Bitboard m_occupancyBB[N_COLORS];
-    /* Combined occupancy bitboard for both sides. */
-    Bitboard m_occupancyCombinedBB;
+
+    /* Bitboards for occupancy representation. */
+    OccupancyBitboards m_occupancies;
+
     /* PieceTypes by square. */
     PieceType m_pieces[N_SQUARES];
-    /* Stack containing the game's state history. */
+
+    /* Stack containing the game state history. */
     std::vector<GameState> m_gameStateHistory;
     
     public:
@@ -49,6 +55,12 @@ class Board {
     Bitboard getOccupancyBitboard(Color) const;
     Bitboard getCombinedOccupancyBitboard() const;
     Piece getPieceOnSquare(Square square) const;
+    Bitboard getCurrentEnPassantTarget() const;
+    bool getCastlingRight(CastlingRight castling_right) const;
+
+    void setPiece(Square square, Piece piece);
+    void unsetPiece(Square square);
+    void replacePiece(Square square, Piece piece);
 
     /* @brief Test if a square is under attack by a piece of the given color.
      * @param square The square for which to test for attacks.
@@ -57,9 +69,6 @@ class Board {
     bool isAttackedBy(Square square, Color color) const;
 
     void makeMove(Move move);
-
-    Bitboard getCurrentEnPassantTarget() const;
-    bool getCastlingRight(CastlingRight castling_right) const;
 
     void print();
 };
