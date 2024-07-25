@@ -2,6 +2,7 @@
 #define MAIN_H
 
 #include <stdio.h>
+#include <random>
 #include "attacks.h"
 #include "bitboard.h"
 #include "board.h"

@@ -51,6 +51,10 @@ struct MoveList {
     public:
     /* Constructor to conveniently generate a move list from a given board. */
     explicit MoveList(const Board& board) : m_last(movegen::generateMoves<TColor>(board, m_moves)) {}
+
+    Move& operator[](size_t index) {
+        return m_moves[index];
+    }
     
     const Move* begin() const { return m_moves; }
     const Move* end() const { return m_last; }

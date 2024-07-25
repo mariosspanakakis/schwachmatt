@@ -37,4 +37,20 @@ void Move::setFlag(MoveFlag flag) {
     m_move |= (flag << FLAG_SHIFT);
 }
 
+bool Move::isCapture() {
+    return (m_move >> FLAG_SHIFT) & 0b0100;
+}
+
+bool Move::isDoublePawnPush() {
+    return (m_move >> FLAG_SHIFT) == 0b0001;
+}
+
+bool Move::isPromotion() {
+    return (m_move >> FLAG_SHIFT) & 0b1000;
+}
+
+PieceType Move::getPromotionPieceType() {
+    return PieceType(((m_move >> FLAG_SHIFT) & 0b0011) + 2);
+}
+
 }   // namespace chess

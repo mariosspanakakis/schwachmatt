@@ -22,11 +22,13 @@ struct GameState {
     public:
     Bitboard enPassantTarget;
     uint8_t castlingRights;
+    Piece capturedPiece;
 };
 
 const GameState INITIAL_GAME_STATE = GameState {
     0ULL,                   // no en passant square
-    0b00001111              // full castling rights for both sides
+    0b00001111,             // full castling rights for both sides
+    NO_PIECE,               // no captured piece
 };
 
 struct OccupancyBitboards {

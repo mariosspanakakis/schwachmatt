@@ -34,6 +34,11 @@ class Move {
     void setFrom(Square from);
     MoveFlag getFlag();
     void setFlag(MoveFlag flag);
+
+    bool isCapture();
+    bool isDoublePawnPush();
+    bool isPromotion();
+    PieceType getPromotionPieceType();
 };
 
 }   // namespace chess

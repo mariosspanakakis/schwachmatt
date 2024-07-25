@@ -148,11 +148,8 @@ void Board::replacePiece(Square square, PieceType pieceType, Color color) {
     Piece prevPiece = m_pieces[square];
     Color prevColor = colorFromPiece(prevPiece);
     PieceType prevPieceType = pieceTypeFromPiece(prevPiece);
-    // clear the corresponding bits
-    bb::clearBit(m_occupancies.pieces[prevColor][prevPieceType], square);
-    bb::clearBit(m_occupancies.colors[color], square);
-    bb::clearBit(m_occupancies.all, square);
-    // set the bits for the new piece
+    // replace the piece
+    unsetPiece(square, prevPieceType, prevColor);
     setPiece(square, pieceType, color);
 }
 
@@ -188,17 +185,46 @@ bool Board::isAttackedBy(Square square, Color color) const {
 }
 
 void Board::makeMove(Move move) {
-    // things to take care of:
-    // - remove the piece from its old location
-    // - add the piece to the new location
-    // - captures
-    // - en passant
-    // - promotions
-    // - castling
+    // get information on moving piece
+    Square from = move.getFrom();
+    Square to = move.getTo();
+    Piece movingPiece = m_pieces[from];
+    Piece capturedPiece = m_pieces[to];
+    PieceType movingPieceType = pieceTypeFromPiece(movingPiece);
+    Color movingPieceColor = colorFromPiece(movingPiece);
 
-    Square fromSquare = move.getFrom();
-    Square toSquare = move.getTo();
-    Piece movingPiece = m_pieces[fromSquare];
+    GameState newState = GameState();
+
+    // remove the moving piece from its old location
+    unsetPiece(from, movingPieceType, movingPieceColor);
+
+    // set the piece on the target square
+    if (move.isCapture()) {
+        replacePiece(to, movingPieceType, movingPieceColor);
+    } else {
+        // handle promotions
+        if (move.isPromotion()) {
+            // get piece type that the pawn promotes to
+            PieceType promotionPieceType = move.getPromotionPieceType();
+            setPiece(to, promotionPieceType, movingPieceColor);
+        } else {
+            setPiece(to, movingPieceType, movingPieceColor);
+        }
+    }
+
+    // store captured piece in the new game state
+    newState.capturedPiece = capturedPiece;
+
+    // store en passant target in the new game state
+    if (move.isDoublePawnPush()) {
+        newState.enPassantTarget = from + (movingPieceColor == WHITE) ? NORTH : SOUTH;
+    } else {
+        newState.enPassantTarget = 0ULL;
+    }
+
+    // castling rights
+
+    // push new game state to stack
 }
 
 void Board::print() {

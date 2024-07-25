@@ -2,6 +2,12 @@
 
 int main(int argc, char *argv[]) {
     try {
+
+        std::random_device rd;
+
+        // random number engine for move selection
+        std::default_random_engine eng(rd());
+
         // initialize attack tables for rapid lookup of attacked squares
         std::cout << "Initializing attack tables... ";
         chess::attacks::initializeAttackTables();
@@ -14,14 +20,26 @@ int main(int argc, char *argv[]) {
 
         board.print();
 
-        // generate moves
-        chess::MoveList movelist = chess::MoveList<chess::BLACK>(board);
-        std::cout << "Found " << movelist.size() << " moves:" << std::endl;
-        for (const chess::Move& move : movelist) {
+        while(true) {
+            // generate moves
+            chess::MoveList movelist = chess::MoveList<chess::BLACK>(board);
+            /*std::cout << "Found " << movelist.size() << " moves:" << std::endl;
+            for (const chess::Move& move : movelist) {
+                chess::utils::printMove(move);
+            }*/
+
+            // get number of move to make
+            std::uniform_int_distribution<size_t> distr(0, movelist.size() - 1);
+            size_t i = distr(eng);
+
+            chess::Move move = movelist[i];
             chess::utils::printMove(move);
+
+            board.makeMove(move);
+            board.print();
         }
 
-        /*chess::Square kingSquare = chess::bb::getLeastSignificantBitIndex(board.getPieceBitboard(chess::KING, color));
+        /*chess::Square kingSquare = chess::bb::getLeastSignificantBitIndex(board.getPieceOccupancy(chess::KING, color));
         bool inCheck = board.isAttackedBy(kingSquare, !color);
         if (inCheck) {
             std::cout << "King is in check." << std::endl;

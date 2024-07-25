@@ -107,7 +107,7 @@ const inline Piece pieceFromColorAndType(Color c, PieceType pt) {
     return Piece(pt + ((c == WHITE) ? 0 : PIECE_ID_OFFSET));
 }
 const inline Color colorFromPiece(Piece piece) {
-    return Color((piece % PIECE_ID_OFFSET) == 1);
+    return Color((piece > PIECE_ID_OFFSET));
 }
 const inline PieceType pieceTypeFromPiece(Piece piece) {
     return PieceType(piece % PIECE_ID_OFFSET);
