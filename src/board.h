@@ -23,12 +23,14 @@ struct GameState {
     Bitboard enPassantTarget;
     uint8_t castlingRights;
     Piece capturedPiece;
+    Color sideToMove;
 };
 
 const GameState INITIAL_GAME_STATE = GameState {
     0ULL,                   // no en passant square
     0b00001111,             // full castling rights for both sides
     NO_PIECE,               // no captured piece
+    WHITE,                  // white begins
 };
 
 struct OccupancyBitboards {
@@ -58,8 +60,10 @@ class Board {
     Bitboard getColorOccupancy(Color) const;
     Bitboard getTotalOccupancy() const;
     Piece getPieceOnSquare(Square square) const;
+
     Bitboard getCurrentEnPassantTarget() const;
     bool getCastlingRight(CastlingRight castling_right) const;
+    Color getSideToMove() const;
 
     void setPiece(Square square, PieceType pieceType, Color color);
     void unsetPiece(Square square, PieceType pieceType, Color color);           // we must compute which piece has been on that square anyway, so we just specify it (in case we already know)

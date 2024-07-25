@@ -7,50 +7,26 @@
 #include "move.h"
 
 namespace chess {
-namespace movegen {
 
-/* @brief Find all possible pseudo-legal moves for all pieces on the board.
- * @tparam TColor The side to move.
+/* @brief Generate all possible pseudo-legal moves for the given board. The
+          moves are generated for the currently active side. This function can
+          be called directly, but is intended to be called from the constructor
+          of the move list itself.
  * @param board A given chess board.
- * @return Pointer to the last element of the move list. */
-template <Color TColor>
-Move* generateMoves(const Board& board, Move* movelist);
+ * @param movelist A pointer to an existing move list.
+ * @return A pointer to the last generated move in the list. */
+Move* generate(const Board& board, Move* movelist);
 
-/* @brief Find all possible pseudo-legal moves for a given piece type on the
-        board.
- * @tparam TColor The side to move.
- * @param board A given chess board.
- * @param piece Piece to calculate moves for, can be any piece except for
- *              the pawn, since pawn moves are generated separately.
- * @param movelist Reference to move list that the moves are stored in.
- * @return Pointer to the last element of the move list. */
-template <Color TColor>
-Move* generatePieceMoves(const Board& board, PieceType pieceType, Move* movelist);
-
-/* @brief Find all possible pseudo-legal pawn moves on the board.
- * @tparam TColor The side to move.
- * @param board A given chess board.
- * @param movelist Reference to move list that the moves are stored in.
- * @return Pointer to the last element of the move list. */
-template <Color TColor>
-Move* generatePawnMoves(const Board& board, Move* movelist);
-
-template <Color TColor>
-Move* generateCastlingMoves(const Board& board, Move* movelist);
-
-}   // namespace movegen
-
-
-template <Color TColor>
+/* A list of moves, generated for a given board representation. The move
+   generation is called from the constructor of this struct. */
 struct MoveList {
-
     private:
     Move m_moves[MAX_NUMBER_OF_MOVES];
     Move* m_last;
 
     public:
     /* Constructor to conveniently generate a move list from a given board. */
-    explicit MoveList(const Board& board) : m_last(movegen::generateMoves<TColor>(board, m_moves)) {}
+    explicit MoveList(const Board& board) : m_last(generate(board, m_moves)) {}
 
     Move& operator[](size_t index) {
         return m_moves[index];
@@ -59,9 +35,6 @@ struct MoveList {
     const Move* begin() const { return m_moves; }
     const Move* end() const { return m_last; }
     size_t size() const { return m_last - m_moves; }
-    bool contains(Move move) const {
-        return std::find(begin(), end(), move) != end();
-    }
 };
 
 }   // namespace chess

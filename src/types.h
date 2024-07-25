@@ -10,7 +10,7 @@ using Square = uint8_t;
 using Piece = uint8_t;
 using PieceType = uint8_t;
 using Direction = int8_t;
-using Color = bool;
+using Color = uint8_t;
 using CastlingRight = uint8_t;
 using MoveFlag = uint8_t;
 

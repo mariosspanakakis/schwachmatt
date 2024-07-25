@@ -22,7 +22,7 @@ int main(int argc, char *argv[]) {
 
         while(true) {
             // generate moves
-            chess::MoveList movelist = chess::MoveList<chess::BLACK>(board);
+            chess::MoveList movelist = chess::MoveList(board);
             /*std::cout << "Found " << movelist.size() << " moves:" << std::endl;
             for (const chess::Move& move : movelist) {
                 chess::utils::printMove(move);

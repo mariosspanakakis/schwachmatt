@@ -1,31 +1,49 @@
 #include "movegen.h"
 
 namespace chess {
-namespace movegen {
 
 template <Color TColor>
-Move* generateMoves(const Board& board, Move* movelist) {
-    // add moves for all pieces
-    for (PieceType pieceType : {PAWN, KNIGHT, BISHOP, ROOK, QUEEN, KING}) {
-        movelist = generatePieceMoves<TColor>(board, pieceType, movelist);
-    }
-    // return the list of all possible moves
-    return movelist;
+static Move* generateAllMoves(const Board& board, Move* movelist);
+
+template <Color TColor>
+static Move* generatePawnMoves(const Board& board, Move* movelist);
+
+template <Color TColor, PieceType TPieceType>
+static Move* generatePieceMoves(const Board& board, Move* movelist);
+
+template <Color TColor>
+static Move* generateCastlingMoves(const Board& board, Move* movelist);
+
+
+Move* generate(const Board& board, Move* movelist) {
+    Color us = board.getSideToMove();
+    return (us == WHITE) ? generateAllMoves<WHITE>(board, movelist)
+                         : generateAllMoves<BLACK>(board, movelist);
 }
 
 template <Color TColor>
-Move* generatePieceMoves(const Board& board, PieceType pieceType, Move* movelist) {
-    // for pawns, call the separate pawn move generation function
-    if (pieceType == PAWN) {
-        movelist = generatePawnMoves<TColor>(board, movelist);
-        return movelist;
-    }
+static Move* generateAllMoves(const Board& board, Move* movelist) {
+    
+    movelist = generatePawnMoves<TColor>(board, movelist);
+    movelist = generatePieceMoves<TColor, KNIGHT>(board, movelist);
+    movelist = generatePieceMoves<TColor, BISHOP>(board, movelist);
+    movelist = generatePieceMoves<TColor, ROOK>(board, movelist);
+    movelist = generatePieceMoves<TColor, QUEEN>(board, movelist);
+    movelist = generatePieceMoves<TColor, KING>(board, movelist);
+
+    return movelist;
+}
+
+template <Color TColor, PieceType TPieceType>
+static Move* generatePieceMoves(const Board& board, Move* movelist) {
+
+    assert(TPieceType != PAWN);  // pawn move generation is handled separately
 
     // get piece locations
     Bitboard our_pieces = board.getColorOccupancy(TColor);
     Bitboard their_pieces = board.getColorOccupancy(!TColor);
     Bitboard all_pieces = board.getTotalOccupancy();
-    Bitboard pieces = board.getPieceOccupancy(pieceType, TColor);
+    Bitboard pieces = board.getPieceOccupancy(TPieceType, TColor);
     
     // for each piece, get the attacked squares
     while (pieces) {
@@ -35,7 +53,7 @@ Move* generatePieceMoves(const Board& board, PieceType pieceType, Move* movelist
 
         // lookup the squares which are attacked by this piece
         Bitboard attacks;
-        switch (pieceType) {                                                        // TODO: replace this by a template
+        switch (TPieceType) {                                                        // TODO: replace this by a template
             case KNIGHT:
                 attacks = attacks::KNIGHT_ATTACKS[from_square];
                 break;
@@ -73,7 +91,7 @@ Move* generatePieceMoves(const Board& board, PieceType pieceType, Move* movelist
     }
 
     // add castling moves for the king
-    if (pieceType == KING) {
+    if (TPieceType == KING) {
         movelist = generateCastlingMoves<TColor>(board, movelist);
     }
 
@@ -81,7 +99,7 @@ Move* generatePieceMoves(const Board& board, PieceType pieceType, Move* movelist
 }
 
 template <Color TColor>
-Move* generatePawnMoves(const Board& board, Move* movelist) {
+static Move* generatePawnMoves(const Board& board, Move* movelist) {
     
     // get piece bitboards
     Bitboard theirPieces = board.getColorOccupancy(!TColor);
@@ -157,7 +175,7 @@ Move* generatePawnMoves(const Board& board, Move* movelist) {
 }
 
 template <Color TColor>
-Move* generateCastlingMoves(const Board& board, Move* movelist) {
+static Move* generateCastlingMoves(const Board& board, Move* movelist) {
     // prerequisites for castling:
     // - castling generally permitted (king and rook have not been moved)
     // - no pieces on the squares between king and rook
@@ -187,8 +205,7 @@ Move* generateCastlingMoves(const Board& board, Move* movelist) {
 }
 
 /* Explicit template instantiations. */
-template Move* generateMoves<WHITE>(const Board& board, Move* movelist);
-template Move* generateMoves<BLACK>(const Board& board, Move* movelist);
+template Move* generateAllMoves<WHITE>(const Board& board, Move* movelist);
+template Move* generateAllMoves<BLACK>(const Board& board, Move* movelist);
 
-}   // namespace movegen
 }   // namespace chess

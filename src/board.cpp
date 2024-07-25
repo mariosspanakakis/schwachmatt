@@ -126,6 +126,10 @@ bool Board::getCastlingRight(CastlingRight castling_right) const {
     return (m_gameStateHistory.back().castlingRights & castling_right);
 }
 
+Color Board::getSideToMove() const {
+    return m_gameStateHistory.back().sideToMove;
+}
+
 void Board::setPiece(Square square, PieceType pieceType, Color color) {
     assert(m_pieces[square] == NO_PIECE);  // assert that square is empty
     bb::setBit(m_occupancies.pieces[color][pieceType], square);
@@ -193,7 +197,8 @@ void Board::makeMove(Move move) {
     PieceType movingPieceType = pieceTypeFromPiece(movingPiece);
     Color movingPieceColor = colorFromPiece(movingPiece);
 
-    GameState newState = GameState();
+    GameState oldGameState = m_gameStateHistory.back();
+    GameState newGameState = GameState();
 
     // remove the moving piece from its old location
     unsetPiece(from, movingPieceType, movingPieceColor);
@@ -213,18 +218,22 @@ void Board::makeMove(Move move) {
     }
 
     // store captured piece in the new game state
-    newState.capturedPiece = capturedPiece;
+    newGameState.capturedPiece = capturedPiece;
 
     // store en passant target in the new game state
     if (move.isDoublePawnPush()) {
-        newState.enPassantTarget = from + (movingPieceColor == WHITE) ? NORTH : SOUTH;
+        newGameState.enPassantTarget = from + (movingPieceColor == WHITE) ? NORTH : SOUTH;
     } else {
-        newState.enPassantTarget = 0ULL;
+        newGameState.enPassantTarget = 0ULL;
     }
 
-    // castling rights
+    // TODO: withdraw castling rights if rook or king moves
+
+    // flip side to move
+    newGameState.sideToMove = !oldGameState.sideToMove;
 
     // push new game state to stack
+    m_gameStateHistory.push_back(newGameState);
 }
 
 void Board::print() {
