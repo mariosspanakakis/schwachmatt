@@ -14,7 +14,7 @@ Board::Board(const std::string& fen){
 
     // initialize the array of pieces
     for (Square square = 0; square < N_SQUARES; square++) {
-        m_pieces[square] = NO_PIECE_TYPE;
+        m_pieces[square] = NO_PIECE;
     }
     
     // split the given FEN into groups that describe the board status
@@ -40,7 +40,7 @@ Board::Board(const std::string& fen){
             char figure = tolower(symbol);
 
             // obtain square from rank and file
-            int square = bb::convertCoordToSquare(rank, file);
+            int square = bb::coordinateToSquare(rank, file);
 
             // set offset for piece referencing
             Color color = is_white ? WHITE : BLACK;
@@ -102,15 +102,15 @@ Board::Board(const std::string& fen){
     m_gameStateHistory.push_back(INITIAL_GAME_STATE);                           // TODO: take care of castling rights etc. as defined in FEN!
 };
 
-Bitboard Board::getPieceBitboard(Piece piece, Color color) const {
-    return m_occupancies.pieces[color][piece];
+Bitboard Board::getPieceOccupancy(PieceType pieceType, Color color) const {
+    return m_occupancies.pieces[color][pieceType];
 }
 
-Bitboard Board::getOccupancyBitboard(Color color) const {
+Bitboard Board::getColorOccupancy(Color color) const {
     return m_occupancies.colors[color];
 }
 
-Bitboard Board::getCombinedOccupancyBitboard() const {
+Bitboard Board::getTotalOccupancy() const {
     return m_occupancies.all;
 }
 
@@ -126,19 +126,35 @@ bool Board::getCastlingRight(CastlingRight castling_right) const {
     return (m_gameStateHistory.back().castlingRights & castling_right);
 }
 
-
-void Board::setPiece(Square square, Piece piece) {
-    
+void Board::setPiece(Square square, PieceType pieceType, Color color) {
+    assert(m_pieces[square] == NO_PIECE);  // assert that square is empty
+    bb::setBit(m_occupancies.pieces[color][pieceType], square);
+    bb::setBit(m_occupancies.colors[color], square);
+    bb::setBit(m_occupancies.all, square);
+    m_pieces[square] = pieceFromColorAndType(color, pieceType);
 }
 
-void Board::unsetPiece(Square square) {
-
+void Board::unsetPiece(Square square, PieceType pieceType, Color color) {
+    assert((m_pieces[square] != NO_PIECE));  // assert that square is not empty
+    bb::clearBit(m_occupancies.pieces[color][pieceType], square);
+    bb::clearBit(m_occupancies.colors[color], square);
+    bb::clearBit(m_occupancies.all, square);
+    m_pieces[square] = NO_PIECE;
 }
 
-void Board::replacePiece(Square square, Piece piece) {
-
+void Board::replacePiece(Square square, PieceType pieceType, Color color) {
+    assert((m_pieces[square] != NO_PIECE));  // assert that square is not empty
+    // get the piece that is on the square
+    Piece prevPiece = m_pieces[square];
+    Color prevColor = colorFromPiece(prevPiece);
+    PieceType prevPieceType = pieceTypeFromPiece(prevPiece);
+    // clear the corresponding bits
+    bb::clearBit(m_occupancies.pieces[prevColor][prevPieceType], square);
+    bb::clearBit(m_occupancies.colors[color], square);
+    bb::clearBit(m_occupancies.all, square);
+    // set the bits for the new piece
+    setPiece(square, pieceType, color);
 }
-
 
 // NOTE: there are more efficient approaches than this
 bool Board::isAttackedBy(Square square, Color color) const {

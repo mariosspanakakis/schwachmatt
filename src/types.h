@@ -67,6 +67,7 @@ constexpr char const* PIECE_TYPE_NAMES[] {
     "KING",
 };
 
+const int PIECE_ID_OFFSET = 8;
 enum Pieces {
     NO_PIECE = 0,
     WHITE_PAWN = PAWN,
@@ -75,7 +76,7 @@ enum Pieces {
     WHITE_ROOK,
     WHITE_QUEEN,
     WHITE_KING,
-    BLACK_PAWN = PAWN + 8,
+    BLACK_PAWN = PAWN + PIECE_ID_OFFSET,
     BLACK_KNIGHT,
     BLACK_BISHOP,
     BLACK_ROOK,
@@ -101,6 +102,16 @@ constexpr char const* PIECE_SYMBOLS[] {
     "q",
     "k",
 };
+
+const inline Piece pieceFromColorAndType(Color c, PieceType pt) {
+    return Piece(pt + ((c == WHITE) ? 0 : PIECE_ID_OFFSET));
+}
+const inline Color colorFromPiece(Piece piece) {
+    return Color((piece % PIECE_ID_OFFSET) == 1);
+}
+const inline PieceType pieceTypeFromPiece(Piece piece) {
+    return PieceType(piece % PIECE_ID_OFFSET);
+}
 
 enum Directions {
     NORTH = 8,

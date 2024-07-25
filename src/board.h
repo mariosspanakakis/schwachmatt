@@ -2,6 +2,7 @@
 #define BOARD_H
 
 #include <stdint.h>
+#include <cassert>
 #include <cctype>
 #include <ctype.h>
 #include "attacks.h"
@@ -41,8 +42,8 @@ class Board {
     /* Bitboards for occupancy representation. */
     OccupancyBitboards m_occupancies;
 
-    /* PieceTypes by square. */
-    PieceType m_pieces[N_SQUARES];
+    /* Pieces by square. */
+    Piece m_pieces[N_SQUARES];
 
     /* Stack containing the game state history. */
     std::vector<GameState> m_gameStateHistory;
@@ -51,16 +52,16 @@ class Board {
     Board(const std::string& fen = INITIAL_FEN);
     ~Board() = default;
 
-    Bitboard getPieceBitboard(Piece, Color) const;
-    Bitboard getOccupancyBitboard(Color) const;
-    Bitboard getCombinedOccupancyBitboard() const;
+    Bitboard getPieceOccupancy(PieceType pieceType, Color color) const;
+    Bitboard getColorOccupancy(Color) const;
+    Bitboard getTotalOccupancy() const;
     Piece getPieceOnSquare(Square square) const;
     Bitboard getCurrentEnPassantTarget() const;
     bool getCastlingRight(CastlingRight castling_right) const;
 
-    void setPiece(Square square, Piece piece);
-    void unsetPiece(Square square);
-    void replacePiece(Square square, Piece piece);
+    void setPiece(Square square, PieceType pieceType, Color color);
+    void unsetPiece(Square square, PieceType pieceType, Color color);           // we must compute which piece has been on that square anyway, so we just specify it (in case we already know)
+    void replacePiece(Square square, PieceType pieceType, Color color);
 
     /* @brief Test if a square is under attack by a piece of the given color.
      * @param square The square for which to test for attacks.

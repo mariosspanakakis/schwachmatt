@@ -1,5 +1,6 @@
 #include <iostream>
 #include <gtest/gtest.h>
+#include "board.h"
 #include "bitboard.h"
 #include "attacks.h"
 
@@ -45,6 +46,24 @@ TEST(AttackTest, MagicNumberGeneration) {
 }
 
 /* --- MOVE GENERATION UNIT TESTS --- */
+
+/* --- BOARD UNIT TESTS --- */
+TEST(BoardTest, SetAndUnsetPiece) {
+    chess::Board originalBoard = chess::Board();
+    chess::Board board = chess::Board();
+
+    for (chess::Color color : {chess::WHITE, chess::BLACK}) {
+        for (chess::PieceType pieceType = chess::PAWN; pieceType < chess::N_PIECE_TYPES; pieceType ++) {
+            for (chess::Square square = 16; square < 48; square++) {
+                board.setPiece(square, pieceType, color);
+                board.unsetPiece(square, pieceType, color);
+            }
+            ASSERT_EQ(originalBoard.getPieceOccupancy(pieceType, color), board.getPieceOccupancy(pieceType, color));
+        }
+        ASSERT_EQ(originalBoard.getColorOccupancy(color), board.getColorOccupancy(color));
+    }
+    ASSERT_EQ(originalBoard.getTotalOccupancy(), board.getTotalOccupancy());
+}
 
 /* --- MAIN TEST FUNCTION --- */
 int main(int argc, char **argv) {

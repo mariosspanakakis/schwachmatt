@@ -22,10 +22,10 @@ Move* generatePieceMoves(const Board& board, PieceType pieceType, Move* movelist
     }
 
     // get piece locations
-    Bitboard our_pieces = board.getOccupancyBitboard(TColor);
-    Bitboard their_pieces = board.getOccupancyBitboard(!TColor);
-    Bitboard all_pieces = board.getCombinedOccupancyBitboard();
-    Bitboard pieces = board.getPieceBitboard(pieceType, TColor);
+    Bitboard our_pieces = board.getColorOccupancy(TColor);
+    Bitboard their_pieces = board.getColorOccupancy(!TColor);
+    Bitboard all_pieces = board.getTotalOccupancy();
+    Bitboard pieces = board.getPieceOccupancy(pieceType, TColor);
     
     // for each piece, get the attacked squares
     while (pieces) {
@@ -84,9 +84,9 @@ template <Color TColor>
 Move* generatePawnMoves(const Board& board, Move* movelist) {
     
     // get piece bitboards
-    Bitboard theirPieces = board.getOccupancyBitboard(!TColor);
-    Bitboard allPieces = board.getCombinedOccupancyBitboard();
-    Bitboard pawns = board.getPieceBitboard(PAWN, TColor);
+    Bitboard theirPieces = board.getColorOccupancy(!TColor);
+    Bitboard allPieces = board.getTotalOccupancy();
+    Bitboard pawns = board.getPieceOccupancy(PAWN, TColor);
 
     // define the move directions
     constexpr Direction forward_dir = (TColor == WHITE) ? NORTH : SOUTH;
@@ -162,7 +162,7 @@ Move* generateCastlingMoves(const Board& board, Move* movelist) {
     // - castling generally permitted (king and rook have not been moved)
     // - no pieces on the squares between king and rook
     // - the squares between king and rook are not under attack             -> this is tested during legality test
-    Bitboard all_pieces = board.getCombinedOccupancyBitboard();
+    Bitboard all_pieces = board.getTotalOccupancy();
     if (TColor == WHITE) {
         if (board.getCastlingRight(WHITE_KINGSIDE_CASTLE)
             && ((all_pieces & bb::WHITE_KINGSIDE_CASTLE_SQUARES) == 0)) {
