@@ -1,10 +1,10 @@
 # Chess Engine
 
-Basic chess engine written in C++, built to understand fundamental concepts of chess programming. This project is work in progress.
+Chess engine written in C++, built to understand fundamental concepts of chess programming. This project is work in progress.
 
 ## Current State
 
-Implementing basic structures for board representation and move generation.
+Implementing and debugging move generation.
 
 ## Features
 
@@ -14,15 +14,15 @@ List of fundamental concepts that have already been implemented:
 - precalculated attack tables that allow for fast lookup of attacked squares and pieces (https://www.chessprogramming.org/Attack_and_Defend_Maps)
 - magic number generation for efficient hashing of board configurations during sliding piece attack generation
 - board generation based on FEN notation (https://de.wikipedia.org/wiki/Forsyth-Edwards-Notation)
+- board status struct containing unobservable game information, e.g. side to move, castling rights, en-passant squares
+- performance test case ```perft``` to validate move generation based on recursive node counting
+- comprehensive move generation including special cases, e.g. pinned pieces, check and double check, en-passant captures and pawn promotions (move generation does not fully work so far and must be debugged based on the ```perft``` tests)
 
 ## Future Work
 
-List of logical next steps and missing functionalities:
+Next steps and future functionalities:
 
-- board status struct containing unobservable game information, e.g. side to move, castling rights, en-passant squares
-- comprehensive move generation including special cases, e.g. pinned pieces, check and double check, en-passant captures and pawn promotions
 - implementation of mate and stalemate logic
-- performance tests ```perft``` to validate move generation
 - UCI communication interface for GUI usage
 - search logic, typically alpha-beta minimax search
 - heuristics for move evaluation
