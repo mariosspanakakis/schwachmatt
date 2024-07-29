@@ -57,7 +57,7 @@ class Board {
     ~Board() = default;
 
     Bitboard getPieceOccupancy(PieceType pieceType, Color color) const;
-    Bitboard getColorOccupancy(Color) const;
+    Bitboard getColorOccupancy(Color color) const;
     Bitboard getTotalOccupancy() const;
     Piece getPieceOnSquare(Square square) const;
 
@@ -75,7 +75,10 @@ class Board {
      * @return A boolean indicating whether the square is under attack. */
     bool isAttackedBy(Square square, Color color) const;
 
+    bool isInCheck(Color color) const;
+
     void makeMove(Move move);
+    void unmakeMove(Move move);
 
     void print();
 };

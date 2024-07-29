@@ -42,23 +42,5 @@ uint64_t getRandom64Sparse() {
     return number;
 }
 
-void printMove(Move move) {
-    // print origin and target square
-    std::cout << SQUARE_NAMES[move.getFrom()];
-    std::cout << " -> ";
-    std::cout << SQUARE_NAMES[move.getTo()];
-    std::cout << " ";
-
-    // print move bitsets
-    std::cout << "[" << std::bitset<4>(move.getFlag()) << " ";
-    std::cout << std::bitset<6>(move.getTo()) << " ";
-    std::cout << std::bitset<6>(move.getFrom()) << "]";
-    std::cout << " ";
-
-    // print move flag
-    std::cout << FLAG_NAMES[move.getFlag()];
-    std::cout << std::endl;
-}
-
 }   // namespace utils
 }   // namespace chess

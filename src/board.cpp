@@ -188,6 +188,12 @@ bool Board::isAttackedBy(Square square, Color color) const {
     return false;
 }
 
+bool Board::isInCheck(Color color) const {
+    Bitboard king = getPieceOccupancy(KING, color);
+    Square kingSquare = bb::getLeastSignificantBitIndex(king);
+    return isAttackedBy(kingSquare, color);
+}
+
 void Board::makeMove(Move move) {
     // get information on moving piece
     Square from = move.getFrom();
@@ -195,7 +201,7 @@ void Board::makeMove(Move move) {
     Piece movingPiece = m_pieces[from];
     Piece capturedPiece = m_pieces[to];
     PieceType movingPieceType = pieceTypeFromPiece(movingPiece);
-    Color movingPieceColor = colorFromPiece(movingPiece);
+    Color movingPieceColor = colorFromPiece(movingPiece);                       // could be replaced by getSideToMove()
 
     GameState oldGameState = m_gameStateHistory.back();
     GameState newGameState = GameState();
@@ -234,6 +240,42 @@ void Board::makeMove(Move move) {
 
     // push new game state to stack
     m_gameStateHistory.push_back(newGameState);
+}
+
+void Board::unmakeMove(Move move) {
+
+    // store and pop the game state introduced by the move to be unmade
+    GameState state = m_gameStateHistory.back();
+    m_gameStateHistory.pop_back();
+
+    // get relevant squares
+    Square from = move.getFrom();
+    Square to = move.getTo();
+    // retrieve information on involved pieces
+    Piece movingPiece = m_pieces[to];                                           // the moving piece is on the to square
+    PieceType movingPieceType = pieceTypeFromPiece(movingPiece);
+    Color movingPieceColor = colorFromPiece(movingPiece);
+    Piece capturedPiece = state.capturedPiece;                                  // retrieve the captured piece from the game state
+    PieceType capturedPieceType = pieceTypeFromPiece(capturedPiece);
+    Color capturedPieceColor = colorFromPiece(capturedPiece);
+
+    // place the piece on its original square
+    setPiece(from, movingPieceType, movingPieceColor);
+
+    if (move.isCapture()) {
+        replacePiece(to, capturedPieceType, capturedPieceColor);                // TODO: should be overloaded to either except type and color or piece
+    } else {
+        // handle promotions
+        if (move.isPromotion()) {                                               // TODO: promotions don't work so far
+            // get piece type that the pawn promotes to
+            PieceType promotionPieceType = move.getPromotionPieceType();
+            unsetPiece(to, promotionPieceType, movingPieceColor);
+        } else {
+            unsetPiece(to, movingPieceType, movingPieceColor);
+        }
+    }
+
+    // TODO: restore castling rights if rook or king moves
 }
 
 void Board::print() {

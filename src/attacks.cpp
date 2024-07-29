@@ -11,9 +11,9 @@ static Bitboard calculateRookAttacks(Square square, Bitboard blockers = 0ULL, bo
 static Bitboard getBlockerConfiguration(int index, Bitboard attack_mask);
 static Bitboard findMagicNumber(Square square, bool is_bishop);
 static Bitboard magicTransform(Bitboard masked_blockers, Bitboard magic, int bits);
-static void initializeMagicAttack(Square square, bool is_bishop);
 static Bitboard lookupBishopAttacks(Square square, Bitboard blockers = 0ULL);
 static Bitboard lookupRookAttacks(Square square, Bitboard blockers = 0ULL);
+static void initializeMagicAttack(Square square, bool is_bishop);
 
 Bitboard PAWN_ATTACKS[N_COLORS][N_SQUARES];
 Bitboard KNIGHT_ATTACKS[N_SQUARES];

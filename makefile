@@ -16,7 +16,7 @@ TEST_EXEC = test
 
 # source files
 MAIN_SOURCES  = $(SRCDIR)/main.cpp $(SRCDIR)/bitboard.cpp $(SRCDIR)/attacks.cpp $(SRCDIR)/board.cpp $(SRCDIR)/utils.cpp $(SRCDIR)/move.cpp $(SRCDIR)/movegen.cpp
-TEST_SOURCES = $(TESTDIR)/unit_test.cpp
+TEST_SOURCES = $(TESTDIR)/main_test.cpp $(TESTDIR)/attacks_test.cpp $(TESTDIR)/board_test.cpp $(TESTDIR)/bitboard_test.cpp $(TESTDIR)/perft_test.cpp
 
 # object files
 MAIN_OBJECTS  = $(MAIN_SOURCES:.cpp=.o)

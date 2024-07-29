@@ -28,18 +28,22 @@ class Move {
     Move();
     Move(Square from, Square to, MoveFlag flag);
     ~Move() = default;
-    Square getTo();
+    Square getTo() const;
     void setTo(Square to);
-    Square getFrom();
+    Square getFrom() const;
     void setFrom(Square from);
-    MoveFlag getFlag();
+    MoveFlag getFlag() const;
     void setFlag(MoveFlag flag);
 
     bool isCapture();
     bool isDoublePawnPush();
     bool isPromotion();
     PieceType getPromotionPieceType();
+    
+    std::string toString() const;
+    void printDetails() const;
 };
+
 
 }   // namespace chess
 
