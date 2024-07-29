@@ -5,6 +5,8 @@
 #include <cassert>
 #include <cctype>
 #include <ctype.h>
+#include <iomanip>
+#include <string.h>
 #include "attacks.h"
 #include "bitboard.h"
 #include "exceptions.h"
@@ -62,7 +64,9 @@ class Board {
     Piece getPieceOnSquare(Square square) const;
 
     Bitboard getCurrentEnPassantTarget() const;
-    bool getCastlingRight(CastlingRight castling_right) const;
+    CastlingRight getCastlingRights() const;
+    CastlingRight getCastlingRights(Color color) const;
+    bool canCastle(Color color, CastlingRight castling_right) const;
     Color getSideToMove() const;
 
     void setPiece(Square square, PieceType pieceType, Color color);

@@ -25,7 +25,7 @@ Board::Board(const std::string& fen){
     std::string fen_pieces = fen_groups[0];
     int rank = RANK_8;
     int file = FILE_A;
-    for (uint64_t i = 0; i < fen_pieces.length(); i++){
+    for (uint64_t i = 0; i < fen_pieces.length(); i++) {
         char symbol = fen_pieces[i];
 
         // if the character is a number, advance the given number of squares
@@ -97,9 +97,52 @@ Board::Board(const std::string& fen){
         m_occupancies.all |= m_occupancies.colors[color];
     }
 
+    // instantiate game state object
+    GameState gameState = GameState();
+
+    // handle side to move
+    std::string fen_side_to_move = fen_groups[1];
+    gameState.sideToMove = fen_side_to_move.compare("w") == 0 ? WHITE : BLACK;
+
+    // handle castling rights
+    std::string fen_castling = fen_groups[2];
+    CastlingRight castling_right = 0;
+    for (char c : fen_castling) {
+        switch (c) {
+            case 'K':
+                castling_right |= WHITE_KINGSIDE_CASTLING;
+                break;
+            case 'Q':
+                castling_right |= WHITE_QUEENSIDE_CASTLING;
+                break;
+            case 'k':
+                castling_right |= BLACK_KINGSIDE_CASTLING;
+                break;
+            case 'q':
+                castling_right |= BLACK_QUEENSIDE_CASTLING;
+                break;
+            case '-':
+                break;
+            default:
+                std::cerr << "Invalid castling character: " << c << std::endl;
+        }
+    }
+    gameState.castlingRights = castling_right;
+
+    // handle en passant square
+    std::string fen_en_passant = fen_groups[3]; // like "e3"
+    gameState.enPassantTarget = 0ULL;
+    for (int i = 0; i < N_SQUARES; ++i) {
+        if (SQUARE_NAMES[i] == fen_en_passant) {
+            bb::setBit(gameState.enPassantTarget, i);
+        }
+    }
+
+    // TODO: handle move counters
+
     // push the initial game state onto the game state history stack
     m_gameStateHistory.reserve(GAME_STATE_HISTORY_LENGTH);
-    m_gameStateHistory.push_back(INITIAL_GAME_STATE);                           // TODO: take care of castling rights etc. as defined in FEN!
+    m_gameStateHistory.push_back(gameState);
 };
 
 Bitboard Board::getPieceOccupancy(PieceType pieceType, Color color) const {
@@ -122,7 +165,15 @@ Bitboard Board::getCurrentEnPassantTarget() const {
     return m_gameStateHistory.back().enPassantTarget;
 }
 
-bool Board::getCastlingRight(CastlingRight castling_right) const {
+CastlingRight Board::getCastlingRights() const {
+    return m_gameStateHistory.back().castlingRights;
+}
+
+CastlingRight Board::getCastlingRights(Color color) const {
+    return m_gameStateHistory.back().castlingRights & ((getSideToMove() == WHITE) ? WHITE_CASTLING : BLACK_CASTLING);
+}
+
+bool Board::canCastle(Color color, CastlingRight castling_right) const {
     return (m_gameStateHistory.back().castlingRights & castling_right);
 }
 
@@ -234,6 +285,12 @@ void Board::makeMove(Move move) {
     }
 
     // TODO: withdraw castling rights if rook or king moves
+    if (movingPieceType == ROOK || movingPiece == KING) {
+        
+    }
+    // TODO: withdraw castling rights if rook is captured
+
+    // TODO: handle castling in general!
 
     // flip side to move
     newGameState.sideToMove = !oldGameState.sideToMove;
@@ -291,6 +348,31 @@ void Board::print() {
     }
     std::cout << std::endl;
     std::cout << "     A B C D E F G H" << std::endl;
+    std::cout << std::endl;
+
+    // get written representation of castling rights
+    std::string castling = std::string(canCastle(WHITE, WHITE_KINGSIDE_CASTLING) ? "K" : "")
+                         + std::string(canCastle(WHITE, WHITE_QUEENSIDE_CASTLING) ? "Q" : "")
+                         + std::string(canCastle(BLACK, BLACK_KINGSIDE_CASTLING) ? "k" : "")
+                         + std::string(canCastle(BLACK, BLACK_QUEENSIDE_CASTLING) ? "q" : "");
+
+    if (castling.compare("") == 0) {
+        castling = "-";
+    }
+
+    // get written representation of en passant square
+    int enPassantIndex = bb::getLeastSignificantBitIndex(getCurrentEnPassantTarget());
+    std::string enPassantSquare = (enPassantIndex != -1) ? SQUARE_NAMES[enPassantIndex] : "NONE";
+
+    // TODO: print further game information (side to move, castling rights, en passant square)
+    std::cout << "State:" << std::endl;
+    std::cout << std::setw(20) << "Side to Move:"
+              << std::setw(8) << COLOR_NAMES[getSideToMove()] << std::endl;
+    std::cout << std::setw(20) << "Castling Rights:"
+              << std::setw(8) << castling << std::endl;
+    std::cout << std::setw(20) << "En Passant Target:"
+              << std::setw(8) << enPassantSquare << std::endl;
+
     std::cout << std::endl;
 }
 

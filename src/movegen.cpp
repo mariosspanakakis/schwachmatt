@@ -161,21 +161,21 @@ static Move* generateCastlingMoves(const Board& board, Move* movelist) {
     // - no pieces on the squares between king and rook
     // - the squares between king and rook are not under attack             -> this is tested during legality test
     Bitboard all_pieces = board.getTotalOccupancy();
-    if (TColor == WHITE) {
-        if (board.getCastlingRight(WHITE_KINGSIDE_CASTLE)
+    if (TColor == WHITE) {                                                      // TODO: this is inefficient and unelegant
+        if (board.canCastle(WHITE, WHITE_KINGSIDE_CASTLING)
             && ((all_pieces & bb::WHITE_KINGSIDE_CASTLE_SQUARES) == 0)) {
                 *movelist++ = Move(E1, G1, KINGSIDE_CASTLE);
         }
-        if (board.getCastlingRight(WHITE_QUEENSIDE_CASTLE)
+        if (board.canCastle(WHITE, WHITE_QUEENSIDE_CASTLING)
             && ((all_pieces & bb::WHITE_QUEENSIDE_CASTLE_SQUARES) == 0)) {
                 *movelist++ = Move(E1, C1, QUEENSIDE_CASTLE);
         }
     } else {
-        if (board.getCastlingRight(BLACK_KINGSIDE_CASTLE)
+        if (board.canCastle(BLACK, BLACK_KINGSIDE_CASTLING)
             && ((all_pieces & bb::BLACK_KINGSIDE_CASTLE_SQUARES) == 0)) {
                 *movelist++ = Move(E8, G8, KINGSIDE_CASTLE);
         }
-        if (board.getCastlingRight(BLACK_QUEENSIDE_CASTLE)
+        if (board.canCastle(BLACK, BLACK_QUEENSIDE_CASTLING)
             && ((all_pieces & bb::BLACK_QUEENSIDE_CASTLE_SQUARES) == 0)) {
                 *movelist++ = Move(E8, C8, QUEENSIDE_CASTLE);
         }

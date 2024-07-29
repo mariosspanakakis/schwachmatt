@@ -14,27 +14,25 @@ int main(int argc, char *argv[]) {
         std::cout << "done!" << std::endl;
         
         // initialize chess board
-        chess::Board board;
-        //board = chess::Board("r3kb1r/p1N2ppp/2pp1q1n/1p2p1B1/Q2PP3/3B1b2/PP3PPP/2R1K2R b Kkq - 1 12");
-        board = chess::Board();
+        //std::string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";   // standard initial FEN
+        std::string fen = "4k3/8/8/8/8/8/8/R3K2R w KQkq - 0 1";                 // setup for white castling
+        chess::Board board = chess::Board(fen);
 
-        /*board.print();
+        board.print();
 
-        while(true) {
-            // generate moves
-            chess::MoveList movelist = chess::MoveList(board);
-            std::cout << "Found " << movelist.size() << " moves:" << std::endl;
-            for (const chess::Move& move : movelist) {
-                std::cout << move.toString() << std::endl;
-            }
+        // generate moves
+        chess::MoveList movelist = chess::MoveList(board);
+        std::cout << "Found " << movelist.size() << " moves:" << std::endl;
+        for (const chess::Move& move : movelist) {
+            std::cout << move.toString() << std::endl;
+        }
 
+        /*while(true) {
             // get number of move to make
             std::uniform_int_distribution<size_t> distr(0, movelist.size() - 1);
             size_t i = distr(eng);
-
             chess::Move move = movelist[i];
             move.printDetails();
-
             board.makeMove(move);
             board.print();
         }*/
