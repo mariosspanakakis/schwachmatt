@@ -37,6 +37,7 @@ class Move {
 
     bool isCapture();
     bool isDoublePawnPush();
+    bool isEnPassantCapture();
     bool isPromotion();
     bool isCastling();
     PieceType getPromotionPieceType();

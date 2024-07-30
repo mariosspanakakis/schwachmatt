@@ -45,6 +45,10 @@ bool Move::isDoublePawnPush() {
     return (m_move >> FLAG_SHIFT) == 0b0001;
 }
 
+bool Move::isEnPassantCapture() {
+    return (m_move >> FLAG_SHIFT) == 0b0101;
+}
+
 bool Move::isPromotion() {
     return (m_move >> FLAG_SHIFT) & 0b1000;
 }

@@ -16,8 +16,9 @@ int main(int argc, char *argv[]) {
         // initialize chess board
         //std::string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";   // standard initial FEN
         //std::string fen = "4k3/8/8/8/8/8/8/R3K2R w KQ - 0 1";                   // setup for white castling
-        std::string fen = "4k3/8/2q5/8/8/8/8/R3K2R w KQ - 0 1";                  // white castling on queen side inhibited
+        //std::string fen = "4k3/8/2q5/8/8/8/8/R3K2R w KQ - 0 1";                  // white castling on queen side inhibited
         //std::string fen = "k2r4/4P1P1/8/8/8/8/8/K7 w - - 0 1";                  // white can capture or promotion-capture
+        std::string fen = "rnbqkbnr/ppp1p1pp/8/3pPp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6 0 3";  // white can en-passant capture on f6
         chess::Board board = chess::Board(fen);
 
         board.print();
@@ -42,6 +43,7 @@ int main(int argc, char *argv[]) {
             board.makeMove(move);
             board.print();
             board.unmakeMove(move);
+            board.print();
             std::cout << std::endl;
         }
 

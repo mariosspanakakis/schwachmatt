@@ -254,9 +254,9 @@ void Board::makeMove(Move move) {
     Square from = move.getFrom();
     Square to = move.getTo();
     Piece movingPiece = m_pieces[from];
-    Piece capturedPiece = m_pieces[to];
     PieceType movingPieceType = pieceTypeFromPiece(movingPiece);
     Color movingPieceColor = colorFromPiece(movingPiece);                       // could be replaced by getSideToMove()
+    Piece capturedPiece = move.isEnPassantCapture() ? ((movingPieceColor == WHITE) ? BLACK_PAWN : WHITE_PAWN) : m_pieces[to];
 
     GameState oldGameState = m_gameStateHistory.back();
     GameState newGameState = GameState();
@@ -306,8 +306,14 @@ void Board::makeMove(Move move) {
                 setPiece(to, promotionPieceType, movingPieceColor);
             }
         } else {
-            // handle captures
-            if (move.isCapture()) {
+            // handle en passant captures
+            if (move.isEnPassantCapture()) {
+                // remove the pawn that has passed us
+                Bitboard enPassantTargetBB = getCurrentEnPassantTarget();
+                Square enPassantTarget = bb::getLeastSignificantBitIndex(enPassantTargetBB);
+                unsetPiece(enPassantTarget + ((movingPieceColor == WHITE) ? SOUTH : NORTH), PAWN, !movingPieceColor);
+                setPiece(to, movingPieceType, movingPieceColor);
+            } else if (move.isCapture()) {
                 replacePiece(to, movingPieceType, movingPieceColor);
             } else {
                 setPiece(to, movingPieceType, movingPieceColor);
@@ -320,7 +326,9 @@ void Board::makeMove(Move move) {
 
     // store en passant target in the new game state
     if (move.isDoublePawnPush()) {
-        newGameState.enPassantTarget = from + (movingPieceColor == WHITE) ? NORTH : SOUTH;
+        Bitboard enPassantTarget = 0ULL;
+        bb::setBit(enPassantTarget, (movingPieceColor == WHITE) ? from + NORTH : from + SOUTH);
+        newGameState.enPassantTarget = enPassantTarget;
     } else {
         newGameState.enPassantTarget = 0ULL;
     }
@@ -428,8 +436,13 @@ void Board::unmakeMove(Move move) {
             // place a pawn on the move's original square
             setPiece(from, PAWN, movingPieceColor);
         } else {
-            // handle captures
-            if (move.isCapture()) {
+            // restore en passant captures
+            if (move.isEnPassantCapture()) {
+                // put a pawn back on the field, one in front of the capture field
+                setPiece((movingPieceColor == WHITE) ? (to + SOUTH) : (to + NORTH), PAWN, capturedPieceColor);
+                unsetPiece(to, movingPieceType, movingPieceColor);
+            } else if (move.isCapture()) {
+                // handle captures
                 replacePiece(to, capturedPieceType, capturedPieceColor);
             } else {
                 unsetPiece(to, movingPieceType, movingPieceColor);
