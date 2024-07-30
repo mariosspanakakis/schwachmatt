@@ -15,16 +15,28 @@ int main(int argc, char *argv[]) {
         
         // initialize chess board
         //std::string fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";   // standard initial FEN
-        //std::string fen = "4k3/8/8/8/8/8/8/R3K2R w KQkq - 0 1";                 // setup for white castling
-        std::string fen = "k2r4/4P1P1/8/8/8/8/8/K7 w - - 0 1";                  // white can capture or promotion-capture
+        //std::string fen = "4k3/8/8/8/8/8/8/R3K2R w KQ - 0 1";                   // setup for white castling
+        std::string fen = "4k3/8/2q5/8/8/8/8/R3K2R w KQ - 0 1";                  // white castling on queen side inhibited
+        //std::string fen = "k2r4/4P1P1/8/8/8/8/8/K7 w - - 0 1";                  // white can capture or promotion-capture
         chess::Board board = chess::Board(fen);
 
         board.print();
 
+        // show all attacked squares
+        /*chess::Bitboard attackedSquares = 0ULL;
+        for (chess::Square square = 0; square < chess::N_SQUARES; square++) {
+            bool attacked = board.isAttackedBy(square, chess::WHITE);
+            if (attacked) {
+                chess::bb::setBit(attackedSquares, square);
+            }
+        }
+        chess::bb::printBitboard(attackedSquares);*/
+
+
         // generate moves
         chess::MoveList movelist = chess::MoveList(board);
         std::cout << "Found " << movelist.size() << " moves:" << std::endl;
-        for (const chess::Move& move : movelist) {
+        for (chess::Move move : movelist) {
             //std::cout << move.toString() << std::endl;
             move.printDetails();
             board.makeMove(move);

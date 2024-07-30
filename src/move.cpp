@@ -30,7 +30,7 @@ void Move::setTo(Square to) {
 }
 
 MoveFlag Move::getFlag() const {
-    return (m_move >> FLAG_SHIFT) & 0x3f;
+    return (m_move >> FLAG_SHIFT) & 0b1111;
 }
 
 void Move::setFlag(MoveFlag flag) {
@@ -47,6 +47,11 @@ bool Move::isDoublePawnPush() {
 
 bool Move::isPromotion() {
     return (m_move >> FLAG_SHIFT) & 0b1000;
+}
+
+bool Move::isCastling() {
+    MoveFlag flag = getFlag();
+    return (flag == KINGSIDE_CASTLE || flag == QUEENSIDE_CASTLE);
 }
 
 PieceType Move::getPromotionPieceType() {

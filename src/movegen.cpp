@@ -157,27 +157,67 @@ static Move* generatePawnMoves(const Board& board, Move* movelist) {
 template <Color TColor>
 static Move* generateCastlingMoves(const Board& board, Move* movelist) {
     // prerequisites for castling:
-    // - castling generally permitted (king and rook have not been moved)
+    // - castling generally permitted (king and rook have not been moved or captured)
     // - no pieces on the squares between king and rook
-    // - the squares between king and rook are not under attack             -> this is tested during legality test
+    // - the squares between king and rook are not under attack
     Bitboard all_pieces = board.getTotalOccupancy();
-    if (TColor == WHITE) {                                                      // TODO: this is inefficient and unelegant
+    if (TColor == WHITE) {                                                      // TODO: castling is handled inefficiently both here and during move making/unmaking
+        // test whether the relevant squares are under attack (king square + the squares the king passes over)
+        // WHITE_KINGSIDE: E1, F1, G1
+        // WHITE_QUEENSIDE: E1, D1, C1
+        // BLACK_KINGSIDE: E8, F8, G8
+        // BLACK_QUEENSIDE: E8, D8, C8
         if (board.canCastle(WHITE, WHITE_KINGSIDE_CASTLING)
             && ((all_pieces & bb::WHITE_KINGSIDE_CASTLE_SQUARES) == 0)) {
+            bool allowed = true;
+            for (Square square : {E1, F1, G1}) {
+                if (board.isAttackedBy(square, BLACK)) {
+                    allowed = false;
+                }
+            }
+            if (allowed) {
                 *movelist++ = Move(E1, G1, KINGSIDE_CASTLE);
+            }
         }
         if (board.canCastle(WHITE, WHITE_QUEENSIDE_CASTLING)
             && ((all_pieces & bb::WHITE_QUEENSIDE_CASTLE_SQUARES) == 0)) {
+            
+            bool allowed = true;
+            for (Square square : {E1, D1, C1}) {
+                if (board.isAttackedBy(square, BLACK)) {
+                    allowed = false;
+                }
+            }
+            if (allowed) {
                 *movelist++ = Move(E1, C1, QUEENSIDE_CASTLE);
+            }
         }
     } else {
         if (board.canCastle(BLACK, BLACK_KINGSIDE_CASTLING)
             && ((all_pieces & bb::BLACK_KINGSIDE_CASTLE_SQUARES) == 0)) {
+            
+            bool allowed = true;
+            for (Square square : {E8, F8, G8}) {
+                if (board.isAttackedBy(square, WHITE)) {
+                    allowed = false;
+                }
+            }
+            if (allowed) {
                 *movelist++ = Move(E8, G8, KINGSIDE_CASTLE);
+            }
         }
         if (board.canCastle(BLACK, BLACK_QUEENSIDE_CASTLING)
             && ((all_pieces & bb::BLACK_QUEENSIDE_CASTLE_SQUARES) == 0)) {
-                *movelist++ = Move(E8, C8, QUEENSIDE_CASTLE);
+            
+            bool allowed = true;
+            for (Square square : {E8, D8, C8}) {
+                if (board.isAttackedBy(square, WHITE)) {
+                    allowed = false;
+                }
+            }
+            if (allowed) {
+                *movelist++ = Move(E8, C8, KINGSIDE_CASTLE);
+            }
         }
     }
 

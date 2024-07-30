@@ -38,6 +38,7 @@ class Move {
     bool isCapture();
     bool isDoublePawnPush();
     bool isPromotion();
+    bool isCastling();
     PieceType getPromotionPieceType();
     
     std::string toString() const;
