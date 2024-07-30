@@ -16,7 +16,7 @@ std::vector<PerftTestCase> PERFT_TEST_CASES = {
     // position 1
     {
         "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", 
-        {20, 400, 8902, 197281, 4865609, /*119060324, 3195901860, 84998978956, 2439530234167*/}
+        {20, 400, 8902, 197281, 4865609, 119060324, /*3195901860, 84998978956, 2439530234167*/}
     },
     // position 2
     {
@@ -45,30 +45,36 @@ std::vector<PerftTestCase> PERFT_TEST_CASES = {
     }
 };
 
-uint64_t perft(chess::Board board, int depth) {
-
+uint64_t perft(chess::Board& board, int depth, bool log) {
     uint64_t nodes = 0;
     
-    // generate all pseudo-legal moves
-    chess::MoveList movelist = chess::MoveList(board);
-
     // end search if base depth has been reached
     if (depth == 0) {
         return 1ULL;
     }
 
+    // generate all pseudo-legal moves
+    chess::MoveList movelist = chess::MoveList(board);
+
     for (const chess::Move& move : movelist) {
+
         // make move
         board.makeMove(move);
         
-        // check for legality of the move
+        // Check for legality of the move
         if (!board.isInCheck(!board.getSideToMove())) {
-            nodes += perft(board, depth - 1);
+            uint64_t childNodes = perft(board, depth - 1, false);
+            nodes += childNodes;
+
+            if (log && depth != 1) {
+                std::cout << move.toString() << ": " << childNodes << std::endl;
+            }
         }
 
         // unmake move
         board.unmakeMove(move);
     }
+
     return nodes;
 }
 
@@ -98,7 +104,7 @@ TEST(PerftTest, Perft) {
             chess::Board board = chess::Board(fen);
 
             auto start = std::chrono::high_resolution_clock::now();
-            uint64_t result = perft(board, depth);
+            uint64_t result = perft(board, depth, true);
             auto end = std::chrono::high_resolution_clock::now();
 
             uint64_t expected = expected_values[depth - 1];
