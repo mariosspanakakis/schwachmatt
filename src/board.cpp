@@ -260,15 +260,21 @@ void Board::makeMove(Move move) {
     // remove the moving piece from its old location
     unsetPiece(from, movingPieceType, movingPieceColor);
 
-    // set the piece on the target square
-    if (move.isCapture()) {
-        replacePiece(to, movingPieceType, movingPieceColor);
-    } else {
-        // handle promotions
-        if (move.isPromotion()) {                                               // TODO: promotions don't work so far
-            // get piece type that the pawn promotes to
-            PieceType promotionPieceType = move.getPromotionPieceType();
+    // handle promotions
+    if (move.isPromotion()) {
+        // get piece type that the pawn promotes to
+        PieceType promotionPieceType = move.getPromotionPieceType();
+
+        // handle captures
+        if (move.isCapture()) {
+            replacePiece(to, promotionPieceType, movingPieceColor);
+        } else {
             setPiece(to, promotionPieceType, movingPieceColor);
+        }
+    } else {
+        // handle captures
+        if (move.isCapture()) {
+            replacePiece(to, movingPieceType, movingPieceColor);
         } else {
             setPiece(to, movingPieceType, movingPieceColor);
         }
@@ -288,6 +294,7 @@ void Board::makeMove(Move move) {
     if (movingPieceType == ROOK || movingPiece == KING) {
         
     }
+
     // TODO: withdraw castling rights if rook is captured
 
     // TODO: handle castling in general!
@@ -308,28 +315,38 @@ void Board::unmakeMove(Move move) {
     // get relevant squares
     Square from = move.getFrom();
     Square to = move.getTo();
-    // retrieve information on involved pieces
-    Piece movingPiece = m_pieces[to];                                           // the moving piece is on the to square
+    // retrieve information on involved pieces, moving piece is on the to square
+    Piece movingPiece = m_pieces[to];
     PieceType movingPieceType = pieceTypeFromPiece(movingPiece);
     Color movingPieceColor = colorFromPiece(movingPiece);
-    Piece capturedPiece = state.capturedPiece;                                  // retrieve the captured piece from the game state
+    // retrieve the captured piece from the game state
+    Piece capturedPiece = state.capturedPiece;
     PieceType capturedPieceType = pieceTypeFromPiece(capturedPiece);
     Color capturedPieceColor = colorFromPiece(capturedPiece);
 
-    // place the piece on its original square
-    setPiece(from, movingPieceType, movingPieceColor);
 
-    if (move.isCapture()) {
-        replacePiece(to, capturedPieceType, capturedPieceColor);                // TODO: should be overloaded to either except type and color or piece
-    } else {
-        // handle promotions
-        if (move.isPromotion()) {                                               // TODO: promotions don't work so far
-            // get piece type that the pawn promotes to
-            PieceType promotionPieceType = move.getPromotionPieceType();
+    if (move.isPromotion()) {
+        // get piece type that the pawn promoted to
+        PieceType promotionPieceType = move.getPromotionPieceType();
+
+        // handle captures
+        if (move.isCapture()) {
+            replacePiece(to, capturedPieceType, capturedPieceColor);
+        } else {
             unsetPiece(to, promotionPieceType, movingPieceColor);
+        }
+        
+        // place a pawn on the move's original square
+        setPiece(from, PAWN, movingPieceColor);
+    } else {
+        // handle captures
+        if (move.isCapture()) {
+            replacePiece(to, capturedPieceType, capturedPieceColor);
         } else {
             unsetPiece(to, movingPieceType, movingPieceColor);
         }
+        // place the moving piece on the move's original square
+        setPiece(from, movingPieceType, movingPieceColor);
     }
 
     // TODO: restore castling rights if rook or king moves
