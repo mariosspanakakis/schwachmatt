@@ -16,12 +16,13 @@ List of fundamental concepts that have already been implemented:
 - board generation based on FEN notation (https://de.wikipedia.org/wiki/Forsyth-Edwards-Notation)
 - board status struct containing unobservable game information, e.g. side to move, castling rights, en-passant squares
 - performance test case ```perft``` to validate move generation based on recursive node counting
-- comprehensive move generation including special cases, e.g. pinned pieces, check and double check, en-passant captures and pawn promotions (move generation does not fully work so far and must be debugged based on the ```perft``` tests)
+- comprehensive move generation including special cases, e.g. pinned pieces, check and double check, en-passant captures and pawn promotions
 
 ## Future Work
 
 Next steps and future functionalities:
 
+- speeding up move generation, which currently is terribly slow (```10:16 min``` for perft up to depth 5 for all given positions; or roughly 800k nodes per second)
 - implementation of mate and stalemate logic
 - UCI communication interface for GUI usage
 - search logic, typically alpha-beta minimax search

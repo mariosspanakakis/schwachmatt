@@ -334,7 +334,7 @@ void Board::makeMove(Move move) {
     }
 
     // withdraw all castling rights if king moves (this is also done when actually castling, which is correct)
-    if (movingPiece == KING) {
+    if (movingPieceType == KING) {
         if (movingPieceColor == WHITE) {
             newGameState.castlingRights &= ~WHITE_CASTLING;
         } else {
@@ -343,7 +343,7 @@ void Board::makeMove(Move move) {
     }
 
     // withdraw castling rights if rook moves
-    if (movingPiece == ROOK) {
+    if (movingPieceType == ROOK) {
         if (movingPieceColor == WHITE && from == H1) {
             newGameState.castlingRights &= ~WHITE_KINGSIDE_CASTLING;
         } else if (movingPieceColor == WHITE && from == A1) {
@@ -356,7 +356,7 @@ void Board::makeMove(Move move) {
     }
 
     // withdraw castling rights if rook is captured
-    if (capturedPiece == ROOK) {
+    if (pieceTypeFromPiece(capturedPiece) == ROOK) {
         if (movingPieceColor == BLACK && to == H1) {
             newGameState.castlingRights &= ~WHITE_KINGSIDE_CASTLING;
         } else if (movingPieceColor == BLACK && to == A1) {

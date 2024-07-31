@@ -216,7 +216,7 @@ static Move* generateCastlingMoves(const Board& board, Move* movelist) {
                 }
             }
             if (allowed) {
-                *movelist++ = Move(E8, C8, KINGSIDE_CASTLE);
+                *movelist++ = Move(E8, C8, QUEENSIDE_CASTLE);
             }
         }
     }

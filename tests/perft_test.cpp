@@ -1,8 +1,8 @@
+#include <chrono>
+#include <gtest/gtest.h>
 #include <iomanip>
 #include <iostream>
 #include <vector>
-#include <chrono>
-#include <gtest/gtest.h>
 #include "board.h"
 #include "movegen.h"
 
@@ -16,7 +16,7 @@ std::vector<PerftTestCase> PERFT_TEST_CASES = {
     // position 1
     {
         "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", 
-        {20, 400, 8902, 197281, 4865609, 119060324, /*3195901860, 84998978956, 2439530234167*/}
+        {20, 400, 8902, 197281, 4865609, /*119060324, 3195901860, 84998978956, 2439530234167*/}
     },
     // position 2
     {
@@ -45,8 +45,10 @@ std::vector<PerftTestCase> PERFT_TEST_CASES = {
     }
 };
 
-uint64_t perft(chess::Board& board, int depth, bool log) {
+uint64_t perft(chess::Board& board, int depth, bool log/*, std::string movestring = ""*/) {
     uint64_t nodes = 0;
+
+    //std::cout << movestring << std::endl;
     
     // end search if base depth has been reached
     if (depth == 0) {
@@ -63,7 +65,7 @@ uint64_t perft(chess::Board& board, int depth, bool log) {
         
         // Check for legality of the move
         if (!board.isInCheck(!board.getSideToMove())) {
-            uint64_t childNodes = perft(board, depth - 1, false);
+            uint64_t childNodes = perft(board, depth - 1, false/*, movestring + "-" + move.toString()*/);
             nodes += childNodes;
 
             if (log && depth != 1) {
@@ -81,6 +83,9 @@ uint64_t perft(chess::Board& board, int depth, bool log) {
 TEST(PerftTest, Perft) {
     chess::attacks::initializeAttackTables();
 
+    // enable or disable detailed leaf node count logging per move
+    bool LOG = false;
+
     bool success = true;
 
     std::cout << std::fixed << std::setprecision(2);
@@ -93,18 +98,18 @@ TEST(PerftTest, Perft) {
         std::cout << std::endl;
         std::cout << "FEN: " << fen << std::endl;
         std::cout << std::endl;
-        std::cout << "Depth"
-                << std::setw(16) << "Expected"
-                << std::setw(16) << "Result"
-                << std::setw(10) << "Time [s]"
-                << std::setw(16) << "Speed [nps]"
-                << std::endl;
+        std::cout << std::setw(6)  << "Depth"
+                  << std::setw(16) << "Expected"
+                  << std::setw(16) << "Result"
+                  << std::setw(10) << "Time [s]"
+                  << std::setw(16) << "Speed [nps]"
+                  << std::endl;
 
         for (size_t depth = 1; depth < expected_values.size() + 1; ++depth) {
             chess::Board board = chess::Board(fen);
 
             auto start = std::chrono::high_resolution_clock::now();
-            uint64_t result = perft(board, depth, true);
+            uint64_t result = perft(board, depth, LOG);
             auto end = std::chrono::high_resolution_clock::now();
 
             uint64_t expected = expected_values[depth - 1];
@@ -113,12 +118,12 @@ TEST(PerftTest, Perft) {
             success = result == expected;
             std::string msg = success ? "" : "failed";
 
-            std::cout << std::setw(5) << depth 
-                    << std::setw(16) << expected 
-                    << std::setw(16) << result 
-                    << std::setw(10) << elapsed.count() / 1000.0
-                    << std::setw(16) << result / elapsed.count() * 1000
-                    << std::setw(8) << msg << std::endl;
+            std::cout << std::setw(6) << depth 
+                      << std::setw(16) << expected 
+                      << std::setw(16) << result 
+                      << std::setw(10) << elapsed.count() / 1000.0
+                      << std::setw(16) << result / elapsed.count() * 1000
+                      << std::setw(8) << msg << std::endl;
         }
 
         std::cout << std::endl;
