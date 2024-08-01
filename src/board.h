@@ -65,13 +65,12 @@ class Board {
 
     Bitboard getCurrentEnPassantTarget() const;
     CastlingRight getCastlingRights() const;
-    CastlingRight getCastlingRights(Color color) const;
     bool canCastle(Color color, CastlingRight castling_right) const;
     Color getSideToMove() const;
 
-    void setPiece(Square square, PieceType pieceType, Color color);
-    void unsetPiece(Square square, PieceType pieceType, Color color);           // we must compute which piece has been on that square anyway, so we just specify it (in case we already know)
-    void replacePiece(Square square, PieceType pieceType, Color color);
+    void setPiece(Square square, Piece piece);
+    void unsetPiece(Square square);
+    void replacePiece(Square square, Piece piece);
 
     /* @brief Test if a square is under attack by a piece of the given color.
      * @param square The square for which to test for attacks.

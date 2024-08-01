@@ -9,8 +9,8 @@ TEST(BoardTest, SetAndUnsetPiece) {
     for (chess::Color color : {chess::WHITE, chess::BLACK}) {
         for (chess::PieceType pieceType = chess::PAWN; pieceType < chess::N_PIECE_TYPES; pieceType ++) {
             for (chess::Square square = 16; square < 48; square++) {
-                board.setPiece(square, pieceType, color);
-                board.unsetPiece(square, pieceType, color);
+                board.setPiece(square, chess::makePiece(color, pieceType));
+                board.unsetPiece(square);
             }
             ASSERT_EQ(originalBoard.getPieceOccupancy(pieceType, color), board.getPieceOccupancy(pieceType, color));
         }

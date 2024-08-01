@@ -169,10 +169,6 @@ CastlingRight Board::getCastlingRights() const {
     return m_gameStateHistory.back().castlingRights;
 }
 
-CastlingRight Board::getCastlingRights(Color color) const {
-    return m_gameStateHistory.back().castlingRights & ((getSideToMove() == WHITE) ? WHITE_CASTLING : BLACK_CASTLING);
-}
-
 bool Board::canCastle(Color color, CastlingRight castling_right) const {
     return (m_gameStateHistory.back().castlingRights & castling_right);
 }
@@ -181,31 +177,26 @@ Color Board::getSideToMove() const {
     return m_gameStateHistory.back().sideToMove;
 }
 
-void Board::setPiece(Square square, PieceType pieceType, Color color) {
+void Board::setPiece(Square square, Piece piece) {
     assert(m_pieces[square] == NO_PIECE);  // assert that square is empty
-    bb::setBit(m_occupancies.pieces[color][pieceType], square);
-    bb::setBit(m_occupancies.colors[color], square);
+    bb::setBit(m_occupancies.pieces[colorOf(piece)][typeOf(piece)], square);
+    bb::setBit(m_occupancies.colors[colorOf(piece)], square);
     bb::setBit(m_occupancies.all, square);
-    m_pieces[square] = makePiece(color, pieceType);
+    m_pieces[square] = piece;
 }
 
-void Board::unsetPiece(Square square, PieceType pieceType, Color color) {
-    assert((m_pieces[square] != NO_PIECE));  // assert that square is not empty
-    bb::clearBit(m_occupancies.pieces[color][pieceType], square);
-    bb::clearBit(m_occupancies.colors[color], square);
+void Board::unsetPiece(Square square) {
+    Piece piece = m_pieces[square];
+    assert((piece != NO_PIECE));  // assert that square is not empty
+    bb::clearBit(m_occupancies.pieces[colorOf(piece)][typeOf(piece)], square);
+    bb::clearBit(m_occupancies.colors[colorOf(piece)], square);
     bb::clearBit(m_occupancies.all, square);
     m_pieces[square] = NO_PIECE;
 }
 
-void Board::replacePiece(Square square, PieceType pieceType, Color color) {
-    assert((m_pieces[square] != NO_PIECE));  // assert that square is not empty
-    // get the piece that is on the square
-    Piece prevPiece = m_pieces[square];
-    Color prevColor = colorOf(prevPiece);
-    PieceType prevPieceType = typeOf(prevPiece);
-    // replace the piece
-    unsetPiece(square, prevPieceType, prevColor);
-    setPiece(square, pieceType, color);
+void Board::replacePiece(Square square, Piece piece) {
+    unsetPiece(square);
+    setPiece(square, piece);
 }
 
 // NOTE: there are more efficient approaches than this
@@ -252,7 +243,6 @@ type, get rid of the cascaded if-else conditions and clean things up.
 void Board::makeMove(Move move) {                                               // TODO: add a movePiece function
 
     Color us = getSideToMove();
-    Color them = !us;
     Square from = move.getFrom();
     Square to = move.getTo();
     Piece piece = m_pieces[from];
@@ -266,8 +256,8 @@ void Board::makeMove(Move move) {                                               
         MoveFlag flag = move.getFlag();
         assert(typeOf(piece) == KING);    // moving piece must be the king
         // move king from from to to square
-        unsetPiece(from, typeOf(piece), us);
-        setPiece(to, typeOf(piece), us);
+        unsetPiece(from);
+        setPiece(to, piece);
         // move rook in the counter direction
         Square rookFrom;
         Square rookTo;
@@ -288,22 +278,19 @@ void Board::makeMove(Move move) {                                               
                 rookTo = D8;
             }
         }
-        unsetPiece(rookFrom, ROOK, us);
-        setPiece(rookTo, ROOK, us);
+        unsetPiece(rookFrom);
+        setPiece(rookTo, makePiece(us, ROOK));
     } else {
         // remove the moving piece from its old location
-        unsetPiece(from, typeOf(piece), us);
+        unsetPiece(from);
 
         // handle promotions
         if (move.isPromotion()) {
-            // get piece type that the pawn promotes to
-            PieceType promotionPieceType = move.getPromotionPieceType();
-
             // handle captures
             if (move.isCapture()) {
-                replacePiece(to, promotionPieceType, us);
+                replacePiece(to, makePiece(us, move.getPromotionPieceType()));
             } else {
-                setPiece(to, promotionPieceType, us);
+                setPiece(to, makePiece(us, move.getPromotionPieceType()));
             }
         } else {
             // handle en passant captures
@@ -311,12 +298,12 @@ void Board::makeMove(Move move) {                                               
                 // remove the pawn that has passed us
                 Bitboard enPassantTargetBB = getCurrentEnPassantTarget();
                 Square enPassantTarget = bb::getLeastSignificantBitIndex(enPassantTargetBB);
-                unsetPiece(enPassantTarget + ((us == WHITE) ? SOUTH : NORTH), PAWN, them);
-                setPiece(to, typeOf(piece), us);
+                unsetPiece(enPassantTarget + ((us == WHITE) ? SOUTH : NORTH));
+                setPiece(to, piece);
             } else if (move.isCapture()) {
-                replacePiece(to, typeOf(piece), us);
+                replacePiece(to, piece);
             } else {
-                setPiece(to, typeOf(piece), us);
+                setPiece(to, piece);
             }
         }
     }
@@ -392,8 +379,8 @@ void Board::unmakeMove(Move move) {
         MoveFlag flag = move.getFlag();
         assert(typeOf(piece) == KING);    // moving piece must be the king
         // move king from to to from square
-        unsetPiece(to, typeOf(piece), us);
-        setPiece(from, typeOf(piece), us);
+        unsetPiece(to);
+        setPiece(from, piece);
         // move rook in the counter direction
         Square rookFrom;
         Square rookTo;
@@ -414,36 +401,32 @@ void Board::unmakeMove(Move move) {
                 rookTo = D8;
             }
         }
-        unsetPiece(rookTo, ROOK, us);
-        setPiece(rookFrom, ROOK, us);
+        unsetPiece(rookTo);
+        setPiece(rookFrom, makePiece(us, ROOK));
     } else {
         if (move.isPromotion()) {
-            // get piece type that the pawn promoted to
-            PieceType promotionPieceType = move.getPromotionPieceType();
-
             // handle captures
             if (move.isCapture()) {
-                replacePiece(to, typeOf(captured), them);
+                replacePiece(to, captured);
             } else {
-                unsetPiece(to, promotionPieceType, us);
+                unsetPiece(to);
             }
-            
             // place a pawn on the move's original square
-            setPiece(from, PAWN, us);
+            setPiece(from, makePiece(us, PAWN));
         } else {
             // restore en passant captures
             if (move.isEnPassantCapture()) {
                 // put a pawn back on the field, one in front of the capture field
-                setPiece((us == WHITE) ? (to + SOUTH) : (to + NORTH), PAWN, them);
-                unsetPiece(to, typeOf(piece), us);
+                setPiece((us == WHITE) ? (to + SOUTH) : (to + NORTH), makePiece(them, PAWN));
+                unsetPiece(to);
             } else if (move.isCapture()) {
                 // handle captures
-                replacePiece(to, typeOf(captured), them);
+                replacePiece(to, captured);
             } else {
-                unsetPiece(to, typeOf(piece), us);
+                unsetPiece(to);
             }
             // place the moving piece on the move's original square
-            setPiece(from, typeOf(piece), us);
+            setPiece(from, piece);
         }
     }
 }
