@@ -186,7 +186,7 @@ void Board::setPiece(Square square, PieceType pieceType, Color color) {
     bb::setBit(m_occupancies.pieces[color][pieceType], square);
     bb::setBit(m_occupancies.colors[color], square);
     bb::setBit(m_occupancies.all, square);
-    m_pieces[square] = pieceFromColorAndType(color, pieceType);
+    m_pieces[square] = makePiece(color, pieceType);
 }
 
 void Board::unsetPiece(Square square, PieceType pieceType, Color color) {
@@ -201,8 +201,8 @@ void Board::replacePiece(Square square, PieceType pieceType, Color color) {
     assert((m_pieces[square] != NO_PIECE));  // assert that square is not empty
     // get the piece that is on the square
     Piece prevPiece = m_pieces[square];
-    Color prevColor = colorFromPiece(prevPiece);
-    PieceType prevPieceType = pieceTypeFromPiece(prevPiece);
+    Color prevColor = colorOf(prevPiece);
+    PieceType prevPieceType = typeOf(prevPiece);
     // replace the piece
     unsetPiece(square, prevPieceType, prevColor);
     setPiece(square, pieceType, color);
@@ -249,14 +249,14 @@ bool Board::isInCheck(Color color) const {
 This is terribly inefficient. Make template for color dependency and maybe move
 type, get rid of the cascaded if-else conditions and clean things up.
 */
-void Board::makeMove(Move move) {
-    // get information on moving piece
+void Board::makeMove(Move move) {                                               // TODO: add a movePiece function
+
+    Color us = getSideToMove();
+    Color them = !us;
     Square from = move.getFrom();
     Square to = move.getTo();
-    Piece movingPiece = m_pieces[from];
-    PieceType movingPieceType = pieceTypeFromPiece(movingPiece);
-    Color movingPieceColor = colorFromPiece(movingPiece);                       // could be replaced by getSideToMove()
-    Piece capturedPiece = move.isEnPassantCapture() ? ((movingPieceColor == WHITE) ? BLACK_PAWN : WHITE_PAWN) : m_pieces[to];
+    Piece piece = m_pieces[from];
+    Piece captured = move.isEnPassantCapture() ? ((us == WHITE) ? BLACK_PAWN : WHITE_PAWN) : m_pieces[to];
 
     GameState oldGameState = m_gameStateHistory.back();
     GameState newGameState = GameState();
@@ -264,15 +264,15 @@ void Board::makeMove(Move move) {
 
     if (move.isCastling()) {
         MoveFlag flag = move.getFlag();
-        assert(movingPieceType == KING);    // moving piece must be the king
+        assert(typeOf(piece) == KING);    // moving piece must be the king
         // move king from from to to square
-        unsetPiece(from, movingPieceType, movingPieceColor);
-        setPiece(to, movingPieceType, movingPieceColor);
+        unsetPiece(from, typeOf(piece), us);
+        setPiece(to, typeOf(piece), us);
         // move rook in the counter direction
         Square rookFrom;
         Square rookTo;
         if (flag == KINGSIDE_CASTLE) {
-            if (movingPieceColor == WHITE) {
+            if (us == WHITE) {
                 rookFrom = H1;
                 rookTo = F1;
             } else {
@@ -280,7 +280,7 @@ void Board::makeMove(Move move) {
                 rookTo = F8;
             }
         } else {
-            if (movingPieceColor == WHITE) {
+            if (us == WHITE) {
                 rookFrom = A1;
                 rookTo = D1;
             } else {
@@ -288,11 +288,11 @@ void Board::makeMove(Move move) {
                 rookTo = D8;
             }
         }
-        unsetPiece(rookFrom, ROOK, movingPieceColor);
-        setPiece(rookTo, ROOK, movingPieceColor);
+        unsetPiece(rookFrom, ROOK, us);
+        setPiece(rookTo, ROOK, us);
     } else {
         // remove the moving piece from its old location
-        unsetPiece(from, movingPieceType, movingPieceColor);
+        unsetPiece(from, typeOf(piece), us);
 
         // handle promotions
         if (move.isPromotion()) {
@@ -301,9 +301,9 @@ void Board::makeMove(Move move) {
 
             // handle captures
             if (move.isCapture()) {
-                replacePiece(to, promotionPieceType, movingPieceColor);
+                replacePiece(to, promotionPieceType, us);
             } else {
-                setPiece(to, promotionPieceType, movingPieceColor);
+                setPiece(to, promotionPieceType, us);
             }
         } else {
             // handle en passant captures
@@ -311,31 +311,31 @@ void Board::makeMove(Move move) {
                 // remove the pawn that has passed us
                 Bitboard enPassantTargetBB = getCurrentEnPassantTarget();
                 Square enPassantTarget = bb::getLeastSignificantBitIndex(enPassantTargetBB);
-                unsetPiece(enPassantTarget + ((movingPieceColor == WHITE) ? SOUTH : NORTH), PAWN, !movingPieceColor);
-                setPiece(to, movingPieceType, movingPieceColor);
+                unsetPiece(enPassantTarget + ((us == WHITE) ? SOUTH : NORTH), PAWN, them);
+                setPiece(to, typeOf(piece), us);
             } else if (move.isCapture()) {
-                replacePiece(to, movingPieceType, movingPieceColor);
+                replacePiece(to, typeOf(piece), us);
             } else {
-                setPiece(to, movingPieceType, movingPieceColor);
+                setPiece(to, typeOf(piece), us);
             }
         }
     }
 
     // store captured piece in the new game state
-    newGameState.capturedPiece = capturedPiece;
+    newGameState.capturedPiece = captured;
 
     // store en passant target in the new game state
     if (move.isDoublePawnPush()) {
         Bitboard enPassantTarget = 0ULL;
-        bb::setBit(enPassantTarget, (movingPieceColor == WHITE) ? from + NORTH : from + SOUTH);
+        bb::setBit(enPassantTarget, (us == WHITE) ? from + NORTH : from + SOUTH);
         newGameState.enPassantTarget = enPassantTarget;
     } else {
         newGameState.enPassantTarget = 0ULL;
     }
 
     // withdraw all castling rights if king moves (this is also done when actually castling, which is correct)
-    if (movingPieceType == KING) {
-        if (movingPieceColor == WHITE) {
+    if (typeOf(piece) == KING) {
+        if (us == WHITE) {
             newGameState.castlingRights &= ~WHITE_CASTLING;
         } else {
             newGameState.castlingRights &= ~BLACK_CASTLING;
@@ -343,27 +343,27 @@ void Board::makeMove(Move move) {
     }
 
     // withdraw castling rights if rook moves
-    if (movingPieceType == ROOK) {
-        if (movingPieceColor == WHITE && from == H1) {
+    if (typeOf(piece) == ROOK) {
+        if (us == WHITE && from == H1) {
             newGameState.castlingRights &= ~WHITE_KINGSIDE_CASTLING;
-        } else if (movingPieceColor == WHITE && from == A1) {
+        } else if (us == WHITE && from == A1) {
             newGameState.castlingRights &= ~WHITE_QUEENSIDE_CASTLING;
-        } else if (movingPieceColor == BLACK && from == H8) {
+        } else if (us == BLACK && from == H8) {
             newGameState.castlingRights &= ~BLACK_KINGSIDE_CASTLING;
-        } else if (movingPieceColor == BLACK && from == A8) {
+        } else if (us == BLACK && from == A8) {
             newGameState.castlingRights &= ~BLACK_QUEENSIDE_CASTLING;
         }
     }
 
     // withdraw castling rights if rook is captured
-    if (pieceTypeFromPiece(capturedPiece) == ROOK) {
-        if (movingPieceColor == BLACK && to == H1) {
+    if (typeOf(captured) == ROOK) {
+        if (us == BLACK && to == H1) {
             newGameState.castlingRights &= ~WHITE_KINGSIDE_CASTLING;
-        } else if (movingPieceColor == BLACK && to == A1) {
+        } else if (us == BLACK && to == A1) {
             newGameState.castlingRights &= ~WHITE_QUEENSIDE_CASTLING;
-        } else if (movingPieceColor == WHITE && to == H8) {
+        } else if (us == WHITE && to == H8) {
             newGameState.castlingRights &= ~BLACK_KINGSIDE_CASTLING;
-        } else if (movingPieceColor == WHITE && to == A8) {
+        } else if (us == WHITE && to == A8) {
             newGameState.castlingRights &= ~BLACK_QUEENSIDE_CASTLING;
         }
     }
@@ -381,29 +381,24 @@ void Board::unmakeMove(Move move) {
     GameState state = m_gameStateHistory.back();
     m_gameStateHistory.pop_back();
 
-    // get relevant squares
+    Color us = getSideToMove();
+    Color them = !us;
     Square from = move.getFrom();
     Square to = move.getTo();
-    // retrieve information on involved pieces, moving piece is on the to square
-    Piece movingPiece = m_pieces[to];
-    PieceType movingPieceType = pieceTypeFromPiece(movingPiece);
-    Color movingPieceColor = colorFromPiece(movingPiece);
-    // retrieve the captured piece from the game state
-    Piece capturedPiece = state.capturedPiece;
-    PieceType capturedPieceType = pieceTypeFromPiece(capturedPiece);
-    Color capturedPieceColor = colorFromPiece(capturedPiece);
+    Piece piece = m_pieces[to];
+    Piece captured = state.capturedPiece;
 
     if (move.isCastling()) {
         MoveFlag flag = move.getFlag();
-        assert(movingPieceType == KING);    // moving piece must be the king
+        assert(typeOf(piece) == KING);    // moving piece must be the king
         // move king from to to from square
-        unsetPiece(to, movingPieceType, movingPieceColor);
-        setPiece(from, movingPieceType, movingPieceColor);
+        unsetPiece(to, typeOf(piece), us);
+        setPiece(from, typeOf(piece), us);
         // move rook in the counter direction
         Square rookFrom;
         Square rookTo;
         if (flag == KINGSIDE_CASTLE) {
-            if (movingPieceColor == WHITE) {
+            if (us == WHITE) {
                 rookFrom = H1;
                 rookTo = F1;
             } else {
@@ -411,7 +406,7 @@ void Board::unmakeMove(Move move) {
                 rookTo = F8;
             }
         } else {
-            if (movingPieceColor == WHITE) {
+            if (us == WHITE) {
                 rookFrom = A1;
                 rookTo = D1;
             } else {
@@ -419,8 +414,8 @@ void Board::unmakeMove(Move move) {
                 rookTo = D8;
             }
         }
-        unsetPiece(rookTo, ROOK, movingPieceColor);
-        setPiece(rookFrom, ROOK, movingPieceColor);
+        unsetPiece(rookTo, ROOK, us);
+        setPiece(rookFrom, ROOK, us);
     } else {
         if (move.isPromotion()) {
             // get piece type that the pawn promoted to
@@ -428,27 +423,27 @@ void Board::unmakeMove(Move move) {
 
             // handle captures
             if (move.isCapture()) {
-                replacePiece(to, capturedPieceType, capturedPieceColor);
+                replacePiece(to, typeOf(captured), them);
             } else {
-                unsetPiece(to, promotionPieceType, movingPieceColor);
+                unsetPiece(to, promotionPieceType, us);
             }
             
             // place a pawn on the move's original square
-            setPiece(from, PAWN, movingPieceColor);
+            setPiece(from, PAWN, us);
         } else {
             // restore en passant captures
             if (move.isEnPassantCapture()) {
                 // put a pawn back on the field, one in front of the capture field
-                setPiece((movingPieceColor == WHITE) ? (to + SOUTH) : (to + NORTH), PAWN, capturedPieceColor);
-                unsetPiece(to, movingPieceType, movingPieceColor);
+                setPiece((us == WHITE) ? (to + SOUTH) : (to + NORTH), PAWN, them);
+                unsetPiece(to, typeOf(piece), us);
             } else if (move.isCapture()) {
                 // handle captures
-                replacePiece(to, capturedPieceType, capturedPieceColor);
+                replacePiece(to, typeOf(captured), them);
             } else {
-                unsetPiece(to, movingPieceType, movingPieceColor);
+                unsetPiece(to, typeOf(piece), us);
             }
             // place the moving piece on the move's original square
-            setPiece(from, movingPieceType, movingPieceColor);
+            setPiece(from, typeOf(piece), us);
         }
     }
 }

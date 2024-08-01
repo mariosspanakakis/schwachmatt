@@ -108,14 +108,14 @@ constexpr char const* PIECE_SYMBOLS[] {
     "k",
 };
 
-const inline Piece pieceFromColorAndType(Color c, PieceType pt) {
-    return Piece(pt + ((c == WHITE) ? 0 : PIECE_ID_OFFSET));
+const inline Piece makePiece(Color c, PieceType pt) {
+    return Piece((c << 3) + pt);
 }
-const inline Color colorFromPiece(Piece piece) {
-    return Color((piece > PIECE_ID_OFFSET));
+const inline Color colorOf(Piece pc) {
+    return Color(pc >> 3);
 }
-const inline PieceType pieceTypeFromPiece(Piece piece) {
-    return PieceType(piece % PIECE_ID_OFFSET);
+const inline PieceType typeOf(Piece pc) {
+    return PieceType(pc & 7);
 }
 
 enum Directions {
