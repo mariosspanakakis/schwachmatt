@@ -161,6 +161,10 @@ Piece Board::getPieceOnSquare(Square square) const {
     return m_pieces[square];
 }
 
+Square Board::getKingSquare(Color color) const {
+    return bb::getLeastSignificantBitIndex(m_occupancies.pieces[color][KING]);
+}
+
 Bitboard Board::getCurrentEnPassantTarget() const {
     return m_gameStateHistory.back().enPassantTarget;
 }
@@ -169,8 +173,12 @@ CastlingRight Board::getCastlingRights() const {
     return m_gameStateHistory.back().castlingRights;
 }
 
-bool Board::canCastle(Color color, CastlingRight castling_right) const {
-    return (m_gameStateHistory.back().castlingRights & castling_right);
+bool Board::canCastle(CastlingRight cr) const {
+    return (m_gameStateHistory.back().castlingRights & cr);
+}
+
+bool Board::isCastlingBlocked(CastlingRight cr) const {
+    return m_occupancies.all & CASTLING_SQUARES[cr];
 }
 
 Color Board::getSideToMove() const {
@@ -230,9 +238,8 @@ bool Board::isAttackedBy(Square square, Color color) const {
     return false;
 }
 
-bool Board::isInCheck(Color color) const {
-    Bitboard king = getPieceOccupancy(KING, color);
-    Square kingSquare = bb::getLeastSignificantBitIndex(king);
+bool Board::isInCheck(Color color) {
+    Square kingSquare = getKingSquare(color);
     return isAttackedBy(kingSquare, !color);
 }
 
@@ -447,10 +454,10 @@ void Board::print() {
     std::cout << std::endl;
 
     // get written representation of castling rights
-    std::string castling = std::string(canCastle(WHITE, WHITE_KINGSIDE_CASTLING) ? "K" : "")
-                         + std::string(canCastle(WHITE, WHITE_QUEENSIDE_CASTLING) ? "Q" : "")
-                         + std::string(canCastle(BLACK, BLACK_KINGSIDE_CASTLING) ? "k" : "")
-                         + std::string(canCastle(BLACK, BLACK_QUEENSIDE_CASTLING) ? "q" : "");
+    std::string castling = std::string(canCastle(WHITE_KINGSIDE_CASTLING) ? "K" : "")
+                         + std::string(canCastle(WHITE_QUEENSIDE_CASTLING) ? "Q" : "")
+                         + std::string(canCastle(BLACK_KINGSIDE_CASTLING) ? "k" : "")
+                         + std::string(canCastle(BLACK_QUEENSIDE_CASTLING) ? "q" : "");
 
     if (castling.compare("") == 0) {
         castling = "-";

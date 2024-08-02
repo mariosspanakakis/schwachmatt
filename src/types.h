@@ -133,7 +133,35 @@ const int N_DIRECTIONS = 8;
 enum Ranks {RANK_1, RANK_2, RANK_3, RANK_4, RANK_5, RANK_6, RANK_7, RANK_8};
 enum Files {FILE_A, FILE_B, FILE_C, FILE_D, FILE_E, FILE_F, FILE_G, FILE_H};
 
+// rank definitions
+constexpr Bitboard RANK_1_BB = 0x00000000000000FFULL;
+constexpr Bitboard RANK_2_BB = RANK_1_BB << 8;
+constexpr Bitboard RANK_3_BB = RANK_1_BB << 16;
+constexpr Bitboard RANK_4_BB = RANK_1_BB << 24;
+constexpr Bitboard RANK_5_BB = RANK_1_BB << 32;
+constexpr Bitboard RANK_6_BB = RANK_1_BB << 40;
+constexpr Bitboard RANK_7_BB = RANK_1_BB << 48;
+constexpr Bitboard RANK_8_BB = RANK_1_BB << 56;
+
+// file definitions
+constexpr Bitboard FILE_H_BB = 0x8080808080808080ULL;
+constexpr Bitboard FILE_G_BB = FILE_H_BB >> 1;
+constexpr Bitboard FILE_F_BB = FILE_H_BB >> 2;
+constexpr Bitboard FILE_E_BB = FILE_H_BB >> 3;
+constexpr Bitboard FILE_D_BB = FILE_H_BB >> 4;
+constexpr Bitboard FILE_C_BB = FILE_H_BB >> 5;
+constexpr Bitboard FILE_B_BB = FILE_H_BB >> 6;
+constexpr Bitboard FILE_A_BB = FILE_H_BB >> 7;
+
+// other relevant bitboard representations
+constexpr Bitboard EDGE_BB = 0xFF818181818181FF;
+constexpr Bitboard WHITE_KINGSIDE_CASTLE_SQUARES = 0x0000000000000060;
+constexpr Bitboard WHITE_QUEENSIDE_CASTLE_SQUARES = 0x000000000000000E;
+constexpr Bitboard BLACK_KINGSIDE_CASTLE_SQUARES = 0x6000000000000000;
+constexpr Bitboard BLACK_QUEENSIDE_CASTLE_SQUARES = 0x0E00000000000000;
+
 enum CastlingRights {
+    NO_CASTLING = 0,
     WHITE_KINGSIDE_CASTLING   = 0b0001,
     WHITE_QUEENSIDE_CASTLING  = 0b0010,
     BLACK_KINGSIDE_CASTLING   = 0b0100,
@@ -141,8 +169,27 @@ enum CastlingRights {
 
     WHITE_CASTLING = WHITE_KINGSIDE_CASTLING | WHITE_QUEENSIDE_CASTLING,
     BLACK_CASTLING = BLACK_KINGSIDE_CASTLING | BLACK_QUEENSIDE_CASTLING,
+    KINGSIDE_CASTLING = WHITE_KINGSIDE_CASTLING | BLACK_KINGSIDE_CASTLING,
+    QUEENSIDE_CASTLING = WHITE_QUEENSIDE_CASTLING | BLACK_QUEENSIDE_CASTLING,
     ANY_CASTLING   = WHITE_CASTLING | BLACK_CASTLING
 };
+const int N_CASTLING_RIGHTS = 16;
+constexpr Bitboard CASTLING_SQUARES[N_CASTLING_RIGHTS] = {                      // not too elegant to hardcode those
+    0x0,
+    0x0000000000000060,
+    0x000000000000000E,
+    0x0,
+    0x6000000000000000,
+    0x0,
+    0x0,
+    0x0,
+    0x0E00000000000000
+};
+constexpr Square CASTLING_KING_GOAL_SQUARE[N_CASTLING_RIGHTS] = { 0, G1, C1, 0, G8, 0, 0, 0, C8 };
+
+constexpr CastlingRights operator&(Color c, CastlingRights cr) {
+    return CastlingRights((c == WHITE ? WHITE_CASTLING : BLACK_CASTLING) & (int)cr);
+}
 
 enum MoveShifts {
     FROM_SHIFT = 0,

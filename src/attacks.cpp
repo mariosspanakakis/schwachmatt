@@ -123,14 +123,14 @@ static Bitboard calculateKnightAttacks(Square square) {
     Bitboard attacks = 0ULL;
     // generate attacks
     attacks |= (
-          ((bitboard << 6)  & ~(bb::FILE_G_BB | bb::FILE_H_BB))     // WSW
-        | ((bitboard << 10) & ~(bb::FILE_A_BB | bb::FILE_B_BB))     // ESE
-        | ((bitboard << 15) & ~(bb::FILE_H_BB))                     // SSW
-        | ((bitboard << 17) & ~(bb::FILE_A_BB))                     // SSE
-        | ((bitboard >> 6)  & ~(bb::FILE_A_BB | bb::FILE_B_BB))     // ENE
-        | ((bitboard >> 10) & ~(bb::FILE_G_BB | bb::FILE_H_BB))     // WNW
-        | ((bitboard >> 15) & ~(bb::FILE_A_BB))                     // NNE
-        | ((bitboard >> 17) & ~(bb::FILE_H_BB))                     // NNW
+          ((bitboard << 6)  & ~(FILE_G_BB | FILE_H_BB))     // WSW
+        | ((bitboard << 10) & ~(FILE_A_BB | FILE_B_BB))     // ESE
+        | ((bitboard << 15) & ~(FILE_H_BB))                 // SSW
+        | ((bitboard << 17) & ~(FILE_A_BB))                 // SSE
+        | ((bitboard >> 6)  & ~(FILE_A_BB | FILE_B_BB))     // ENE
+        | ((bitboard >> 10) & ~(FILE_G_BB | FILE_H_BB))     // WNW
+        | ((bitboard >> 15) & ~(FILE_A_BB))                 // NNE
+        | ((bitboard >> 17) & ~(FILE_H_BB))                 // NNW
     );
     return attacks;
 }
@@ -161,31 +161,31 @@ static Bitboard calculateBishopAttacks(Square square, Bitboard blockers, bool ma
     Bitboard attacks = 0ULL;
     Bitboard bb;
     // northeast diagonal
-    for (bb = bitboard; (bb & ~bb::FILE_H_BB) != 0; bb <<= 9) {
+    for (bb = bitboard; (bb & ~FILE_H_BB) != 0; bb <<= 9) {
         Bitboard attacked_square = bb << 9;
         attacks |= attacked_square;
         if (blockers & attacked_square) break;
     }
     // northwest diagonal
-    for (bb = bitboard; (bb & ~bb::FILE_A_BB) != 0; bb <<= 7) {
+    for (bb = bitboard; (bb & ~FILE_A_BB) != 0; bb <<= 7) {
         Bitboard attacked_square = bb << 7;
         attacks |= attacked_square;
         if (blockers & attacked_square) break;
     }
     // southeast diagonal
-    for (bb = bitboard; (bb & ~bb::FILE_H_BB) != 0; bb >>= 7) {
+    for (bb = bitboard; (bb & ~FILE_H_BB) != 0; bb >>= 7) {
         Bitboard attacked_square = bb >> 7;
         attacks |= attacked_square;
         if (blockers & attacked_square) break;
     }
     // southwest diagonal
-    for (bb = bitboard; (bb & ~bb::FILE_A_BB) != 0; bb >>= 9) {
+    for (bb = bitboard; (bb & ~FILE_A_BB) != 0; bb >>= 9) {
         Bitboard attacked_square = bb >> 9;
         attacks |= attacked_square;
         if (blockers & attacked_square) break;
     }
     if (mask_mode) {
-        attacks &= ~bb::EDGE_BB;
+        attacks &= ~EDGE_BB;
     }
     return attacks;
 }
@@ -198,50 +198,50 @@ static Bitboard calculateRookAttacks(Square square, Bitboard blockers, bool mask
     Bitboard bb;
     if (mask_mode) {
         // north line
-        for (Bitboard bb = bitboard; (bb & ~bb::RANK_7_BB) != 0; bb <<= 8) {
+        for (Bitboard bb = bitboard; (bb & ~RANK_7_BB) != 0; bb <<= 8) {
             Bitboard attacked_square = bb << 8;
             attacks |= attacked_square;
             if (blockers & attacked_square) break;
         }
         // south line
-        for (bb = bitboard; (bb & ~bb::RANK_2_BB) != 0; bb >>= 8) {
+        for (bb = bitboard; (bb & ~RANK_2_BB) != 0; bb >>= 8) {
             Bitboard attacked_square = bb >> 8;
             attacks |= attacked_square;
             if (blockers & attacked_square) break;
         }
         // east line
-        for (bb = bitboard; (bb & ~bb::FILE_H_BB & ~bb::FILE_G_BB) != 0; bb <<= 1) {
+        for (bb = bitboard; (bb & ~FILE_H_BB & ~FILE_G_BB) != 0; bb <<= 1) {
             Bitboard attacked_square = bb << 1;
             attacks |= attacked_square;
             if (blockers & attacked_square) break;
         }
         // west line
-        for (bb = bitboard; (bb & ~bb::FILE_A_BB & ~bb::FILE_B_BB) != 0; bb >>= 1) {
+        for (bb = bitboard; (bb & ~FILE_A_BB & ~FILE_B_BB) != 0; bb >>= 1) {
             Bitboard attacked_square = bb >> 1;
             attacks |= attacked_square;
             if (blockers & attacked_square) break;
         }
     } else {
         // north line
-        for (Bitboard bb = bitboard; (bb & ~bb::RANK_8_BB) != 0; bb <<= 8) {
+        for (Bitboard bb = bitboard; (bb & ~RANK_8_BB) != 0; bb <<= 8) {
             Bitboard attacked_square = bb << 8;
             attacks |= attacked_square;
             if (blockers & attacked_square) break;
         }
         // south line
-        for (bb = bitboard; (bb & ~bb::RANK_1_BB) != 0; bb >>= 8) {
+        for (bb = bitboard; (bb & ~RANK_1_BB) != 0; bb >>= 8) {
             Bitboard attacked_square = bb >> 8;
             attacks |= attacked_square;
             if (blockers & attacked_square) break;
         }
         // east line
-        for (bb = bitboard; (bb & ~bb::FILE_H_BB) != 0; bb <<= 1) {
+        for (bb = bitboard; (bb & ~FILE_H_BB) != 0; bb <<= 1) {
             Bitboard attacked_square = bb << 1;
             attacks |= attacked_square;
             if (blockers & attacked_square) break;
         }
         // west line
-        for (bb = bitboard; (bb & ~bb::FILE_A_BB) != 0; bb >>= 1) {
+        for (bb = bitboard; (bb & ~FILE_A_BB) != 0; bb >>= 1) {
             Bitboard attacked_square = bb >> 1;
             attacks |= attacked_square;
             if (blockers & attacked_square) break;

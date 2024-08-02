@@ -91,7 +91,7 @@ static Move* generatePawnMoves(const Board& board, Move* movelist) {
     constexpr Direction right_capture_dir = (TColor == WHITE) ? NORTHEAST : SOUTHWEST;
     constexpr Direction left_capture_dir = (TColor == WHITE) ? NORTHWEST : SOUTHEAST;
     // define the double push rank
-    Bitboard double_push_rank = (TColor == WHITE) ? bb::RANK_3_BB : bb::RANK_6_BB;
+    Bitboard double_push_rank = (TColor == WHITE) ? RANK_3_BB : RANK_6_BB;
     // get all possible target squares
     Bitboard single_pushes = (bb::shift<forward_dir>(pawns) & ~allPieces);
     Bitboard double_pushes = (bb::shift<forward_dir>(single_pushes & double_push_rank) & ~allPieces);
@@ -101,7 +101,7 @@ static Move* generatePawnMoves(const Board& board, Move* movelist) {
     // lambda function to generate the corresponding move for each target square
     auto GatherMoves {[&movelist] (Bitboard targets, Direction dir, MoveFlag flag) {
         // separate the target bitboard into non-promotion and promotion targets
-        Bitboard promotions = targets & (bb::RANK_1_BB | bb::RANK_8_BB);
+        Bitboard promotions = targets & (RANK_1_BB | RANK_8_BB);
         Bitboard non_promotions = targets - promotions;
 
         // generate all non-promotion moves
@@ -155,68 +155,28 @@ static Move* generatePawnMoves(const Board& board, Move* movelist) {
 }
 
 template <Color TColor>
-static Move* generateCastlingMoves(const Board& board, Move* movelist) {
-    // prerequisites for castling:
-    // - castling generally permitted (king and rook have not been moved or captured)
-    // - no pieces on the squares between king and rook
-    // - the squares between king and rook are not under attack
-    Bitboard all_pieces = board.getTotalOccupancy();
-    if (TColor == WHITE) {                                                      // TODO: castling is handled inefficiently both here and during move making/unmaking
-        // test whether the relevant squares are under attack (king square + the squares the king passes over)
-        // WHITE_KINGSIDE: E1, F1, G1
-        // WHITE_QUEENSIDE: E1, D1, C1
-        // BLACK_KINGSIDE: E8, F8, G8
-        // BLACK_QUEENSIDE: E8, D8, C8
-        if (board.canCastle(WHITE, WHITE_KINGSIDE_CASTLING)
-            && ((all_pieces & bb::WHITE_KINGSIDE_CASTLE_SQUARES) == 0)) {
-            bool allowed = true;
-            for (Square square : {E1, F1, G1}) {
-                if (board.isAttackedBy(square, BLACK)) {
-                    allowed = false;
+static Move* generateCastlingMoves(const Board& board, Move* movelist) {        // So far, will check for legality. This should however be moved to a board.isLegal(move) function
+
+    if (board.canCastle(TColor & ANY_CASTLING)) {
+        for (const CastlingRight cr : {TColor & KINGSIDE_CASTLING, TColor & QUEENSIDE_CASTLING}) {
+            if (board.canCastle(cr) && !board.isCastlingBlocked(cr)) {
+                Square from = board.getKingSquare(TColor);
+                Square to = CASTLING_KING_GOAL_SQUARE[cr];
+                // check if any square the king must pass is under attack
+                Direction dir = to > from ? EAST : WEST;
+                bool allowed = true;
+                for (Square sq = from; sq != to + dir; sq += dir) {
+                    if (board.isAttackedBy(sq, !TColor)) {
+                        allowed = false;
+                    }
                 }
-            }
-            if (allowed) {
-                *movelist++ = Move(E1, G1, KINGSIDE_CASTLE);
-            }
-        }
-        if (board.canCastle(WHITE, WHITE_QUEENSIDE_CASTLING)
-            && ((all_pieces & bb::WHITE_QUEENSIDE_CASTLE_SQUARES) == 0)) {
-            
-            bool allowed = true;
-            for (Square square : {E1, D1, C1}) {
-                if (board.isAttackedBy(square, BLACK)) {
-                    allowed = false;
+                if (allowed) {
+                    if ((int)cr & (int)KINGSIDE_CASTLING) {
+                        *movelist++ = Move(from, to, KINGSIDE_CASTLE);
+                    } else {
+                        *movelist++ = Move(from, to, QUEENSIDE_CASTLE);
+                    }
                 }
-            }
-            if (allowed) {
-                *movelist++ = Move(E1, C1, QUEENSIDE_CASTLE);
-            }
-        }
-    } else {
-        if (board.canCastle(BLACK, BLACK_KINGSIDE_CASTLING)
-            && ((all_pieces & bb::BLACK_KINGSIDE_CASTLE_SQUARES) == 0)) {
-            
-            bool allowed = true;
-            for (Square square : {E8, F8, G8}) {
-                if (board.isAttackedBy(square, WHITE)) {
-                    allowed = false;
-                }
-            }
-            if (allowed) {
-                *movelist++ = Move(E8, G8, KINGSIDE_CASTLE);
-            }
-        }
-        if (board.canCastle(BLACK, BLACK_QUEENSIDE_CASTLING)
-            && ((all_pieces & bb::BLACK_QUEENSIDE_CASTLE_SQUARES) == 0)) {
-            
-            bool allowed = true;
-            for (Square square : {E8, D8, C8}) {
-                if (board.isAttackedBy(square, WHITE)) {
-                    allowed = false;
-                }
-            }
-            if (allowed) {
-                *movelist++ = Move(E8, C8, QUEENSIDE_CASTLE);
             }
         }
     }

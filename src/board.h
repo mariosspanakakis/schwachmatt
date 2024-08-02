@@ -62,10 +62,12 @@ class Board {
     Bitboard getColorOccupancy(Color color) const;
     Bitboard getTotalOccupancy() const;
     Piece getPieceOnSquare(Square square) const;
+    Square getKingSquare(Color color) const;
 
     Bitboard getCurrentEnPassantTarget() const;
     CastlingRight getCastlingRights() const;
-    bool canCastle(Color color, CastlingRight castling_right) const;
+    bool canCastle(CastlingRight cr) const;
+    bool isCastlingBlocked(CastlingRight cr) const;
     Color getSideToMove() const;
 
     void setPiece(Square square, Piece piece);
@@ -78,7 +80,7 @@ class Board {
      * @return A boolean indicating whether the square is under attack. */
     bool isAttackedBy(Square square, Color color) const;
 
-    bool isInCheck(Color color) const;
+    bool isInCheck(Color color);
 
     void makeMove(Move move);
     void unmakeMove(Move move);
