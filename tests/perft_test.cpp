@@ -115,8 +115,11 @@ TEST(PerftTest, Perft) {
             uint64_t expected = expected_values[depth - 1];
             std::chrono::duration<double, std::milli> elapsed = end - start;
 
-            success = result == expected;
-            std::string msg = success ? "" : "failed";
+            bool run_successful = result == expected;
+            if (!run_successful) {
+                success = false;
+            }
+            std::string msg = run_successful ? "" : "failed";
 
             std::cout << std::setw(6) << depth 
                       << std::setw(16) << expected 
