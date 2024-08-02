@@ -33,7 +33,7 @@ std::vector<PerftTestCase> PERFT_TEST_CASES = {
         "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1",
         {6, 264, 9467, 422333, 15833292, /*706045033*/}
     },
-    //position 5
+    // position 5
     {
         "rnbq1k1r/pp1Pbppp/2p5/8/2B5/8/PPP1NnPP/RNBQK2R w KQ - 1 8",
         {44, 1486, 62379, 2103487, 89941194}
@@ -63,7 +63,7 @@ uint64_t perft(chess::Board& board, int depth, bool log/*, std::string movestrin
         // make move
         board.makeMove(move);
         
-        // Check for legality of the move
+        // check for legality of the move
         if (!board.isInCheck(!board.getSideToMove())) {
             uint64_t childNodes = perft(board, depth - 1, false/*, movestring + "-" + move.toString()*/);
             nodes += childNodes;
