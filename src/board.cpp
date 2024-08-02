@@ -40,7 +40,7 @@ Board::Board(const std::string& fen){
             char figure = tolower(symbol);
 
             // obtain square from rank and file
-            int square = bb::coordinateToSquare(rank, file);
+            Square square = bb::coordinateToSquare(rank, file);
 
             // set offset for piece referencing
             Color color = is_white ? WHITE : BLACK;
@@ -250,6 +250,7 @@ type, get rid of the cascaded if-else conditions and clean things up.
 void Board::makeMove(Move move) {                                               // TODO: add a movePiece function
 
     Color us = getSideToMove();
+    Color them = !us;
     Square from = move.getFrom();
     Square to = move.getTo();
     Piece piece = m_pieces[from];
@@ -260,31 +261,16 @@ void Board::makeMove(Move move) {                                               
     newGameState.castlingRights = oldGameState.castlingRights;                  // TODO: implement copy constructor for game state that copies the relevant attributes
 
     if (move.isCastling()) {
-        MoveFlag flag = move.getFlag();
+        // make sure the moving piece is the king
         assert(typeOf(piece) == KING);    // moving piece must be the king
-        // move king from from to to square
+
+        // determine rook target square
+        Square rookFrom = bb::coordinateToSquare(us * RANK_8, (from < to) ? FILE_H : FILE_A);
+        Square rookTo = (from < to) ? to + WEST : to + EAST;
+
+        // move the king and the rook
         unsetPiece(from);
         setPiece(to, piece);
-        // move rook in the counter direction
-        Square rookFrom;
-        Square rookTo;
-        if (flag == KINGSIDE_CASTLE) {
-            if (us == WHITE) {
-                rookFrom = H1;
-                rookTo = F1;
-            } else {
-                rookFrom = H8;
-                rookTo = F8;
-            }
-        } else {
-            if (us == WHITE) {
-                rookFrom = A1;
-                rookTo = D1;
-            } else {
-                rookFrom = A8;
-                rookTo = D8;
-            }
-        }
         unsetPiece(rookFrom);
         setPiece(rookTo, makePiece(us, ROOK));
     } else {
@@ -329,28 +315,29 @@ void Board::makeMove(Move move) {                                               
 
     // withdraw all castling rights if king moves (this is also done when actually castling, which is correct)
     if (typeOf(piece) == KING) {
-        if (us == WHITE) {
-            newGameState.castlingRights &= ~WHITE_CASTLING;
-        } else {
-            newGameState.castlingRights &= ~BLACK_CASTLING;
-        }
+        newGameState.castlingRights &= ~(us & ANY_CASTLING);
     }
 
-    // withdraw castling rights if rook moves
+    // withdraw castling rights if rook moves away from start square
     if (typeOf(piece) == ROOK) {
-        if (us == WHITE && from == H1) {
-            newGameState.castlingRights &= ~WHITE_KINGSIDE_CASTLING;
-        } else if (us == WHITE && from == A1) {
-            newGameState.castlingRights &= ~WHITE_QUEENSIDE_CASTLING;
-        } else if (us == BLACK && from == H8) {
-            newGameState.castlingRights &= ~BLACK_KINGSIDE_CASTLING;
-        } else if (us == BLACK && from == A8) {
-            newGameState.castlingRights &= ~BLACK_QUEENSIDE_CASTLING;
+        if (from == H1 || from == H8) {
+            newGameState.castlingRights &= ~(us & KINGSIDE_CASTLING);
+        } else if (from == A1 || from == A8) {
+            newGameState.castlingRights &= ~(us & QUEENSIDE_CASTLING);
         }
     }
 
     // withdraw castling rights if rook is captured
     if (typeOf(captured) == ROOK) {
+
+        // NOTE: This should be equivalent to what comes below. However, it fails
+        //       for perft position 4 at depth 4.
+        /*if (to == H1 || to == H8) {
+            newGameState.castlingRights &= ~(them & KINGSIDE_CASTLING);
+        } else if (to == A1 || to == A8) {
+            newGameState.castlingRights &= ~(them & QUEENSIDE_CASTLING);
+        }*/
+
         if (us == BLACK && to == H1) {
             newGameState.castlingRights &= ~WHITE_KINGSIDE_CASTLING;
         } else if (us == BLACK && to == A1) {
@@ -383,31 +370,15 @@ void Board::unmakeMove(Move move) {
     Piece captured = state.capturedPiece;
 
     if (move.isCastling()) {
-        MoveFlag flag = move.getFlag();
         assert(typeOf(piece) == KING);    // moving piece must be the king
+
+        // determine rook target square
+        Square rookFrom = bb::coordinateToSquare(us * RANK_8, (from < to) ? FILE_H : FILE_A);
+        Square rookTo = (from < to) ? to + WEST : to + EAST;
+
         // move king from to to from square
         unsetPiece(to);
         setPiece(from, piece);
-        // move rook in the counter direction
-        Square rookFrom;
-        Square rookTo;
-        if (flag == KINGSIDE_CASTLE) {
-            if (us == WHITE) {
-                rookFrom = H1;
-                rookTo = F1;
-            } else {
-                rookFrom = H8;
-                rookTo = F8;
-            }
-        } else {
-            if (us == WHITE) {
-                rookFrom = A1;
-                rookTo = D1;
-            } else {
-                rookFrom = A8;
-                rookTo = D8;
-            }
-        }
         unsetPiece(rookTo);
         setPiece(rookFrom, makePiece(us, ROOK));
     } else {

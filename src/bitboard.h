@@ -44,8 +44,8 @@ constexpr Bitboard shift(Bitboard b) {
 }
 
 // convert a rank-file coordinate to a square
-inline int coordinateToSquare(int rank, int file) {
-    return 8 * rank + file;
+inline Square coordinateToSquare(int rank, int file) {
+    return Square(8 * rank + file);
 }
 
 inline Bitboard squareToBitboard(Square square) {
