@@ -59,7 +59,7 @@ inline int popcount(Bitboard b) {
 /* Get the index of the least significant one bit of the given bitboard. */
 inline Square lsb(Bitboard bitboard) {
     //assert(bitboard);
-    return Square(__builtin_ctzll(bitboard));
+    return Square(__builtin_ctzll(bitboard));                                   // NOTE: calling __builtin_ctzll on an empty bitboard results in a segmentation fault
     //return popcount((bitboard & -bitboard) - 1);
 }
 

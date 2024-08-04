@@ -320,7 +320,7 @@ void Board::makeMove(Move move) {                                               
         }
     }
 
-    // withdraw castling rights if rook is captured
+    // withdraw castling rights if rook is captured                             // NOTE: this seems to have a bug!
     if (type_of(captured) == ROOK) {
 
         // NOTE: This should be equivalent to what comes below. However, it fails
@@ -437,8 +437,8 @@ void Board::print() {
     }
 
     // get written representation of en passant square
-    int enPassantIndex = bb::lsb(getCurrentEnPassantTarget());
-    std::string enPassantSquare = (enPassantIndex != -1) ? SQUARE_NAMES[enPassantIndex] : "NONE";
+    Bitboard en_passant_target_bb = getCurrentEnPassantTarget();
+    std::string enPassantSquare = en_passant_target_bb ? SQUARE_NAMES[bb::lsb(en_passant_target_bb)] : "NONE";
 
     // TODO: print further game information (side to move, castling rights, en passant square)
     std::cout << "State:" << std::endl;
