@@ -1,4 +1,3 @@
-# directory definitions
 SRCDIR=src
 TESTDIR=tests
 
@@ -9,6 +8,13 @@ LDFLAGS  =
 GTEST_DIR = lib/googletest
 GTEST_LIBS = -lgtest -lgtest_main -lpthread
 GTEST_INCLUDE = -I$(GTEST_DIR)/include -I$(SRCDIR)
+
+# optinal profiling
+PROFILE ?= 0
+ifeq ($(PROFILE), 1)
+    CXXFLAGS += -pg -no-pie
+    LDFLAGS  += -pg
+endif
 
 # executable names
 EXEC = main

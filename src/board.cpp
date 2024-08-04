@@ -6,15 +6,15 @@ Board::Board(const std::string& fen){
     // initialize empty bitboards
     for (bool color : {WHITE, BLACK}){
         for (PieceType pieceType = 0; pieceType < N_PIECE_TYPES; pieceType++) {
-            m_occupancies.pieces[color][pieceType] = 0ULL;
+            occupancies_.pieces[color][pieceType] = 0ULL;
         }
-        m_occupancies.colors[color] = 0ULL;
+        occupancies_.colors[color] = 0ULL;
     }
-    m_occupancies.all = 0ULL;
+    occupancies_.all = 0ULL;
 
     // initialize the array of pieces
     for (Square square = 0; square < N_SQUARES; square++) {
-        m_pieces[square] = NO_PIECE;
+        pieces_[square] = NO_PIECE;
     }
     
     // split the given FEN into groups that describe the board status
@@ -40,7 +40,7 @@ Board::Board(const std::string& fen){
             char figure = tolower(symbol);
 
             // obtain square from rank and file
-            Square square = bb::coordinateToSquare(rank, file);
+            Square square = bb::get_square(rank, file);
 
             // set offset for piece referencing
             Color color = is_white ? WHITE : BLACK;
@@ -48,28 +48,28 @@ Board::Board(const std::string& fen){
             // update the occupancy bitboard in accordance to the pieces
             switch (figure){
                 case 'p':
-                    bb::setBit(m_occupancies.pieces[color][PAWN], square);
-                    m_pieces[square] = is_white ? WHITE_PAWN : BLACK_PAWN;
+                    bb::setBit(occupancies_.pieces[color][PAWN], square);
+                    pieces_[square] = is_white ? WHITE_PAWN : BLACK_PAWN;
                     break;
                 case 'n':
-                    bb::setBit(m_occupancies.pieces[color][KNIGHT], square);
-                    m_pieces[square] = is_white ? WHITE_KNIGHT : BLACK_KNIGHT;
+                    bb::setBit(occupancies_.pieces[color][KNIGHT], square);
+                    pieces_[square] = is_white ? WHITE_KNIGHT : BLACK_KNIGHT;
                     break;
                 case 'b':
-                    bb::setBit(m_occupancies.pieces[color][BISHOP], square);
-                    m_pieces[square] = is_white ? WHITE_BISHOP : BLACK_BISHOP;
+                    bb::setBit(occupancies_.pieces[color][BISHOP], square);
+                    pieces_[square] = is_white ? WHITE_BISHOP : BLACK_BISHOP;
                     break;
                 case 'r':
-                    bb::setBit(m_occupancies.pieces[color][ROOK], square);
-                    m_pieces[square] = is_white ? WHITE_ROOK : BLACK_ROOK;
+                    bb::setBit(occupancies_.pieces[color][ROOK], square);
+                    pieces_[square] = is_white ? WHITE_ROOK : BLACK_ROOK;
                     break;
                 case 'q':
-                    bb::setBit(m_occupancies.pieces[color][QUEEN], square);
-                    m_pieces[square] = is_white ? WHITE_QUEEN : BLACK_QUEEN;
+                    bb::setBit(occupancies_.pieces[color][QUEEN], square);
+                    pieces_[square] = is_white ? WHITE_QUEEN : BLACK_QUEEN;
                     break;
                 case 'k':
-                    bb::setBit(m_occupancies.pieces[color][KING], square);
-                    m_pieces[square] = is_white ? WHITE_KING : BLACK_KING;
+                    bb::setBit(occupancies_.pieces[color][KING], square);
+                    pieces_[square] = is_white ? WHITE_KING : BLACK_KING;
                     break;
             }
             // proceed to next file
@@ -91,10 +91,10 @@ Board::Board(const std::string& fen){
     // update the occupancy bitboards
     for (bool color : {WHITE, BLACK}) {
         for (PieceType pieceType = 0; pieceType < N_PIECE_TYPES; pieceType++) {
-            Bitboard bb = m_occupancies.pieces[color][pieceType];
-            m_occupancies.colors[color] |= bb;
+            Bitboard bb = occupancies_.pieces[color][pieceType];
+            occupancies_.colors[color] |= bb;
         }
-        m_occupancies.all |= m_occupancies.colors[color];
+        occupancies_.all |= occupancies_.colors[color];
     }
 
     // instantiate game state object
@@ -102,7 +102,7 @@ Board::Board(const std::string& fen){
 
     // handle side to move
     std::string fen_side_to_move = fen_groups[1];
-    gameState.sideToMove = fen_side_to_move.compare("w") == 0 ? WHITE : BLACK;
+    gameState.side_to_move = fen_side_to_move.compare("w") == 0 ? WHITE : BLACK;
 
     // handle castling rights
     std::string fen_castling = fen_groups[2];
@@ -127,79 +127,79 @@ Board::Board(const std::string& fen){
                 std::cerr << "Invalid castling character: " << c << std::endl;
         }
     }
-    gameState.castlingRights = castling_right;
+    gameState.castling_rights = castling_right;
 
     // handle en passant square
     std::string fen_en_passant = fen_groups[3]; // like "e3"
-    gameState.enPassantTarget = 0ULL;
+    gameState.en_passant_target = 0ULL;
     for (int i = 0; i < N_SQUARES; ++i) {
         if (SQUARE_NAMES[i] == fen_en_passant) {
-            bb::setBit(gameState.enPassantTarget, i);
+            bb::setBit(gameState.en_passant_target, i);
         }
     }
 
     // TODO: handle move counters
 
     // push the initial game state onto the game state history stack
-    m_gameStateHistory.reserve(GAME_STATE_HISTORY_LENGTH);
-    m_gameStateHistory.push_back(gameState);
+    game_state_history_.reserve(GAME_STATE_HISTORY_LENGTH);
+    game_state_history_.push_back(gameState);
 };
 
 Bitboard Board::getPieceOccupancy(PieceType pieceType, Color color) const {
-    return m_occupancies.pieces[color][pieceType];
+    return occupancies_.pieces[color][pieceType];
 }
 
 Bitboard Board::getColorOccupancy(Color color) const {
-    return m_occupancies.colors[color];
+    return occupancies_.colors[color];
 }
 
 Bitboard Board::getTotalOccupancy() const {
-    return m_occupancies.all;
+    return occupancies_.all;
 }
 
 Piece Board::getPieceOnSquare(Square square) const {
-    return m_pieces[square];
+    return pieces_[square];
 }
 
 Square Board::getKingSquare(Color color) const {
-    return bb::getLeastSignificantBitIndex(m_occupancies.pieces[color][KING]);
+    return bb::lsb(occupancies_.pieces[color][KING]);
 }
 
 Bitboard Board::getCurrentEnPassantTarget() const {
-    return m_gameStateHistory.back().enPassantTarget;
+    return game_state_history_.back().en_passant_target;
 }
 
 CastlingRight Board::getCastlingRights() const {
-    return m_gameStateHistory.back().castlingRights;
+    return game_state_history_.back().castling_rights;
 }
 
 bool Board::canCastle(CastlingRight cr) const {
-    return (m_gameStateHistory.back().castlingRights & cr);
+    return (game_state_history_.back().castling_rights & cr);
 }
 
 bool Board::isCastlingBlocked(CastlingRight cr) const {
-    return m_occupancies.all & CASTLING_SQUARES[cr];
+    return occupancies_.all & CASTLING_SQUARES[cr];
 }
 
 Color Board::getSideToMove() const {
-    return m_gameStateHistory.back().sideToMove;
+    return game_state_history_.back().side_to_move;
 }
 
 void Board::setPiece(Square square, Piece piece) {
-    assert(m_pieces[square] == NO_PIECE);  // assert that square is empty
-    bb::setBit(m_occupancies.pieces[colorOf(piece)][typeOf(piece)], square);
-    bb::setBit(m_occupancies.colors[colorOf(piece)], square);
-    bb::setBit(m_occupancies.all, square);
-    m_pieces[square] = piece;
+    //assert(pieces_[square] == NO_PIECE);  // assert that square is empty
+    bb::setBit(occupancies_.pieces[color_of(piece)][type_of(piece)], square);
+    bb::setBit(occupancies_.colors[color_of(piece)], square);
+    bb::setBit(occupancies_.all, square);
+    pieces_[square] = piece;
 }
 
 void Board::unsetPiece(Square square) {
-    Piece piece = m_pieces[square];
-    assert((piece != NO_PIECE));  // assert that square is not empty
-    bb::clearBit(m_occupancies.pieces[colorOf(piece)][typeOf(piece)], square);
-    bb::clearBit(m_occupancies.colors[colorOf(piece)], square);
-    bb::clearBit(m_occupancies.all, square);
-    m_pieces[square] = NO_PIECE;
+    Piece piece = pieces_[square];
+    //assert((piece != NO_PIECE));  // assert that square is not empty
+    bb::clearBit(occupancies_.pieces[color_of(piece)][type_of(piece)], square);
+    bb::clearBit(occupancies_.colors[color_of(piece)], square);
+    bb::clearBit(occupancies_.all, square);
+    pieces_[square] = NO_PIECE;
 }
 
 void Board::replacePiece(Square square, Piece piece) {
@@ -214,24 +214,24 @@ bool Board::isAttackedBy(Square square, Color color) const {
 
     // following the I-see-you-you-see-me approach, calculate piece attacks from
     // the initial square and check if the corresponding pieces can be attacked
-    Bitboard theirPawns = m_occupancies.pieces[them][PAWN];
+    Bitboard theirPawns = occupancies_.pieces[them][PAWN];
     if (attacks::getPawnAttacks(square, us) & theirPawns) {
         return true;
     }
-    Bitboard theirKnights = m_occupancies.pieces[them][KNIGHT];
+    Bitboard theirKnights = occupancies_.pieces[them][KNIGHT];
     if (attacks::getPieceAttacks<KNIGHT>(square, 0ULL) & theirKnights) {
         return true;
     }
-    Bitboard theirKing = m_occupancies.pieces[them][KING];
+    Bitboard theirKing = occupancies_.pieces[them][KING];
     if (attacks::getPieceAttacks<KING>(square, 0ULL) & theirKing) {
         return true;
     }
-    Bitboard theirBishopsAndQueens = m_occupancies.pieces[them][BISHOP] | m_occupancies.pieces[them][QUEEN];
-    if (attacks::getPieceAttacks<BISHOP>(square, m_occupancies.all) & theirBishopsAndQueens) {
+    Bitboard theirBishopsAndQueens = occupancies_.pieces[them][BISHOP] | occupancies_.pieces[them][QUEEN];
+    if (attacks::getPieceAttacks<BISHOP>(square, occupancies_.all) & theirBishopsAndQueens) {
         return true;
     }
-    Bitboard theirRooksAndQueens = m_occupancies.pieces[them][ROOK] | m_occupancies.pieces[them][QUEEN];
-    if (attacks::getPieceAttacks<ROOK>(square, m_occupancies.all) & theirRooksAndQueens) {
+    Bitboard theirRooksAndQueens = occupancies_.pieces[them][ROOK] | occupancies_.pieces[them][QUEEN];
+    if (attacks::getPieceAttacks<ROOK>(square, occupancies_.all) & theirRooksAndQueens) {
         return true;
     }
     
@@ -243,36 +243,34 @@ bool Board::isInCheck(Color color) {
     return isAttackedBy(kingSquare, !color);
 }
 
-/* TODO:
-This is terribly inefficient. Make template for color dependency and maybe move
-type, get rid of the cascaded if-else conditions and clean things up.
-*/
 void Board::makeMove(Move move) {                                               // TODO: add a movePiece function
 
     Color us = getSideToMove();
-    Color them = !us;
+    //Color them = !us;
     Square from = move.getFrom();
     Square to = move.getTo();
-    Piece piece = m_pieces[from];
-    Piece captured = move.isEnPassantCapture() ? ((us == WHITE) ? BLACK_PAWN : WHITE_PAWN) : m_pieces[to];
+    Piece piece = pieces_[from];
+    Piece captured = move.isEnPassantCapture() ? ((us == WHITE) ? BLACK_PAWN : WHITE_PAWN) : pieces_[to];
 
-    GameState oldGameState = m_gameStateHistory.back();
-    GameState newGameState = GameState();
-    newGameState.castlingRights = oldGameState.castlingRights;                  // TODO: implement copy constructor for game state that copies the relevant attributes
+    GameState prev_game_state = game_state_history_.back();
+    GameState next_game_state = GameState();
+    next_game_state.castling_rights = prev_game_state.castling_rights;                  // TODO: implement copy constructor for game state that copies the relevant attributes
+    next_game_state.captured = captured;
+    next_game_state.side_to_move = !prev_game_state.side_to_move;
 
     if (move.isCastling()) {
         // make sure the moving piece is the king
-        assert(typeOf(piece) == KING);    // moving piece must be the king
+        //assert(type_of(piece) == KING);    // moving piece must be the king
 
         // determine rook target square
-        Square rookFrom = bb::coordinateToSquare(us * RANK_8, (from < to) ? FILE_H : FILE_A);
+        Square rookFrom = bb::get_square(us * RANK_8, (from < to) ? FILE_H : FILE_A);
         Square rookTo = (from < to) ? to + WEST : to + EAST;
 
         // move the king and the rook
         unsetPiece(from);
         setPiece(to, piece);
         unsetPiece(rookFrom);
-        setPiece(rookTo, makePiece(us, ROOK));
+        setPiece(rookTo, make_piece(us, ROOK));
     } else {
         // remove the moving piece from its old location
         unsetPiece(from);
@@ -281,16 +279,16 @@ void Board::makeMove(Move move) {                                               
         if (move.isPromotion()) {
             // handle captures
             if (move.isCapture()) {
-                replacePiece(to, makePiece(us, move.getPromotionPieceType()));
+                replacePiece(to, make_piece(us, move.getPromotionPieceType()));
             } else {
-                setPiece(to, makePiece(us, move.getPromotionPieceType()));
+                setPiece(to, make_piece(us, move.getPromotionPieceType()));
             }
         } else {
             // handle en passant captures
             if (move.isEnPassantCapture()) {
                 // remove the pawn that has passed us
                 Bitboard enPassantTargetBB = getCurrentEnPassantTarget();
-                Square enPassantTarget = bb::getLeastSignificantBitIndex(enPassantTargetBB);
+                Square enPassantTarget = bb::lsb(enPassantTargetBB);
                 unsetPiece(enPassantTarget + ((us == WHITE) ? SOUTH : NORTH));
                 setPiece(to, piece);
             } else if (move.isCapture()) {
@@ -301,86 +299,78 @@ void Board::makeMove(Move move) {                                               
         }
     }
 
-    // store captured piece in the new game state
-    newGameState.capturedPiece = captured;
-
     // store en passant target in the new game state
     if (move.isDoublePawnPush()) {
-        Bitboard enPassantTarget = 0ULL;
-        bb::setBit(enPassantTarget, (us == WHITE) ? from + NORTH : from + SOUTH);
-        newGameState.enPassantTarget = enPassantTarget;
+        next_game_state.en_passant_target = (us == WHITE) ? bb::square_bb(from + NORTH) : bb::square_bb(from + SOUTH);
     } else {
-        newGameState.enPassantTarget = 0ULL;
+        next_game_state.en_passant_target = 0ULL;
     }
 
     // withdraw all castling rights if king moves (this is also done when actually castling, which is correct)
-    if (typeOf(piece) == KING) {
-        newGameState.castlingRights &= ~(us & ANY_CASTLING);
+    if (type_of(piece) == KING) {
+        next_game_state.castling_rights &= ~(us & ANY_CASTLING);
     }
 
     // withdraw castling rights if rook moves away from start square
-    if (typeOf(piece) == ROOK) {
+    if (type_of(piece) == ROOK) {
         if (from == H1 || from == H8) {
-            newGameState.castlingRights &= ~(us & KINGSIDE_CASTLING);
+            next_game_state.castling_rights &= ~(us & KINGSIDE_CASTLING);
         } else if (from == A1 || from == A8) {
-            newGameState.castlingRights &= ~(us & QUEENSIDE_CASTLING);
+            next_game_state.castling_rights &= ~(us & QUEENSIDE_CASTLING);
         }
     }
 
     // withdraw castling rights if rook is captured
-    if (typeOf(captured) == ROOK) {
+    if (type_of(captured) == ROOK) {
 
         // NOTE: This should be equivalent to what comes below. However, it fails
         //       for perft position 4 at depth 4.
         /*if (to == H1 || to == H8) {
-            newGameState.castlingRights &= ~(them & KINGSIDE_CASTLING);
+            next_game_state.castlingRights &= ~(them & KINGSIDE_CASTLING);
         } else if (to == A1 || to == A8) {
-            newGameState.castlingRights &= ~(them & QUEENSIDE_CASTLING);
+            next_game_state.castlingRights &= ~(them & QUEENSIDE_CASTLING);
         }*/
 
         if (us == BLACK && to == H1) {
-            newGameState.castlingRights &= ~WHITE_KINGSIDE_CASTLING;
+            next_game_state.castling_rights &= ~WHITE_KINGSIDE_CASTLING;
         } else if (us == BLACK && to == A1) {
-            newGameState.castlingRights &= ~WHITE_QUEENSIDE_CASTLING;
+            next_game_state.castling_rights &= ~WHITE_QUEENSIDE_CASTLING;
         } else if (us == WHITE && to == H8) {
-            newGameState.castlingRights &= ~BLACK_KINGSIDE_CASTLING;
+            next_game_state.castling_rights &= ~BLACK_KINGSIDE_CASTLING;
         } else if (us == WHITE && to == A8) {
-            newGameState.castlingRights &= ~BLACK_QUEENSIDE_CASTLING;
+            next_game_state.castling_rights &= ~BLACK_QUEENSIDE_CASTLING;
         }
     }
 
-    // flip side to move
-    newGameState.sideToMove = !oldGameState.sideToMove;
-
     // push new game state to stack
-    m_gameStateHistory.push_back(newGameState);
+    game_state_history_.push_back(next_game_state);
 }
 
 void Board::unmakeMove(Move move) {
 
     // store and pop the game state introduced by the move to be unmade
-    GameState state = m_gameStateHistory.back();
-    m_gameStateHistory.pop_back();
+    GameState state = game_state_history_.back();
+    game_state_history_.pop_back();
 
     Color us = getSideToMove();
     Color them = !us;
     Square from = move.getFrom();
     Square to = move.getTo();
-    Piece piece = m_pieces[to];
-    Piece captured = state.capturedPiece;
+    Piece piece = pieces_[to];
+    Piece captured = state.captured;
 
     if (move.isCastling()) {
-        assert(typeOf(piece) == KING);    // moving piece must be the king
+        assert(type_of(piece) == KING);    // moving piece must be the king
 
         // determine rook target square
-        Square rookFrom = bb::coordinateToSquare(us * RANK_8, (from < to) ? FILE_H : FILE_A);
+        Square rookFrom = bb::get_square(us * RANK_8, (from < to) ? FILE_H : FILE_A);
         Square rookTo = (from < to) ? to + WEST : to + EAST;
 
         // move king from to to from square
         unsetPiece(to);
         setPiece(from, piece);
         unsetPiece(rookTo);
-        setPiece(rookFrom, makePiece(us, ROOK));
+        setPiece(rookFrom, make_piece(us, ROOK));
     } else {
         if (move.isPromotion()) {
             // handle captures
@@ -390,12 +380,12 @@ void Board::unmakeMove(Move move) {
                 unsetPiece(to);
             }
             // place a pawn on the move's original square
-            setPiece(from, makePiece(us, PAWN));
+            setPiece(from, make_piece(us, PAWN));
         } else {
             // restore en passant captures
             if (move.isEnPassantCapture()) {
                 // put a pawn back on the field, one in front of the capture field
-                setPiece((us == WHITE) ? (to + SOUTH) : (to + NORTH), makePiece(them, PAWN));
+                setPiece((us == WHITE) ? (to + SOUTH) : (to + NORTH), make_piece(them, PAWN));
                 unsetPiece(to);
             } else if (move.isCapture()) {
                 // handle captures
@@ -409,13 +399,25 @@ void Board::unmakeMove(Move move) {
     }
 }
 
+bool Board::isLegal(Move move) {
+    // various situations to cover:
+    // 1. if the king is moving: test whether the goal square is under attack
+    // 2. if castling, ensure that none of the squares the king passes are under attack
+    // 3. if en-passant capturing, ensure that the king does not end up in check
+    // 4. for all other moves, test whether they unblock a sliding piece's attack to the king
+    
+    // what if the king is in check? could/should add a separate move GENERATION for this case 
+
+    return true;
+}
+
 void Board::print() {
     std::cout << std::endl;
     for (int rank = 7; rank >= 0; rank--) {
         std::cout << " " << rank + 1 << "  ";
         for (int file = 0; file < 8; file++) {
             int square = (rank * 8 + file);
-            Piece piece = m_pieces[square];
+            Piece piece = pieces_[square];
             std::cout << " " << PIECE_SYMBOLS[piece];
         }
         std::cout << std::endl;
@@ -435,7 +437,7 @@ void Board::print() {
     }
 
     // get written representation of en passant square
-    int enPassantIndex = bb::getLeastSignificantBitIndex(getCurrentEnPassantTarget());
+    int enPassantIndex = bb::lsb(getCurrentEnPassantTarget());
     std::string enPassantSquare = (enPassantIndex != -1) ? SQUARE_NAMES[enPassantIndex] : "NONE";
 
     // TODO: print further game information (side to move, castling rights, en passant square)

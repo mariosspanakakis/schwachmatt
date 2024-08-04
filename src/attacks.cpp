@@ -286,13 +286,13 @@ static Bitboard lookupRookAttacks(Square square, Bitboard blockers) {
 
 static Bitboard getBlockerConfiguration(int index, Bitboard attack_mask) {
     // get number of relevant bits for the given attack mask
-    int bits = bb::countBits(attack_mask);
+    int bits = bb::popcount(attack_mask);
     // initialize empty configuration
     Bitboard configuration = 0ULL;
     // loop through the attack mask and set the required bits
     for (int i = 0; i < bits; i++) {
         // pop least significant 1 bit in attack mask
-        int square = bb::getLeastSignificantBitIndex(attack_mask);
+        int square = bb::lsb(attack_mask);
         bb::clearBit(attack_mask, square);
         // populate the configuration bitboard at the given location
         if (index & (1 << i)) {
@@ -325,7 +325,7 @@ static Bitboard findMagicNumber(Square square, bool is_bishop) {
         Bitboard magic_number = utils::getRandom64Sparse();
         
         // discard numbers that do not contain enough bits
-        if (bb::countBits((attack_mask * magic_number) & 0xFF00000000000000) < 6) continue;
+        if (bb::popcount((attack_mask * magic_number) & 0xFF00000000000000) < 6) continue;
         
         // reset array of used attacks
         memset(used, 0ULL, sizeof(used));

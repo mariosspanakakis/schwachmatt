@@ -3,63 +3,19 @@
 namespace chess {
 
 Move::Move() {
-    m_move = 0;
+    move_ = 0;
 }
 
 Move::Move(Square from, Square to, MoveFlag flag) {
-    m_move = 0;
+    move_ = 0;
     setFrom(from);
     setTo(to);
     setFlag(flag);
 }
 
-Square Move::getFrom() const {
-    return (m_move >> FROM_SHIFT) & 0x3f;
-}
-
-void Move::setFrom(Square from) {
-    m_move |= (from << FROM_SHIFT);
-}
-
-Square Move::getTo() const {
-    return (m_move >> TO_SHIFT) & 0x3f;
-}
-
-void Move::setTo(Square to) {
-    m_move |= (to << TO_SHIFT); 
-}
-
-MoveFlag Move::getFlag() const {
-    return (m_move >> FLAG_SHIFT) & 0b1111;
-}
-
-void Move::setFlag(MoveFlag flag) {
-    m_move |= (flag << FLAG_SHIFT);
-}
-
-bool Move::isCapture() {
-    return (m_move >> FLAG_SHIFT) & 0b0100;
-}
-
-bool Move::isDoublePawnPush() {
-    return (m_move >> FLAG_SHIFT) == 0b0001;
-}
-
-bool Move::isEnPassantCapture() {
-    return (m_move >> FLAG_SHIFT) == 0b0101;
-}
-
-bool Move::isPromotion() {
-    return (m_move >> FLAG_SHIFT) & 0b1000;
-}
-
 bool Move::isCastling() {
     MoveFlag flag = getFlag();
     return (flag == KINGSIDE_CASTLE || flag == QUEENSIDE_CASTLE);
-}
-
-PieceType Move::getPromotionPieceType() {
-    return PieceType(((m_move >> FLAG_SHIFT) & 0b0011) + 2);
 }
 
 void Move::printDetails() const {

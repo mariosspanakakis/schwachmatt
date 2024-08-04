@@ -23,23 +23,12 @@ void printBitboard(Bitboard bitboard) {
     std::cout << std::endl;
 }
 
-Bitboard getPopulatedBitboard(const std::vector<Square>& populatedSquares) {
+Bitboard getPopulatedBitboard(const std::vector<Square>& populated_squares) {
     Bitboard bitboard = 0ULL;
-    for (auto it = populatedSquares.begin(); it != populatedSquares.end(); ++it) {
+    for (auto it = populated_squares.begin(); it != populated_squares.end(); ++it) {
         bb::setBit(bitboard, *it);
     }
     return bitboard;
-}
-
-int countBits(Bitboard bitboard) {
-    int r;
-    for(r = 0; bitboard; r++, bitboard &= bitboard - 1);
-    return r;
-}
-
-int getLeastSignificantBitIndex(Bitboard bitboard) {
-    if (bitboard) return countBits((bitboard & -bitboard) - 1);
-    else return -1;
 }
 
 }   // namespace bb

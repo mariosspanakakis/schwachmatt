@@ -108,13 +108,13 @@ constexpr char const* PIECE_SYMBOLS[] {
     "k",
 };
 
-const inline Piece makePiece(Color c, PieceType pt) {
+const inline Piece make_piece(Color c, PieceType pt) {
     return Piece((c << 3) + pt);
 }
-const inline Color colorOf(Piece pc) {
+const inline Color color_of(Piece pc) {
     return Color(pc >> 3);
 }
-const inline PieceType typeOf(Piece pc) {
+const inline PieceType type_of(Piece pc) {
     return PieceType(pc & 7);
 }
 

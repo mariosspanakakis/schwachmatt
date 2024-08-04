@@ -22,25 +22,25 @@ namespace chess {
 
 class Move {
     private:
-    uint16_t m_move;
+    uint16_t move_;
 
     public:
     Move();
     Move(Square from, Square to, MoveFlag flag);
     ~Move() = default;
-    Square getTo() const;
-    void setTo(Square to);
-    Square getFrom() const;
-    void setFrom(Square from);
-    MoveFlag getFlag() const;
-    void setFlag(MoveFlag flag);
+    inline Square getTo() const { return (move_ >> TO_SHIFT) & 0x3f; };
+    inline void setTo(Square to) { move_ |= (to << TO_SHIFT); };
+    inline Square getFrom() const { return (move_ >> FROM_SHIFT) & 0x3f; };
+    inline void setFrom(Square from) { move_ |= (from << FROM_SHIFT); };
+    inline MoveFlag getFlag() const { return (move_ >> FLAG_SHIFT) & 0b1111; };
+    inline void setFlag(MoveFlag flag) { move_ |= (flag << FLAG_SHIFT); };
 
-    bool isCapture();
-    bool isDoublePawnPush();
-    bool isEnPassantCapture();
-    bool isPromotion();
+    inline bool isCapture() { return (move_ >> FLAG_SHIFT) & 0b0100; };
+    inline bool isDoublePawnPush() { return (move_ >> FLAG_SHIFT) == 0b0001; };
+    inline bool isEnPassantCapture() { return (move_ >> FLAG_SHIFT) == 0b0101; };
+    inline bool isPromotion() { return (move_ >> FLAG_SHIFT) & 0b1000; };
+    inline PieceType getPromotionPieceType() { return PieceType(((move_ >> FLAG_SHIFT) & 0b0011) + 2);};
     bool isCastling();
-    PieceType getPromotionPieceType();
     
     std::string toString() const;
     void printDetails() const;

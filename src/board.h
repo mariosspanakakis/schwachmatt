@@ -1,10 +1,10 @@
 #ifndef BOARD_H
 #define BOARD_H
 
-#include <stdint.h>
 #include <cassert>
 #include <cctype>
 #include <ctype.h>
+#include <stdint.h>
 #include <iomanip>
 #include <string.h>
 #include "attacks.h"
@@ -22,10 +22,10 @@ const std::string INITIAL_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w K
 // game state, containing all non-visible board information
 struct GameState {
     public:
-    Bitboard enPassantTarget;
-    uint8_t castlingRights;
-    Piece capturedPiece;
-    Color sideToMove;
+    Bitboard en_passant_target;
+    uint8_t castling_rights;
+    Piece captured;
+    Color side_to_move;
 };
 
 const GameState INITIAL_GAME_STATE = GameState {
@@ -46,13 +46,13 @@ class Board {
     private:
 
     /* Bitboards for occupancy representation. */
-    OccupancyBitboards m_occupancies;
+    OccupancyBitboards occupancies_;
 
     /* Pieces by square. */
-    Piece m_pieces[N_SQUARES];
+    Piece pieces_[N_SQUARES];
 
     /* Stack containing the game state history. */
-    std::vector<GameState> m_gameStateHistory;
+    std::vector<GameState> game_state_history_;
     
     public:
     Board(const std::string& fen = INITIAL_FEN);
@@ -84,6 +84,8 @@ class Board {
 
     void makeMove(Move move);
     void unmakeMove(Move move);
+
+    bool isLegal(Move move);
 
     void print();
 };

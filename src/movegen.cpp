@@ -48,8 +48,7 @@ static Move* generatePieceMoves(const Board& board, Move* movelist) {
     // for each piece, get the attacked squares
     while (pieces) {
         // extract one of the pieces
-        int from = bb::getLeastSignificantBitIndex(pieces);
-        bb::clearBit(pieces, from);
+        Square from = bb::pop_lsb(pieces);
 
         // lookup the squares which are attacked by this piece
         Bitboard attacks = attacks::getPieceAttacks<TPieceType>(from, all_pieces);
@@ -59,8 +58,7 @@ static Move* generatePieceMoves(const Board& board, Move* movelist) {
 
         // loop through all attacked squares
         while (attacks) {
-            int to = bb::getLeastSignificantBitIndex(attacks);
-            bb::clearBit(attacks, to);
+            Square to = bb::pop_lsb(attacks);
 
             // test whether this move captures a piece and set the flag accordingly
             MoveFlag flag = bb::getBit(their_pieces, to) ? CAPTURE : QUIET;
@@ -86,12 +84,11 @@ static Move* generatePawnMoves(const Board& board, Move* movelist) {
     Bitboard allPieces = board.getTotalOccupancy();
     Bitboard pawns = board.getPieceOccupancy(PAWN, TColor);
 
-    // define the move directions
+    // in dependence of the color, define the move directions and the double push rank
     constexpr Direction forward_dir = (TColor == WHITE) ? NORTH : SOUTH;
     constexpr Direction right_capture_dir = (TColor == WHITE) ? NORTHEAST : SOUTHWEST;
     constexpr Direction left_capture_dir = (TColor == WHITE) ? NORTHWEST : SOUTHEAST;
-    // define the double push rank
-    Bitboard double_push_rank = (TColor == WHITE) ? RANK_3_BB : RANK_6_BB;
+    constexpr Bitboard double_push_rank = (TColor == WHITE) ? RANK_3_BB : RANK_6_BB;
     // get all possible target squares
     Bitboard single_pushes = (bb::shift<forward_dir>(pawns) & ~allPieces);
     Bitboard double_pushes = (bb::shift<forward_dir>(single_pushes & double_push_rank) & ~allPieces);
@@ -107,9 +104,8 @@ static Move* generatePawnMoves(const Board& board, Move* movelist) {
         // generate all non-promotion moves
         while(non_promotions) {
             // extract a target square and the corresponding origin square
-            int to_square = bb::getLeastSignificantBitIndex(non_promotions);
-            bb::clearBit(non_promotions, to_square);
-            int from_square = to_square - dir;
+            Square to_square = bb::pop_lsb(non_promotions);
+            Square from_square = to_square - dir;
 
             // add the move to the moves list
             *movelist++ = Move(from_square, to_square, flag);
@@ -117,9 +113,8 @@ static Move* generatePawnMoves(const Board& board, Move* movelist) {
         // generate all promotion moves
         while(promotions) {
             // extract a target square and the corresponding origin square
-            int to_square = bb::getLeastSignificantBitIndex(promotions);
-            bb::clearBit(promotions, to_square);
-            int from_square = to_square - dir;
+            Square to_square = bb::pop_lsb(promotions);
+            Square from_square = to_square - dir;
 
             // generate a separate move for promoting to any possible piece
             for (MoveFlag promotion_flag : {KNIGHT_PROMOTION, BISHOP_PROMOTION, ROOK_PROMOTION, QUEEN_PROMOTION}) {
@@ -139,15 +134,14 @@ static Move* generatePawnMoves(const Board& board, Move* movelist) {
     // check for possible en-passant captures
     Bitboard en_passant_target = board.getCurrentEnPassantTarget();
     if (en_passant_target) {
-        int to_square = bb::getLeastSignificantBitIndex(en_passant_target);
-        MoveFlag en_passant_flag = EN_PASSANT_CAPTURE;
+        int to_square = bb::lsb(en_passant_target);
         if (right_captures & en_passant_target) {
             int from_square = to_square - right_capture_dir;
-            *movelist++ = Move(from_square, to_square, en_passant_flag);
+            *movelist++ = Move(from_square, to_square, EN_PASSANT_CAPTURE);
         }
         if (left_captures & en_passant_target) {
             int from_square = to_square - left_capture_dir;
-            *movelist++ = Move(from_square, to_square, en_passant_flag);
+            *movelist++ = Move(from_square, to_square, EN_PASSANT_CAPTURE);
         }
     }
 
