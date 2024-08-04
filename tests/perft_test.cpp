@@ -16,7 +16,7 @@ std::vector<PerftTestCase> PERFT_TEST_CASES = {
     // position 1
     {
         "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1", 
-        {20, 400, 8902, 197281, 4865609, /*119060324, 3195901860, 84998978956, 2439530234167*/}
+        {20, 400, 8902, 197281, 4865609, 119060324, /*3195901860, 84998978956, 2439530234167*/}
     },
     // position 2
     {
@@ -26,12 +26,12 @@ std::vector<PerftTestCase> PERFT_TEST_CASES = {
     // position 3
     {
         "8/2p5/3p4/KP5r/1R3p1k/8/4P1P1/8 w - -",
-        {14, 191, 2812, 43238, 674624, /*11030083, 178633661, 3009794393*/}
+        {14, 191, 2812, 43238, 674624, 11030083, 178633661, /*3009794393*/}
     },
     // position 4
     {
         "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1",
-        {6, 264, 9467, 422333, 15833292, /*706045033*/}
+        {6, 264, 9467, 422333, 15833292, 706045033}                             // NOTE: currently fails at depth 6
     },
     // position 5
     {
@@ -84,9 +84,9 @@ TEST(PerftTest, Perft) {
     chess::attacks::initializeAttackTables();
 
     // enable or disable detailed leaf node count logging per move
-    bool LOG = false;
+    bool divided_logging = true;
 
-    bool success = true;
+    bool success = false;
 
     std::cout << std::fixed << std::setprecision(2);
 
@@ -109,7 +109,7 @@ TEST(PerftTest, Perft) {
             chess::Board board = chess::Board(fen);
 
             auto start = std::chrono::high_resolution_clock::now();
-            uint64_t result = perft(board, depth, LOG);
+            uint64_t result = perft(board, depth, divided_logging);
             auto end = std::chrono::high_resolution_clock::now();
 
             uint64_t expected = expected_values[depth - 1];
