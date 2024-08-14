@@ -3,8 +3,9 @@
 namespace chess {
 
 template <Color TColor>
-static Move* generateAllMoves(const Board& board, Move* movelist);
+static Move* generateLegalMoves(const Board& board, Move* movelist);
 
+/*
 template <Color TColor>
 static Move* generatePawnMoves(const Board& board, Move* movelist);
 
@@ -13,27 +14,39 @@ static Move* generatePieceMoves(const Board& board, Move* movelist);
 
 template <Color TColor>
 static Move* generateCastlingMoves(const Board& board, Move* movelist);
-
+*/
 
 Move* generate(const Board& board, Move* movelist) {
     Color us = board.getSideToMove();
-    return (us == WHITE) ? generateAllMoves<WHITE>(board, movelist)
-                         : generateAllMoves<BLACK>(board, movelist);
+    return (us == WHITE) ? generateLegalMoves<WHITE>(board, movelist)
+                         : generateLegalMoves<BLACK>(board, movelist);
 }
 
+/* Generate all strictly legal moves in the given position. */
 template <Color TColor>
-static Move* generateAllMoves(const Board& board, Move* movelist) {
+static Move* generateLegalMoves(const Board& board, Move* movelist) {
     
-    movelist = generatePawnMoves<TColor>(board, movelist);
-    movelist = generatePieceMoves<TColor, KNIGHT>(board, movelist);
-    movelist = generatePieceMoves<TColor, BISHOP>(board, movelist);
-    movelist = generatePieceMoves<TColor, ROOK>(board, movelist);
-    movelist = generatePieceMoves<TColor, QUEEN>(board, movelist);
-    movelist = generatePieceMoves<TColor, KING>(board, movelist);
+    // TODO: generate all legal king moves (based on currently attacked squares)
+
+    // TODO: test whether we are in a) double-check or b) single-check
+    //      a) double-check: the only legal moves are king moves, we're done here
+    //      b) single-check: we can either move the king, capture the checking
+    //                       piece, or block the attack (for sliding piece only)
+
+    // TODO: find pinned pieces and generate their possible moves:
+    //      - pinned knights are unable to move
+    //      - for diagonal pin rays consider bishops, queens, and pawn captures
+    //      - for vertical pin rays consider rooks, queens, and pawn pushes
+    //      - for horizontal pin rays consider rooks and queens
+
+    // TODO: handle castling
+
+    // TODO: handle the sneaky discovered check for en-passant moves
 
     return movelist;
 }
 
+/*
 template <Color TColor, PieceType TPieceType>
 static Move* generatePieceMoves(const Board& board, Move* movelist) {
 
@@ -178,8 +191,10 @@ static Move* generateCastlingMoves(const Board& board, Move* movelist) {        
     return movelist;
 }
 
+*/
+
 /* Explicit template instantiations. */
-template Move* generateAllMoves<WHITE>(const Board& board, Move* movelist);
-template Move* generateAllMoves<BLACK>(const Board& board, Move* movelist);
+template Move* generateLegalMoves<WHITE>(const Board& board, Move* movelist);
+template Move* generateLegalMoves<BLACK>(const Board& board, Move* movelist);
 
 }   // namespace chess
