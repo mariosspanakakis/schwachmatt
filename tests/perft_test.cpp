@@ -31,6 +31,7 @@ std::vector<PerftTestCase> PERFT_TEST_CASES = {
     // position 4
     {
         "r3k2r/Pppp1ppp/1b3nbN/nP6/BBP1P3/q4N2/Pp1P2PP/R2Q1RK1 w kq - 0 1",
+        //"r3k2r/Pppp1ppp/1b3nbN/nPP5/BB2P3/q4N2/Pp1P2PP/R2Q1RK1 b kq - 0 1",     // c4c5, fails after b2a1 rook promotion capture (probably due to something related to the castling rights!)
         {6, 264, 9467, 422333, 15833292, 706045033}                             // NOTE: currently fails at depth 6
     },
     // position 5
@@ -86,7 +87,7 @@ TEST(PerftTest, Perft) {
     // enable or disable detailed leaf node count logging per move
     bool divided_logging = true;
 
-    bool success = false;
+    bool success = true;
 
     std::cout << std::fixed << std::setprecision(2);
 

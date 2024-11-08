@@ -20,6 +20,7 @@ int main(int argc, char *argv[]) {
         //std::string fen = "4k3/8/2r5/8/8/8/8/R3K1NR w KQ - 0 1";                // white castling on king side blocked and on queen side inhibited
         //std::string fen = "k2r4/4P1P1/8/8/8/8/8/K7 w - - 0 1";                  // white can capture or promotion-capture
         //std::string fen = "rnbqkbnr/ppp1p1pp/8/3pPp2/8/8/PPPP1PPP/RNBQKBNR w KQkq f6 0 3";  // white can en-passant capture on f6
+        //std::string fen = "r3k2r/Pppp1ppp/1b3nbN/nPP5/BB2P3/q4N2/Pp1P2PP/R2Q1RK1 b kq - 0 1";   // the position that fails for rook promotion
         chess::Board board = chess::Board(fen);
 
         board.print();
