@@ -6,13 +6,6 @@
 #include <string>
 #include <vector>
 
-/*
-GUI     -> uci ->           ENGINE
-GUI     <- uciok <-         ENGINE
-GUI     -> isready ->       ENGINE
-GUI     <- isreadyok <-     ENGINE
-*/
-
 class UniversalChessInterface {
     private:
     void process(std::string command);
