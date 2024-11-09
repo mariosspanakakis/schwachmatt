@@ -22,11 +22,11 @@ List of fundamental concepts that have already been implemented:
 
 Next steps and future functionalities:
 
-- speeding up move generation, which currently is terribly slow (```10:16 min``` for perft up to depth 5 for all given positions; or roughly 800k nodes per second)
-- implementation of mate and stalemate logic
+- generate strictly legal instead of pseudo-legal moves which then have to be tested; this would significantly speed up move generation which currently is rather slow with around 2 million nodes per second
+- fix a bug in move generation (apparently related to castling rights after rook promotion) that makes ```perft``` fail for certain positions
+- implementation of game end conditions (mate, stalemate, 50 move rule, insufficient material, ...)
 - UCI communication interface for GUI usage
-- search logic, typically alpha-beta minimax search
-- heuristics for move evaluation
+- search logic and heuristics for move evaluation
 - ...
 
 ## References

@@ -69,9 +69,9 @@ uint64_t perft(chess::Board& board, int depth, bool log/*, std::string movestrin
             uint64_t childNodes = perft(board, depth - 1, false/*, movestring + "-" + move.toString()*/);
             nodes += childNodes;
 
-            if (log && depth != 1) {
+            /*if (log && depth != 1) {
                 std::cout << move.toString() << ": " << childNodes << std::endl;
-            }
+            }*/
         }
 
         // unmake move
