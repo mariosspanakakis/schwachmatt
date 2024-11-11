@@ -15,7 +15,7 @@ void UniversalChessInterface::process(std::string input) {
     std::string command = tokens.at(0);
     if (command == "uci") {                         // initial command
         std::cout << "id name Schwachmatt" << std::endl;
-        std::cout << "author name Marios Spanakakis" << std::endl;
+        std::cout << "id author Marios Spanakakis" << std::endl;
         std::cout << "uciok" << std::endl;
     } else if (command == "ucinewgame") {           // start new game
         // TODO: handle
