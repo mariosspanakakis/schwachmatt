@@ -1,10 +1,7 @@
 #include <gtest/gtest.h>
-#include "attacks.h"
+#include "attacks.cpp"
 
-
-// NOTE: cannot access static functions - add conditional compile statements or make non-static
-
-/*TEST(AttackTest, MagicNumberGeneration) {
+TEST(AttackTest, MagicNumberGeneration) {
     chess::attacks::initializeAttackTables();
 
     for (int is_bishop = 0; is_bishop < 2; is_bishop++) {
@@ -23,4 +20,4 @@
             }
         }
     }
-}*/
+}

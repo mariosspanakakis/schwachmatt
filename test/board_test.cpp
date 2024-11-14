@@ -1,6 +1,6 @@
 #include <gtest/gtest.h>
-#include "board.h"
-#include "movegen.h"
+#include "board.cpp"
+#include "movegen.cpp"
 
 
 TEST(BoardTest, GetPieceInformation) {

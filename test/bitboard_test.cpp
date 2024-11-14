@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "bitboard.h"
+#include "bitboard.cpp"
 
 TEST(BitboardTest, SetBit) {
     chess::Bitboard bitboard = 0ULL;
