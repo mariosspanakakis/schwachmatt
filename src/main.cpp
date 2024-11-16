@@ -24,6 +24,9 @@ int main(int argc, char *argv[]) {
 
         board.print();
 
+        chess::Bitboard attackers = board.getAttackers(chess::F3, chess::WHITE);
+        chess::bb::printBitboard(attackers); 
+
         // generate moves
         chess::MoveList movelist = chess::MoveList(board);
         std::cout << "Found " << movelist.size() << " moves:" << std::endl;

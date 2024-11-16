@@ -74,20 +74,24 @@ class Board {
     void unsetPiece(Square square);
     void replacePiece(Square square, Piece piece);
 
+    /* Returns a bitboard representing all pieces attacking the given square. */
+    Bitboard getAttackers(Square square, Color color) const;
+
+    /* Returns a bitboard representing all attacked squares. */
+    Bitboard getAttackedSquares(Color color) const;
+
     /* @brief Test if a square is under attack by a piece of the given color.
      * @param square The square for which to test for attacks.
      * @param color The attacking color.
      * @return A boolean indicating whether the square is under attack. */
     bool isAttackedBy(Square square, Color color) const;
 
-    bool isInCheck(Color color);
+    bool isInCheck(Color color) const;
 
     void makeMove(Move move);
     void unmakeMove(Move move);
 
-    bool isLegal(Move move);
-
-    void print();
+    void print() const;
 };
 
 }   // namespace chess

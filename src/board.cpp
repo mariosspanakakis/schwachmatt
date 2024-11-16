@@ -207,6 +207,27 @@ void Board::replacePiece(Square square, Piece piece) {
     setPiece(square, piece);
 }
 
+Bitboard Board::getAttackers(Square square, Color color) const {
+    Color us = !color;
+    Color them = color;
+
+    Bitboard attackers = (
+          (attacks::getPawnAttacks(square, us) & occupancies_.pieces[them][PAWN])
+        | (attacks::getPieceAttacks<KNIGHT>(square, 0ULL) & occupancies_.pieces[them][KNIGHT])
+        | (attacks::getPieceAttacks<KING>(square, 0ULL) & occupancies_.pieces[them][KING])
+        | (attacks::getPieceAttacks<BISHOP>(square, occupancies_.all) & (occupancies_.pieces[them][BISHOP] | occupancies_.pieces[them][QUEEN]))
+        | (attacks::getPieceAttacks<ROOK>(square, occupancies_.all) & (occupancies_.pieces[them][ROOK] | occupancies_.pieces[them][QUEEN]))
+    );
+
+    return attackers;
+}
+
+Bitboard Board::getAttackedSquares(Color color) const {
+    Bitboard attacked = 0ULL;
+
+    return attacked;
+}
+
 // NOTE: there are more efficient approaches than this
 bool Board::isAttackedBy(Square square, Color color) const {
     Color us = !color;
@@ -238,7 +259,7 @@ bool Board::isAttackedBy(Square square, Color color) const {
     return false;
 }
 
-bool Board::isInCheck(Color color) {
+bool Board::isInCheck(Color color) const {
     Square kingSquare = getKingSquare(color);
     return isAttackedBy(kingSquare, !color);
 }
@@ -399,19 +420,7 @@ void Board::unmakeMove(Move move) {
     }
 }
 
-bool Board::isLegal(Move move) {
-    // various situations to cover:
-    // 1. if the king is moving: test whether the goal square is under attack
-    // 2. if castling, ensure that none of the squares the king passes are under attack
-    // 3. if en-passant capturing, ensure that the king does not end up in check
-    // 4. for all other moves, test whether they unblock a sliding piece's attack to the king
-    
-    // what if the king is in check? could/should add a separate move GENERATION for this case 
-
-    return true;
-}
-
-void Board::print() {
+void Board::print() const {
     std::cout << std::endl;
     for (int rank = 7; rank >= 0; rank--) {
         std::cout << " " << rank + 1 << "  ";
