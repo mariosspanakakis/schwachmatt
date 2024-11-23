@@ -8,7 +8,6 @@
 #include <vector>
 #include "types.h"
 
-namespace chess {
 namespace bb {
 
 // print a readable bitboard representation to the console
@@ -71,6 +70,5 @@ inline Square pop_lsb(Bitboard& bitboard) {
 }
 
 }   // namespace bb
-}   // namespace chess
 
 #endif

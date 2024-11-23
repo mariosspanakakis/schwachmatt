@@ -6,8 +6,6 @@
 #include "attacks.h"
 #include "move.h"
 
-namespace chess {
-
 /* @brief Generate all possible pseudo-legal moves for the given board. The
           moves are generated for the currently active side. This function can
           be called directly, but is intended to be called from the constructor
@@ -36,7 +34,5 @@ struct MoveList {
     const Move* end() const { return m_last; }
     size_t size() const { return m_last - m_moves; }
 };
-
-}   // namespace chess
 
 #endif

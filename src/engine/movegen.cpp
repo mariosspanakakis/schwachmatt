@@ -1,7 +1,5 @@
 #include "movegen.h"
 
-namespace chess {
-
 template <Color TColor>
 static Move* generateAllMoves(const Board& board, Move* movelist);
 
@@ -181,5 +179,3 @@ static Move* generateCastlingMoves(const Board& board, Move* movelist) {        
 /* Explicit template instantiations. */
 template Move* generateAllMoves<WHITE>(const Board& board, Move* movelist);
 template Move* generateAllMoves<BLACK>(const Board& board, Move* movelist);
-
-}   // namespace chess

@@ -3,8 +3,6 @@
 
 #include <stdint.h>
 
-namespace chess {
-
 using Bitboard = uint64_t;
 using Square = uint8_t;
 using Piece = uint8_t;
@@ -238,7 +236,5 @@ constexpr char const* FLAG_NAMES[] = {
     "ROOK_PROMOTION_CAPTURE",
     "QUEEN_PROMOTION_CAPTURE"
 };
-
-}   // namespace chess
 
 #endif

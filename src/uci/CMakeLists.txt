@@ -1,5 +1,7 @@
-# define the UCI library
-add_library(uci STATIC uci.cpp)
+add_library(uci
+    uci.cpp
+    uci.h
+)
 
-# specify include directories for the UCI library (if uci.h is needed elsewhere)
 target_include_directories(uci PUBLIC ${CMAKE_CURRENT_SOURCE_DIR})
+target_link_libraries(uci PRIVATE common)

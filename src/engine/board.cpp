@@ -1,7 +1,5 @@
 #include "board.h"
 
-namespace chess {
-
 Board::Board(const std::string& fen){
     // initialize empty bitboards
     for (bool color : {WHITE, BLACK}){
@@ -18,7 +16,7 @@ Board::Board(const std::string& fen){
     }
     
     // split the given FEN into groups that describe the board status
-    std::vector<std::string> fen_groups = utils::splitFen(fen);
+    std::vector<std::string> fen_groups = utils::tokenize(fen, ' ');
 
     // loop through FEN and set up pieces as specified, note that FEN notation
     // counts ranks downwards but files upwards!
@@ -451,5 +449,3 @@ void Board::print() {
 
     std::cout << std::endl;
 }
-
-}   // namespace chess

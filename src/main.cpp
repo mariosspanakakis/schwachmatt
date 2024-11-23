@@ -4,18 +4,17 @@
 #include "board.h"
 
 int main() {
-    // NOTE: it might make sense to add an Engine() object as an additional
-    //       layer of abstraction, that would take care of initialization, board
-    //       management, search etc.
-    // ChessEngine engine;
-    // engine.init();
-
-    // initialize attack tables for rapid lookup of attacked squares
+    /* Initialize engine. */
     //chess::attacks::initializeAttackTables();
 
     // set up the UCI communication
     UniversalChessInterface uci;
     uci.operate();
+
+    // TODO: add producer thread that adds all received commands to a command queue
+    // TODO: add consumer thread that subsequently calls and handles the commands in the queue
+
+    // NOTE: maybe use dispatch functions that are called for each command?
 
     return 0;
 }

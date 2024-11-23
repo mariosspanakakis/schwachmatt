@@ -1,7 +1,5 @@
 #include "move.h"
 
-namespace chess {
-
 Move::Move() {
     move_ = 0;
 }
@@ -39,5 +37,3 @@ void Move::printDetails() const {
 std::string Move::toString() const {
     return std::string(SQUARE_NAMES[getFrom()]) + std::string(SQUARE_NAMES[getTo()]);
 }
-
-}   // namespace chess

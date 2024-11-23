@@ -1,8 +1,8 @@
 #include <chrono>
-#include <gtest/gtest.h>
 #include <iomanip>
 #include <iostream>
 #include <vector>
+#include <catch2/catch_test_macros.hpp>
 #include "board.h"
 #include "movegen.h"
 
@@ -46,7 +46,7 @@ std::vector<PerftTestCase> PERFT_TEST_CASES = {
     }
 };
 
-uint64_t perft(chess::Board& board, int depth, bool log/*, std::string movestring = ""*/) {
+uint64_t perft(Board& board, int depth, bool log/*, std::string movestring = ""*/) {
     uint64_t nodes = 0;
 
     //std::cout << movestring << std::endl;
@@ -57,9 +57,9 @@ uint64_t perft(chess::Board& board, int depth, bool log/*, std::string movestrin
     }
 
     // generate all pseudo-legal moves
-    chess::MoveList movelist = chess::MoveList(board);
+    MoveList movelist = MoveList(board);
 
-    for (const chess::Move& move : movelist) {
+    for (const Move& move : movelist) {
 
         // make move
         board.makeMove(move);
@@ -81,33 +81,31 @@ uint64_t perft(chess::Board& board, int depth, bool log/*, std::string movestrin
     return nodes;
 }
 
-TEST(PerftTest, Perft) {
-    chess::attacks::initializeAttackTables();
+TEST_CASE("Testing move generation using perft") {
+    attacks::initializeAttackTables();
 
     // enable or disable detailed leaf node count logging per move
     bool divided_logging = true;
 
-    bool success = true;
-
     std::cout << std::fixed << std::setprecision(2);
 
     for (PerftTestCase test_case : PERFT_TEST_CASES) {
-
+        // extract and print test case parameters
         std::vector<uint64_t> expected_values = test_case.nodes;
         std::string fen = test_case.fen;
-
         std::cout << std::endl;
         std::cout << "FEN: " << fen << std::endl;
         std::cout << std::endl;
         std::cout << std::setw(6)  << "Depth"
-                  << std::setw(16) << "Expected"
-                  << std::setw(16) << "Result"
-                  << std::setw(10) << "Time [s]"
-                  << std::setw(16) << "Speed [nps]"
-                  << std::endl;
+                << std::setw(16) << "Expected"
+                << std::setw(16) << "Result"
+                << std::setw(10) << "Time [s]"
+                << std::setw(16) << "Speed [nps]"
+                << std::endl;
 
+        bool success = true;
         for (size_t depth = 1; depth < expected_values.size() + 1; ++depth) {
-            chess::Board board = chess::Board(fen);
+            Board board = Board(fen);
 
             auto start = std::chrono::high_resolution_clock::now();
             uint64_t result = perft(board, depth, divided_logging);
@@ -116,22 +114,19 @@ TEST(PerftTest, Perft) {
             uint64_t expected = expected_values[depth - 1];
             std::chrono::duration<double, std::milli> elapsed = end - start;
 
-            bool run_successful = result == expected;
-            if (!run_successful) {
-                success = false;
-            }
-            std::string msg = run_successful ? "" : "failed";
+            success = result == expected;
+            std::string msg = success ? "" : "failed";
 
             std::cout << std::setw(6) << depth 
-                      << std::setw(16) << expected 
-                      << std::setw(16) << result 
-                      << std::setw(10) << elapsed.count() / 1000.0
-                      << std::setw(16) << result / elapsed.count() * 1000
-                      << std::setw(8) << msg << std::endl;
+                    << std::setw(16) << expected 
+                    << std::setw(16) << result 
+                    << std::setw(10) << elapsed.count() / 1000.0
+                    << std::setw(16) << result / elapsed.count() * 1000
+                    << std::setw(8) << msg << std::endl;
         }
+        
+        REQUIRE(success);
 
         std::cout << std::endl;
     }
-
-    EXPECT_TRUE(success);
 }

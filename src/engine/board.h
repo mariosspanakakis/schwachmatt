@@ -14,8 +14,6 @@
 #include "types.h"
 #include "utils.h"
 
-namespace chess {
-
 // standard initial board configuration
 const std::string INITIAL_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";
 
@@ -89,7 +87,5 @@ class Board {
 
     void print();
 };
-
-}   // namespace chess
 
 #endif

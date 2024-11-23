@@ -1,6 +1,5 @@
 #include "bitboard.h"
 
-namespace chess {
 namespace bb {
 
 void printBitboard(Bitboard bitboard) {
@@ -32,4 +31,3 @@ Bitboard getPopulatedBitboard(const std::vector<Square>& populated_squares) {
 }
 
 }   // namespace bb
-}   // namespace chess

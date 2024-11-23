@@ -1,7 +1,9 @@
 #include "attacks.h"
 
-namespace chess {
 namespace attacks {
+
+// pseudo random number state
+static uint32_t randomState = 856839613;
 
 static Bitboard calculatePawnAttacks(Square square, Color color);
 static Bitboard calculateKnightAttacks(Square square);
@@ -14,6 +16,9 @@ static Bitboard magicTransform(Bitboard masked_blockers, Bitboard magic, int bit
 static Bitboard lookupBishopAttacks(Square square, Bitboard blockers = 0ULL);
 static Bitboard lookupRookAttacks(Square square, Bitboard blockers = 0ULL);
 static void initializeMagicAttack(Square square, bool is_bishop);
+static uint32_t getRandom32();
+static uint64_t getRandom64();
+static uint64_t getRandom64Sparse();
 
 Bitboard PAWN_ATTACKS[N_COLORS][N_SQUARES];
 Bitboard KNIGHT_ATTACKS[N_SQUARES];
@@ -322,7 +327,7 @@ static Bitboard findMagicNumber(Square square, bool is_bishop) {
     // conduct brute-force random search for suitable magic numbers
     for (int iteration = 0; iteration < 1e7; iteration++) {
         // get magic number candidate
-        Bitboard magic_number = utils::getRandom64Sparse();
+        Bitboard magic_number = getRandom64Sparse();
         
         // discard numbers that do not contain enough bits
         if (bb::popcount((attack_mask * magic_number) & 0xFF00000000000000) < 6) continue;
@@ -384,6 +389,29 @@ static void initializeMagicAttack(Square square, bool is_bishop) {
     }
 }
 
+static uint32_t getRandom32() {
+    uint32_t number = randomState;
+    number ^= number << 13;
+    number ^= number >> 17;
+    number ^= number << 5;
+    randomState = number;
+    return number;
+}
+
+static uint64_t getRandom64() {
+    uint64_t a, b, c, d;
+    a = (uint64_t) (getRandom32() & 0xFFFF);
+    b = (uint64_t) (getRandom32() & 0xFFFF);
+    c = (uint64_t) (getRandom32() & 0xFFFF);
+    d = (uint64_t) (getRandom32() & 0xFFFF);
+    return a | (b << 16) | (c << 32) | (d << 48);
+}
+
+static uint64_t getRandom64Sparse() {
+    uint64_t number = getRandom64() & getRandom64() & getRandom64();
+    return number;
+}
+
 template Bitboard getPieceAttacks<KNIGHT>(Square square, Bitboard blockers);
 template Bitboard getPieceAttacks<BISHOP>(Square square, Bitboard blockers);
 template Bitboard getPieceAttacks<ROOK>(Square square, Bitboard blockers);
@@ -391,4 +419,3 @@ template Bitboard getPieceAttacks<QUEEN>(Square square, Bitboard blockers);
 template Bitboard getPieceAttacks<KING>(Square square, Bitboard blockers);
 
 }   // namespace attacks
-}   // namespace chess

@@ -4,9 +4,7 @@
 #include <cstring>
 #include "bitboard.h"
 #include "exceptions.h"
-#include "utils.h"
 
-namespace chess {
 namespace attacks {
 
 /* @brief Precalculate attacks for all pieces and all squares. This function
@@ -32,6 +30,5 @@ Bitboard getPieceAttacks(Square square, Bitboard blockers);
 Bitboard getPawnAttacks(Square square, Color color);
 
 }   // namespace attacks
-}   // namespace chess
 
 #endif

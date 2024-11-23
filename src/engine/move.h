@@ -18,8 +18,6 @@ therefore necessary to look at the board that the move has been made on in
 order to obtain this information.
 */
 
-namespace chess {
-
 class Move {
     private:
     uint16_t move_;
@@ -45,8 +43,5 @@ class Move {
     std::string toString() const;
     void printDetails() const;
 };
-
-
-}   // namespace chess
 
 #endif
