@@ -1,9 +1,14 @@
-#include <catch2/catch_test_macros.hpp>
+#include <gtest/gtest.h>
 #include "attacks.cpp"
 
-TEST_CASE("Attacks: generate magic numbers") {
-    attacks::initializeAttackTables();
+class AttacksTest : public ::testing::Test {
+protected:
+    void SetUp() override {
+        attacks::initializeAttackTables();
+    }
+};
 
+TEST_F(AttacksTest, GenerateMagicNumbers) {
     for (int is_bishop = 0; is_bishop < 2; is_bishop++) {
         for (int square = 0; square < N_SQUARES; square++) {
             // get attack mask and number of relevant bits
@@ -16,7 +21,7 @@ TEST_CASE("Attacks: generate magic numbers") {
                 Bitboard manual_attacks = is_bishop ? attacks::calculateBishopAttacks(square, blockers) : attacks::calculateRookAttacks(square, blockers);
                 Bitboard lookup_attacks = is_bishop ? attacks::lookupBishopAttacks(square, blockers) : attacks::lookupRookAttacks(square, blockers);
 
-                REQUIRE(manual_attacks == lookup_attacks);
+                EXPECT_EQ(manual_attacks, lookup_attacks);
             }
         }
     }

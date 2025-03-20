@@ -1,10 +1,13 @@
+#include <gtest/gtest.h>
 #include <chrono>
 #include <iomanip>
 #include <iostream>
 #include <vector>
-#include <catch2/catch_test_macros.hpp>
 #include "board.h"
 #include "movegen.h"
+
+#define MAX_DEPTH 6
+#define ENABLE_DETAILED_LOGGING 0
 
 struct PerftTestCase {
     std::string fen;
@@ -46,7 +49,7 @@ std::vector<PerftTestCase> PERFT_TEST_CASES = {
     }
 };
 
-uint64_t perft(Board& board, int depth, bool log/*, std::string movestring = ""*/) {
+uint64_t perft(Board& board, int depth, bool enable_detailed_logging/*, std::string movestring = ""*/) {
     uint64_t nodes = 0;
 
     //std::cout << movestring << std::endl;
@@ -60,8 +63,6 @@ uint64_t perft(Board& board, int depth, bool log/*, std::string movestring = ""*
     MoveList movelist = MoveList(board);
 
     for (const Move& move : movelist) {
-
-        // make move
         board.makeMove(move);
         
         // check for legality of the move
@@ -69,27 +70,28 @@ uint64_t perft(Board& board, int depth, bool log/*, std::string movestring = ""*
             uint64_t childNodes = perft(board, depth - 1, false/*, movestring + "-" + move.toString()*/);
             nodes += childNodes;
 
-            /*if (log && depth != 1) {
+            if (enable_detailed_logging && depth != 1) {
                 std::cout << move.toString() << ": " << childNodes << std::endl;
-            }*/
+            }
         }
 
-        // unmake move
         board.unmakeMove(move);
     }
 
     return nodes;
 }
 
-TEST_CASE("Testing move generation using perft") {
-    attacks::initializeAttackTables();
+class PerftTest : public ::testing::Test {
+protected:
+    void SetUp() override {
+        attacks::initializeAttackTables();
+    }
+};
 
-    // enable or disable detailed leaf node count logging per move
-    bool divided_logging = true;
-
+TEST_F(PerftTest, MoveGeneration) {
     std::cout << std::fixed << std::setprecision(2);
 
-    for (PerftTestCase test_case : PERFT_TEST_CASES) {
+    for (const PerftTestCase& test_case : PERFT_TEST_CASES) {
         // extract and print test case parameters
         std::vector<uint64_t> expected_values = test_case.nodes;
         std::string fen = test_case.fen;
@@ -104,11 +106,11 @@ TEST_CASE("Testing move generation using perft") {
                 << std::endl;
 
         bool success = true;
-        for (size_t depth = 1; depth < expected_values.size() + 1; ++depth) {
+        for (size_t depth = 1; depth <= MAX_DEPTH && depth <= expected_values.size(); ++depth) {
             Board board = Board(fen);
 
             auto start = std::chrono::high_resolution_clock::now();
-            uint64_t result = perft(board, depth, divided_logging);
+            uint64_t result = perft(board, depth, ENABLE_DETAILED_LOGGING);
             auto end = std::chrono::high_resolution_clock::now();
 
             uint64_t expected = expected_values[depth - 1];
@@ -123,9 +125,9 @@ TEST_CASE("Testing move generation using perft") {
                     << std::setw(10) << elapsed.count() / 1000.0
                     << std::setw(16) << result / elapsed.count() * 1000
                     << std::setw(8) << msg << std::endl;
+
+            EXPECT_EQ(result, expected) << "Perft failed at depth " << depth << " for FEN: " << fen;
         }
-        
-        REQUIRE(success);
 
         std::cout << std::endl;
     }
