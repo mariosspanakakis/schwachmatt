@@ -1,4 +1,4 @@
-#include "move.h"
+#include "move.hpp"
 
 Move::Move() {
     move_ = 0;
@@ -9,11 +9,6 @@ Move::Move(Square from, Square to, MoveFlag flag) {
     setFrom(from);
     setTo(to);
     setFlag(flag);
-}
-
-bool Move::isCastling() {
-    MoveFlag flag = getFlag();
-    return (flag == KINGSIDE_CASTLE || flag == QUEENSIDE_CASTLE);
 }
 
 void Move::printDetails() const {

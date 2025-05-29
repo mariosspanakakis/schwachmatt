@@ -1,11 +1,11 @@
-#ifndef MOVE_H
-#define MOVE_H
+#ifndef MOVE_HPP
+#define MOVE_HPP
 
 #include <bitset>
 #include <cstdint>
 #include <iostream>
 #include <map>
-#include "bitboard.h"
+#include "bitboard.hpp"
 
 /*
 The 16 bits of a move are assigned as follows:
@@ -38,7 +38,7 @@ class Move {
     inline bool isEnPassantCapture() { return (move_ >> FLAG_SHIFT) == 0b0101; };
     inline bool isPromotion() { return (move_ >> FLAG_SHIFT) & 0b1000; };
     inline PieceType getPromotionPieceType() { return PieceType(((move_ >> FLAG_SHIFT) & 0b0011) + 2);};
-    bool isCastling();
+    inline bool isCastling() { return (getFlag() == KINGSIDE_CASTLE || getFlag() == QUEENSIDE_CASTLE);};
     
     std::string toString() const;
     void printDetails() const;

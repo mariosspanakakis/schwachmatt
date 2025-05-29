@@ -1,20 +1,24 @@
-#include <iostream>
+#include "main.hpp"
 
-#include "uci.h"
-#include "board.h"
+std::atomic<bool> running(true);
+void shutdown(int signum) {
+    running = false;
+    std::cout << "Shutting down..." << std::endl;
+}
 
-int main() {
-    /* Initialize engine. */
-    //chess::attacks::initializeAttackTables();
+int main(int argc, char* argv[]) {
+    /* Connect shutdown signal to signal handler. */
+    std::signal(SIGINT, shutdown);
 
-    // set up the UCI communication
-    UniversalChessInterface uci;
-    uci.operate();
+    /* Start the engine. */
+    Engine engine;
+    engine.start();
 
-    // TODO: add producer thread that adds all received commands to a command queue
-    // TODO: add consumer thread that subsequently calls and handles the commands in the queue
+    /* Keep the program running while all operation happens in threads. */
+    while (running) {
+        std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    }
 
-    // NOTE: maybe use dispatch functions that are called for each command?
-
+    engine.stop();
     return 0;
 }

@@ -1,21 +1,22 @@
-#ifndef ATTACKS_H
-#define ATTACKS_H
+#ifndef ATTACKS_HPP
+#define ATTACKS_HPP
 
-#include <cstring>
-#include "bitboard.h"
-#include "exceptions.h"
+#include <array>
+#include <cassert>
+#include <random>
+#include "bitboard.hpp"
+#include "exceptions.hpp"
+#include "utils.hpp"
 
 namespace attacks {
 
-/* @brief Precalculate attacks for all pieces and all squares. This function
-    is run once on the beginning of the program in order to speed up
-    move generation by providing quick lookup tables. The initialization
-    takes a moment which is due to the brute-force magic number
-    generation. */
-void initializeAttackTables(void);
+/* @brief Precalculate attack tables for all pieces. Must be called once before
+ *  being able to use the attack module. */
+void precalculate(bool info = false);
 
 /* @brief Get the attack bitboard representation for a given piece on a given
- *  square. The blocker configuration is only relevant for sliding pieces.
+ *  square. The blocker configuration is only relevant for sliding pieces. For
+ *  other piece types, it is automatically set zero.
  * @tparam TPieceType The type of piece to generate attacks for.
  * @param square The square to generate the attacks from.
  * @returns A bitboard representation of all attacked squares. */

@@ -1,5 +1,5 @@
 #include <gtest/gtest.h>
-#include "movegen.h"
+#include "movegen.hpp"
 #include "board.cpp"
 
 class BoardTest : public ::testing::Test {

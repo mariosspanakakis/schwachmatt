@@ -1,5 +1,5 @@
-#ifndef BOARD_H
-#define BOARD_H
+#ifndef BOARD_HPP
+#define BOARD_HPP
 
 #include <cassert>
 #include <cctype>
@@ -7,12 +7,12 @@
 #include <stdint.h>
 #include <iomanip>
 #include <string.h>
-#include "attacks.h"
-#include "bitboard.h"
-#include "exceptions.h"
-#include "move.h"
-#include "types.h"
-#include "utils.h"
+#include "attacks.hpp"
+#include "bitboard.hpp"
+#include "exceptions.hpp"
+#include "move.hpp"
+#include "types.hpp"
+#include "utils.hpp"
 
 // standard initial board configuration
 const std::string INITIAL_FEN = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1";

@@ -1,4 +1,4 @@
-#include "movegen.h"
+#include "movegen.hpp"
 
 template <Color TColor>
 static Move* generateAllMoves(const Board& board, Move* movelist);
@@ -46,7 +46,7 @@ static Move* generatePieceMoves(const Board& board, Move* movelist) {
     // for each piece, get the attacked squares
     while (pieces) {
         // extract one of the pieces
-        Square from = bb::pop_lsb(pieces);
+        Square from = bb::popLSB(pieces);
 
         // lookup the squares which are attacked by this piece
         Bitboard attacks = attacks::getPieceAttacks<TPieceType>(from, all_pieces);
@@ -56,10 +56,10 @@ static Move* generatePieceMoves(const Board& board, Move* movelist) {
 
         // loop through all attacked squares
         while (attacks) {
-            Square to = bb::pop_lsb(attacks);
+            Square to = bb::popLSB(attacks);
 
             // test whether this move captures a piece and set the flag accordingly
-            MoveFlag flag = bb::getBit(their_pieces, to) ? CAPTURE : QUIET;
+            MoveFlag flag = bb::get(their_pieces, to) ? CAPTURE : QUIET;
 
             // add the move to the list of moves
             *movelist++ = Move(from, to, flag);
@@ -87,6 +87,7 @@ static Move* generatePawnMoves(const Board& board, Move* movelist) {
     constexpr Direction right_capture_dir = (TColor == WHITE) ? NORTHEAST : SOUTHWEST;
     constexpr Direction left_capture_dir = (TColor == WHITE) ? NORTHWEST : SOUTHEAST;
     constexpr Bitboard double_push_rank = (TColor == WHITE) ? RANK_3_BB : RANK_6_BB;
+
     // get all possible target squares
     Bitboard single_pushes = (bb::shift<forward_dir>(pawns) & ~allPieces);
     Bitboard double_pushes = (bb::shift<forward_dir>(single_pushes & double_push_rank) & ~allPieces);
@@ -102,16 +103,17 @@ static Move* generatePawnMoves(const Board& board, Move* movelist) {
         // generate all non-promotion moves
         while(non_promotions) {
             // extract a target square and the corresponding origin square
-            Square to_square = bb::pop_lsb(non_promotions);
+            Square to_square = bb::popLSB(non_promotions);
             Square from_square = to_square - dir;
 
             // add the move to the moves list
             *movelist++ = Move(from_square, to_square, flag);
         }
+        
         // generate all promotion moves
         while(promotions) {
             // extract a target square and the corresponding origin square
-            Square to_square = bb::pop_lsb(promotions);
+            Square to_square = bb::popLSB(promotions);
             Square from_square = to_square - dir;
 
             // generate a separate move for promoting to any possible piece
@@ -132,7 +134,7 @@ static Move* generatePawnMoves(const Board& board, Move* movelist) {
     // check for possible en-passant captures
     Bitboard en_passant_target = board.getCurrentEnPassantTarget();
     if (en_passant_target) {
-        int to_square = bb::lsb(en_passant_target);
+        int to_square = bb::getLSB(en_passant_target);
         if (right_captures & en_passant_target) {
             int from_square = to_square - right_capture_dir;
             *movelist++ = Move(from_square, to_square, EN_PASSANT_CAPTURE);
@@ -176,6 +178,6 @@ static Move* generateCastlingMoves(const Board& board, Move* movelist) {        
     return movelist;
 }
 
-/* Explicit template instantiations. */
+/* Explicit template instantiation. */
 template Move* generateAllMoves<WHITE>(const Board& board, Move* movelist);
 template Move* generateAllMoves<BLACK>(const Board& board, Move* movelist);

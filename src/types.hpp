@@ -1,5 +1,5 @@
-#ifndef TYPES_H
-#define TYPES_H
+#ifndef TYPES_HPP
+#define TYPES_HPP
 
 #include <stdint.h>
 
@@ -37,6 +37,10 @@ constexpr char const* SQUARE_NAMES[] {
     "a7", "b7", "c7", "d7", "e7", "f7", "g7", "h7",
     "a8", "b8", "c8", "d8", "e8", "f8", "g8", "h8",
 };
+
+inline Square get_square(int rank, int file) {
+    return Square(8 * rank + file);
+}
 
 enum Colors {
     WHITE,
@@ -153,6 +157,7 @@ constexpr Bitboard FILE_A_BB = FILE_H_BB >> 7;
 
 // other relevant bitboard representations
 constexpr Bitboard EDGE_BB = 0xFF818181818181FF;
+constexpr Bitboard CORNER_BB = 0x8100000000000081;
 constexpr Bitboard WHITE_KINGSIDE_CASTLE_SQUARES = 0x0000000000000060;
 constexpr Bitboard WHITE_QUEENSIDE_CASTLE_SQUARES = 0x000000000000000E;
 constexpr Bitboard BLACK_KINGSIDE_CASTLE_SQUARES = 0x6000000000000000;

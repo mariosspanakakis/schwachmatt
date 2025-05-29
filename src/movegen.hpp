@@ -1,10 +1,10 @@
-#ifndef MOVEGEN_H
-#define MOVEGEN_H
+#ifndef MOVEGEN_HPP
+#define MOVEGEN_HPP
 
-#include "bitboard.h"
-#include "board.h"
-#include "attacks.h"
-#include "move.h"
+#include "bitboard.hpp"
+#include "board.hpp"
+#include "attacks.hpp"
+#include "move.hpp"
 
 /* @brief Generate all possible pseudo-legal moves for the given board. The
           moves are generated for the currently active side. This function can

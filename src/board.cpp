@@ -1,4 +1,4 @@
-#include "board.h"
+#include "board.hpp"
 
 Board::Board(const std::string& fen){
     // initialize empty bitboards
@@ -38,7 +38,7 @@ Board::Board(const std::string& fen){
             char figure = tolower(symbol);
 
             // obtain square from rank and file
-            Square square = bb::get_square(rank, file);
+            Square square = get_square(rank, file);
 
             // set offset for piece referencing
             Color color = is_white ? WHITE : BLACK;
@@ -46,27 +46,27 @@ Board::Board(const std::string& fen){
             // update the occupancy bitboard in accordance to the pieces
             switch (figure){
                 case 'p':
-                    bb::setBit(occupancies_.pieces[color][PAWN], square);
+                    bb::set(occupancies_.pieces[color][PAWN], square);
                     pieces_[square] = is_white ? WHITE_PAWN : BLACK_PAWN;
                     break;
                 case 'n':
-                    bb::setBit(occupancies_.pieces[color][KNIGHT], square);
+                    bb::set(occupancies_.pieces[color][KNIGHT], square);
                     pieces_[square] = is_white ? WHITE_KNIGHT : BLACK_KNIGHT;
                     break;
                 case 'b':
-                    bb::setBit(occupancies_.pieces[color][BISHOP], square);
+                    bb::set(occupancies_.pieces[color][BISHOP], square);
                     pieces_[square] = is_white ? WHITE_BISHOP : BLACK_BISHOP;
                     break;
                 case 'r':
-                    bb::setBit(occupancies_.pieces[color][ROOK], square);
+                    bb::set(occupancies_.pieces[color][ROOK], square);
                     pieces_[square] = is_white ? WHITE_ROOK : BLACK_ROOK;
                     break;
                 case 'q':
-                    bb::setBit(occupancies_.pieces[color][QUEEN], square);
+                    bb::set(occupancies_.pieces[color][QUEEN], square);
                     pieces_[square] = is_white ? WHITE_QUEEN : BLACK_QUEEN;
                     break;
                 case 'k':
-                    bb::setBit(occupancies_.pieces[color][KING], square);
+                    bb::set(occupancies_.pieces[color][KING], square);
                     pieces_[square] = is_white ? WHITE_KING : BLACK_KING;
                     break;
             }
@@ -132,7 +132,7 @@ Board::Board(const std::string& fen){
     gameState.en_passant_target = 0ULL;
     for (int i = 0; i < N_SQUARES; ++i) {
         if (SQUARE_NAMES[i] == fen_en_passant) {
-            bb::setBit(gameState.en_passant_target, i);
+            bb::set(gameState.en_passant_target, i);
         }
     }
 
@@ -160,7 +160,7 @@ Piece Board::getPieceOnSquare(Square square) const {
 }
 
 Square Board::getKingSquare(Color color) const {
-    return bb::lsb(occupancies_.pieces[color][KING]);
+    return bb::getLSB(occupancies_.pieces[color][KING]);
 }
 
 Bitboard Board::getCurrentEnPassantTarget() const {
@@ -185,18 +185,18 @@ Color Board::getSideToMove() const {
 
 void Board::setPiece(Square square, Piece piece) {
     //assert(pieces_[square] == NO_PIECE);  // assert that square is empty
-    bb::setBit(occupancies_.pieces[color_of(piece)][type_of(piece)], square);
-    bb::setBit(occupancies_.colors[color_of(piece)], square);
-    bb::setBit(occupancies_.all, square);
+    bb::set(occupancies_.pieces[color_of(piece)][type_of(piece)], square);
+    bb::set(occupancies_.colors[color_of(piece)], square);
+    bb::set(occupancies_.all, square);
     pieces_[square] = piece;
 }
 
 void Board::unsetPiece(Square square) {
     Piece piece = pieces_[square];
     //assert((piece != NO_PIECE));  // assert that square is not empty
-    bb::clearBit(occupancies_.pieces[color_of(piece)][type_of(piece)], square);
-    bb::clearBit(occupancies_.colors[color_of(piece)], square);
-    bb::clearBit(occupancies_.all, square);
+    bb::clear(occupancies_.pieces[color_of(piece)][type_of(piece)], square);
+    bb::clear(occupancies_.colors[color_of(piece)], square);
+    bb::clear(occupancies_.all, square);
     pieces_[square] = NO_PIECE;
 }
 
@@ -261,7 +261,7 @@ void Board::makeMove(Move move) {                                               
         //assert(type_of(piece) == KING);    // moving piece must be the king
 
         // determine rook target square
-        Square rookFrom = bb::get_square(us * RANK_8, (from < to) ? FILE_H : FILE_A);
+        Square rookFrom = get_square(us * RANK_8, (from < to) ? FILE_H : FILE_A);
         Square rookTo = (from < to) ? to + WEST : to + EAST;
 
         // move the king and the rook
@@ -286,7 +286,7 @@ void Board::makeMove(Move move) {                                               
             if (move.isEnPassantCapture()) {
                 // remove the pawn that has passed us
                 Bitboard enPassantTargetBB = getCurrentEnPassantTarget();
-                Square enPassantTarget = bb::lsb(enPassantTargetBB);
+                Square enPassantTarget = bb::getLSB(enPassantTargetBB);
                 unsetPiece(enPassantTarget + ((us == WHITE) ? SOUTH : NORTH));
                 setPiece(to, piece);
             } else if (move.isCapture()) {
@@ -299,7 +299,7 @@ void Board::makeMove(Move move) {                                               
 
     // store en passant target in the new game state
     if (move.isDoublePawnPush()) {
-        next_game_state.en_passant_target = (us == WHITE) ? bb::square_bb(from + NORTH) : bb::square_bb(from + SOUTH);
+        next_game_state.en_passant_target = (us == WHITE) ? bb::getBitboard(from + NORTH) : bb::getBitboard(from + SOUTH);
     } else {
         next_game_state.en_passant_target = 0ULL;
     }
@@ -361,7 +361,7 @@ void Board::unmakeMove(Move move) {
         assert(type_of(piece) == KING);    // moving piece must be the king
 
         // determine rook target square
-        Square rookFrom = bb::get_square(us * RANK_8, (from < to) ? FILE_H : FILE_A);
+        Square rookFrom = get_square(us * RANK_8, (from < to) ? FILE_H : FILE_A);
         Square rookTo = (from < to) ? to + WEST : to + EAST;
 
         // move king from to to from square
@@ -436,7 +436,7 @@ void Board::print() {
 
     // get written representation of en passant square
     Bitboard en_passant_target_bb = getCurrentEnPassantTarget();
-    std::string enPassantSquare = en_passant_target_bb ? SQUARE_NAMES[bb::lsb(en_passant_target_bb)] : "NONE";
+    std::string enPassantSquare = en_passant_target_bb ? SQUARE_NAMES[bb::getLSB(en_passant_target_bb)] : "NONE";
 
     // TODO: print further game information (side to move, castling rights, en passant square)
     std::cout << "State:" << std::endl;
