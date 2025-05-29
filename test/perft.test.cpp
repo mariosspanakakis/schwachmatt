@@ -6,7 +6,7 @@
 #include "board.hpp"
 #include "movegen.hpp"
 
-#define MAX_DEPTH 5
+#define MAX_DEPTH 6
 #define ENABLE_DETAILED_LOGGING 0
 
 struct PerftTestCase {
